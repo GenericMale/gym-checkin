@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title>KTV - Admin Login</title>
+    <script src="<%= url('/static/tailwind.js') %>"></script>
+    <style>
+        .bg-ktv { background-color: #76a59d; }
+        .text-ktv { color: #76a59d; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center relative">
+    <div class="absolute top-0 left-0 w-full h-1/3 bg-ktv rounded-b-[3rem] shadow-md z-0"></div>
+
+    <div class="bg-white p-10 rounded-3xl shadow-2xl w-96 relative z-10 border border-gray-100">
+        <div class="text-center mb-8">
+            <h2 class="font-serif text-2xl tracking-tight text-gray-800">Klagenfurter Turnverein <span class="text-ktv">1862</span></h2>
+            <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Verwaltung</p>
+        </div>
+
+        <% if (locals.error) { %> <p class="bg-red-50 text-red-600 p-3 rounded-lg mb-6 text-center text-sm font-semibold border border-red-100"><%= error %></p> <% } %>
+
+        <form method="POST" action="<%= url('/admin/login') %>">
+            <input type="password" name="password" placeholder="Passwort eingeben" class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-[#76a59d]" required>
+            <button class="w-full bg-ktv hover:bg-[#65918a] text-white font-bold p-4 rounded-xl transition shadow-md">Einloggen</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klagenfurter Turnverein - Verwaltung</title>
+    <script src="<%= url('/static/tailwind.js') %>"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
+
+        .bg-ktv { background-color: #76a59d; }
+        .text-ktv { color: #76a59d; }
+        .border-ktv { border-color: #76a59d; }
+        .hover-bg-ktv:hover { background-color: #65918a; }
+        .font-ktv-serif { font-family: 'Playfair Display', serif; }
+
+        @media print {
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area {
+                position: absolute; left: 0; top: 0; width: 100%;
+                display: flex; flex-direction: column; align-items: center;
+                justify-content: center; height: 100vh;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
+
+    <nav class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50 no-print shadow-sm">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="bg-ktv p-2 rounded-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </div>
+                <div>
+                    <h1 class="font-ktv-serif text-xl leading-tight">Klagenfurter Turnverein <span class="text-ktv">1862</span></h1>
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">Interne Verwaltung</p>
+                </div>
+            </div>
+            <a href="<%= url('/admin/logout') %>" class="text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-2">
+                Abmelden
+            </a>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-6 no-print">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Hallen Management -->
+            <div class="lg:col-span-4 space-y-8">
+                <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
+                    <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
+                        <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                        Turnhallen
+                    </h2>
+
+                    <form method="POST" action="<%= url('/admin/add-hall') %>" class="flex gap-2 mb-8">
+                        <input type="text" name="name" placeholder="Name der Halle..." class="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
+                        <button class="bg-ktv text-white px-5 rounded-xl hover-bg-ktv transition shadow-md font-bold text-xl">+</button>
+                    </form>
+
+                    <div class="space-y-3">
+                        <% halls.forEach(hall => { %>
+                            <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex items-center justify-between group">
+                                <div class="overflow-hidden mr-4">
+                                    <h3 class="font-bold text-gray-700 truncate"><%= hall.name %></h3>
+                                    <p class="text-[10px] text-ktv font-mono truncate opacity-60 group-hover:opacity-100 transition"><%= hall.url %></p>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                    <button class="print-btn" data-hall="<%= hall.name %>" data-qr="<%= hall.qr %>" class="p-2 bg-white border border-gray-200 text-gray-400 hover:text-ktv hover:border-ktv rounded-lg transition shadow-sm" title="QR-Code drucken">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                    </button>
+                                    <form method="POST" action="<%= url(`/admin/delete-hall/${hall.id}`) %>">
+                                        <button class="p-2 bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 rounded-lg transition shadow-sm">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </section>
+
+                <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
+                    <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
+                        <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                        Einstellungen
+                    </h2>
+                    <form method="POST" action="<%= url('/admin/update-settings') %>" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Max. Session Dauer (Min.)</label>
+                            <input type="number" name="max_session_minutes" value="<%= settings.max_session_minutes %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                            <p class="text-[10px] text-gray-400 mt-1">Danach gilt ein Scan als neue Sitzung.</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Standard Dauer (Min.)</label>
+                            <input type="number" name="default_session_minutes" value="<%= settings.default_session_minutes %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                            <p class="text-[10px] text-gray-400 mt-1">Wird verwendet, wenn das Auschecken vergessen wurde.</p>
+                        </div>
+                        <button class="w-full bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition">Speichern</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Trainer Management -->
+            <div class="lg:col-span-3">
+                <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 sticky top-24">
+                    <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
+                        <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                        Trainer
+                    </h2>
+
+                    <details class="mb-6 group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+                        <summary class="p-4 cursor-pointer font-bold text-ktv flex justify-between items-center list-none text-sm">
+                            <span>+ Neu anlegen</span>
+                            <span class="group-open:rotate-180 transition-transform">↓</span>
+                        </summary>
+                        <form method="POST" action="<%= url('/admin/add-trainer') %>" class="p-4 pt-0 space-y-4">
+                            <input type="text" name="name" placeholder="Name" class="w-full bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                            <input type="text" name="pin" placeholder="PIN (4 Stellen)" pattern="[0-9]{4}" class="w-full bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                            <div class="bg-white p-3 rounded-xl border border-gray-200 text-[11px]">
+                                <p class="font-bold text-gray-400 mb-2 uppercase">Hallen</p>
+                                <% halls.forEach(hall => { %>
+                                    <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded"> <%= hall.name %></label>
+                                <% }) %>
+                            </div>
+                            <button class="w-full bg-ktv text-white font-bold py-2.5 rounded-xl text-sm shadow-md">Hinzufügen</button>
+                        </form>
+                    </details>
+
+                    <div class="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+                        <% trainers.forEach(trainer => {
+                            const trainerAssignments = assignments.filter(a => a.trainer_id === trainer.id).map(a => a.hall_id);
+                        %>
+                            <details class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+                                <summary class="p-3 cursor-pointer flex justify-between items-center list-none hover:bg-gray-50 text-sm">
+                                    <span class="font-bold text-gray-700"><%= trainer.name %></span>
+                                    <span class="text-ktv text-[10px] font-bold uppercase tracking-wider">Bearbeiten</span>
+                                </summary>
+                                <div class="p-3 border-t bg-gray-50">
+                                    <form method="POST" action="<%= url(`/admin/edit-trainer/${trainer.id}`) %>" class="space-y-3">
+                                        <input type="text" name="name" value="<%= trainer.name %>" class="w-full bg-white border border-gray-200 p-2 rounded-lg text-xs outline-none focus:ring-1 ring-ktv" required>
+                                        <input type="text" name="pin" value="<%= trainer.pin %>" class="w-full bg-white border border-gray-200 p-2 rounded-lg text-xs text-center font-mono" required>
+                                        <div class="bg-white p-2 rounded-lg border border-gray-200 text-[10px] space-y-1">
+                                            <% halls.forEach(hall => { %>
+                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" <%= trainerAssignments.includes(hall.id) ? 'checked' : '' %>> <%= hall.name %></label>
+                                            <% }) %>
+                                        </div>
+                                        <div class="flex gap-1">
+                                            <button class="flex-1 bg-ktv text-white py-1.5 rounded-lg text-[10px] font-bold">Speichern</button>
+                                            <button form="del-<%= trainer.id %>" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">Löschen</button>
+                                        </div>
+                                    </form>
+                                    <form id="del-<%= trainer.id %>" method="POST" action="<%= url(`/admin/delete-trainer/${trainer.id}`) %>" class="hidden"></form>
+                                </div>
+                            </details>
+                        <% }) %>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Protokoll Tabelle -->
+            <div class="lg:col-span-5">
+                <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-6 flex justify-between items-center bg-white border-b border-gray-50">
+                        <h2 class="font-ktv-serif text-2xl flex items-center gap-3">
+                            <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                            Protokoll
+                        </h2>
+                        <a href="<%= url('/admin/export') %>" class="bg-[#eef5f4] text-ktv hover:bg-ktv hover:text-white transition-all px-4 py-2 rounded-xl text-xs font-bold border border-ktv/10 flex items-center gap-2 shadow-sm">
+                            📥 Exportieren
+                        </a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-[0.1em] font-bold">
+                                <tr>
+                                    <th class="px-6 py-4">Trainer / Halle</th>
+                                    <th class="px-6 py-4">Zeitraum</th>
+                                    <th class="px-6 py-4">Dauer</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                <% logs.forEach(log => { %>
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-6 py-4">
+                                            <div class="font-bold text-gray-700"><%= log.trainer %></div>
+                                            <div class="text-[10px] text-ktv uppercase font-bold"><%= log.hall %></div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="text-gray-800 text-xs">
+                                                <%= new Date(log.start_timestamp + " UTC").toLocaleDateString('de-AT', { day:'2-digit', month:'2-digit' }) %> | 
+                                                <%= new Date(log.start_timestamp + " UTC").toLocaleTimeString('de-AT', { hour:'2-digit', minute:'2-digit' }) %> - 
+                                                <%= log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleTimeString('de-AT', { hour:'2-digit', minute:'2-digit' }) : '...' %>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <% if (log.duration_minutes) { %>
+                                                <span class="px-2 py-1 bg-ktv text-white rounded-md text-[10px] font-bold">
+                                                    <%= log.duration_minutes %> Min.
+                                                </span>
+                                            <% } else { %>
+                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-[10px] font-bold">
+                                                    Läuft...
+                                                </span>
+                                            <% } %>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                                <% if (logs.length === 0) { %>
+                                    <tr><td colspan="3" class="px-6 py-20 text-center text-gray-300 italic">Noch keine Einträge vorhanden.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Hidden Print Container -->
+    <div id="printArea" class="hidden">
+        <div class="text-center border-[10px] border-ktv p-20 rounded-[4rem]">
+            <h1 class="font-ktv-serif text-6xl mb-12 text-gray-800" id="printTitle"></h1>
+            <div class="bg-white p-8 inline-block rounded-[3rem] shadow-xl border border-gray-100">
+                <img id="printImage" class="w-[500px] h-[500px]">
+            </div>
+            <p class="font-ktv-serif text-3xl mt-12 text-ktv italic">Der Verein, der bewegt!</p>
+            <p class="text-xl text-gray-400 mt-4 uppercase tracking-[0.4em]">Klagenfurter Turnverein 1862</p>
+        </div>
+    </div>
+
+    <script>
+        document.querySelectorAll('.print-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const hallName = btn.getAttribute('data-hall');
+                const qrData = btn.getAttribute('data-qr');
+
+                document.getElementById('printTitle').innerText = hallName;
+                document.getElementById('printImage').src = qrData;
+
+                const printArea = document.getElementById('printArea');
+                printArea.classList.remove('hidden');
+                printArea.classList.add('print-area');
+
+                window.print();
+
+                printArea.classList.add('hidden');
+                printArea.classList.remove('print-area');
+            });
+        });
+    </script>
+</body>
+</html>
