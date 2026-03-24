@@ -6,6 +6,8 @@ const sqlite3 = require('sqlite3').verbose();
 const QRCode = require('qrcode');
 const path = require('path');
 
+const ExcelJS = require('exceljs');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -50,6 +52,7 @@ db.serialize(() => {
     // Initial Settings
     db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('max_session_minutes', '180')");
     db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('default_session_minutes', '90')");
+    db.run("INSERT OR IGNORE INTO settings (key, value) VALUES ('hourly_wage', '20')");
 });
 
 const getSettings = (callback) => {
@@ -185,13 +188,47 @@ router.get('/admin', requireAuth, (req, res) => {
         db.all("SELECT * FROM trainers", (err, trainers) => {
             db.all("SELECT * FROM trainer_halls", (err, assignments) => {
                 getSettings((settings) => {
-                    db.all(`SELECT c.*, COALESCE(t.name, 'Gelöscht') as trainer, COALESCE(h.name, 'Gelöscht') as hall
-                            FROM checkins c
-                            LEFT JOIN trainers t ON c.trainer_id = t.id
-                            LEFT JOIN halls h ON c.hall_id = h.id
-                            ORDER BY c.start_timestamp DESC LIMIT 100`, (err, logs) => {
-                        res.render('admin', { halls, trainers, assignments, logs, settings });
-                    });
+                    res.render('admin', { halls, trainers, assignments, settings });
+                });
+            });
+        });
+    });
+});
+
+// 3.5 Protokoll Seite
+router.get('/admin/protocol', requireAuth, (req, res) => {
+    const { month, trainer, hall } = req.query;
+    
+    // Default Monat: Aktueller Monat im Format YYYY-MM
+    const now = new Date();
+    const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const selectedMonth = month || defaultMonth;
+
+    let query = `
+        SELECT c.*, COALESCE(t.name, 'Gelöscht') as trainer, COALESCE(h.name, 'Gelöscht') as hall
+        FROM checkins c
+        LEFT JOIN trainers t ON c.trainer_id = t.id
+        LEFT JOIN halls h ON c.hall_id = h.id
+        WHERE strftime('%Y-%m', c.start_timestamp) = ?
+    `;
+    const params = [selectedMonth];
+
+    if (trainer) {
+        query += " AND c.trainer_id = ?";
+        params.push(trainer);
+    }
+    if (hall) {
+        query += " AND c.hall_id = ?";
+        params.push(hall);
+    }
+
+    query += " ORDER BY c.start_timestamp DESC";
+
+    db.all(query, params, (err, logs) => {
+        db.all("SELECT id, name FROM trainers ORDER BY name ASC", (err, trainers) => {
+            db.all("SELECT id, name FROM halls ORDER BY name ASC", (err, halls) => {
+                getSettings((settings) => {
+                    res.render('protocol', { logs, trainers, halls, settings, filters: { month: selectedMonth, trainer, hall } });
                 });
             });
         });
@@ -200,10 +237,12 @@ router.get('/admin', requireAuth, (req, res) => {
 
 // 4. Admin API Actions (Hallen & Trainer & Settings)
 router.post('/admin/update-settings', requireAuth, (req, res) => {
-    const { max_session_minutes, default_session_minutes } = req.body;
+    const { max_session_minutes, default_session_minutes, hourly_wage } = req.body;
     db.run("UPDATE settings SET value = ? WHERE key = 'max_session_minutes'", [max_session_minutes], () => {
         db.run("UPDATE settings SET value = ? WHERE key = 'default_session_minutes'", [default_session_minutes], () => {
-            redirect(res, '/admin');
+            db.run("UPDATE settings SET value = ? WHERE key = 'hourly_wage'", [hourly_wage], () => {
+                redirect(res, '/admin');
+            });
         });
     });
 });
@@ -252,22 +291,138 @@ router.post('/admin/delete-trainer/:id', requireAuth, (req, res) => {
 
 // 5. Excel Export
 router.get('/admin/export', requireAuth, (req, res) => {
-    db.all(`SELECT 
-                datetime(c.start_timestamp, 'localtime') as Start, 
-                datetime(c.end_timestamp, 'localtime') as Ende,
-                c.duration_minutes as Dauer_Min,
-                COALESCE(t.name, 'Gelöscht') as Trainer, 
-                COALESCE(h.name, 'Gelöscht') as Hall
+    const { month } = req.query;
+    const now = new Date();
+    const selectedMonth = month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+
+    getSettings(async (settings) => {
+        const hourlyWage = parseFloat(settings.hourly_wage);
+
+        db.all(`
+            SELECT c.*, COALESCE(t.name, 'Unbekannt') as trainer_name, COALESCE(h.name, 'Gelöscht') as hall_name
             FROM checkins c
             LEFT JOIN trainers t ON c.trainer_id = t.id
             LEFT JOIN halls h ON c.hall_id = h.id
-            ORDER BY c.start_timestamp DESC`, (err, rows) => {
-        if (rows.length === 0) return res.send("Keine Daten.");
-        const header = "Start,Ende,Dauer (Min),Trainer,Halle\n";
-        const csv = rows.map(r => `"${r.Start}","${r.Ende || ''}","${r.Dauer_Min || ''}","${r.Trainer}","${r.Hall}"`).join('\n');
-        res.header('Content-Type', 'text/csv; charset=utf-8');
-        res.attachment('ktv-trainings-logs.csv');
-        res.send('\uFEFF' + header + csv);
+            WHERE strftime('%Y-%m', c.start_timestamp) = ?
+            ORDER BY t.name ASC, c.start_timestamp ASC
+        `, [selectedMonth], async (err, rows) => {
+            const workbook = new ExcelJS.Workbook();
+            
+            // Gruppieren nach Trainer
+            const trainers = {};
+            rows.forEach(row => {
+                if (!trainers[row.trainer_name]) trainers[row.trainer_name] = [];
+                trainers[row.trainer_name].push(row);
+            });
+
+            for (const [trainerName, logs] of Object.entries(trainers)) {
+                const sheet = workbook.addWorksheet(trainerName.substring(0, 31)); // Max 31 Zeichen
+                sheet.columns = [
+                    { header: 'Start', key: 'start', width: 20 },
+                    { header: 'Ende', key: 'end', width: 20 },
+                    { header: 'Halle', key: 'hall', width: 20 },
+                    { header: 'Dauer (Min)', key: 'duration', width: 15 },
+                    { header: 'Entschädigung (€)', key: 'pay', width: 15 }
+                ];
+
+                let totalDuration = 0;
+                let totalPay = 0;
+
+                logs.forEach(log => {
+                    const pay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
+                    sheet.addRow({
+                        start: new Date(log.start_timestamp + " UTC").toLocaleString('de-AT'),
+                        end: log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleString('de-AT') : '...',
+                        hall: log.hall_name,
+                        duration: log.duration_minutes || 0,
+                        pay: pay.toFixed(2)
+                    });
+                    totalDuration += (log.duration_minutes || 0);
+                    totalPay += pay;
+                });
+
+                sheet.addRow({});
+                sheet.addRow({ hall: 'GESAMT', duration: totalDuration, pay: totalPay.toFixed(2) });
+                
+                // Styling
+                sheet.getRow(1).font = { bold: true };
+                const lastRow = sheet.lastRow;
+                lastRow.font = { bold: true };
+            }
+
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', `attachment; filename=ktv-abrechnung-${selectedMonth}.xlsx`);
+            await workbook.xlsx.write(res);
+            res.end();
+        });
+    });
+});
+
+// 5.5 Trainer Export (mit PIN-Schutz)
+router.post('/api/export-trainer', (req, res) => {
+    const { trainerId, pin, month } = req.body;
+    
+    db.get("SELECT * FROM trainers WHERE id = ? AND pin = ?", [trainerId, pin], (err, trainer) => {
+        if (!trainer) return res.status(401).send("Falscher PIN.");
+
+        let selectedMonth = month;
+        const now = new Date();
+        if (month === 'current') {
+            selectedMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        } else if (month === 'last') {
+            const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            selectedMonth = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        getSettings(async (settings) => {
+            const hourlyWage = parseFloat(settings.hourly_wage);
+
+            db.all(`
+                SELECT c.*, COALESCE(h.name, 'Gelöscht') as hall_name
+                FROM checkins c
+                LEFT JOIN halls h ON c.hall_id = h.id
+                WHERE c.trainer_id = ? AND strftime('%Y-%m', c.start_timestamp) = ?
+                ORDER BY c.start_timestamp ASC
+            `, [trainerId, selectedMonth], async (err, rows) => {
+                const workbook = new ExcelJS.Workbook();
+                const sheet = workbook.addWorksheet(trainer.name.substring(0, 31));
+                
+                sheet.columns = [
+                    { header: 'Start', key: 'start', width: 20 },
+                    { header: 'Ende', key: 'end', width: 20 },
+                    { header: 'Halle', key: 'hall', width: 20 },
+                    { header: 'Dauer (Min)', key: 'duration', width: 15 },
+                    { header: 'Entschädigung (€)', key: 'pay', width: 15 }
+                ];
+
+                let totalDuration = 0;
+                let totalPay = 0;
+
+                rows.forEach(log => {
+                    const pay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
+                    sheet.addRow({
+                        start: new Date(log.start_timestamp + " UTC").toLocaleString('de-AT'),
+                        end: log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleString('de-AT') : '...',
+                        hall: log.hall_name,
+                        duration: log.duration_minutes || 0,
+                        pay: pay.toFixed(2)
+                    });
+                    totalDuration += (log.duration_minutes || 0);
+                    totalPay += pay;
+                });
+
+                sheet.addRow({});
+                sheet.addRow({ hall: 'GESAMT', duration: totalDuration, pay: totalPay.toFixed(2) });
+                
+                sheet.getRow(1).font = { bold: true };
+                sheet.lastRow.font = { bold: true };
+
+                res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+                res.setHeader('Content-Disposition', `attachment; filename=ktv-abrechnung-${trainer.name.replace(/\s+/g, '_')}-${selectedMonth}.xlsx`);
+                await workbook.xlsx.write(res);
+                res.end();
+            });
+        });
     });
 });
 

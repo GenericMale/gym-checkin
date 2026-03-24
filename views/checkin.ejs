@@ -108,6 +108,21 @@
                 </button>
             </div>
         </div>
+
+        <!-- Berichte Bereich -->
+        <div id="reportsWrapper" class="mt-8 pt-6 border-t border-gray-100">
+            <button id="btnToggleReports" class="text-xs text-gray-400 hover:text-ktv flex items-center gap-1 mx-auto transition-colors uppercase tracking-widest font-bold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Abrechnung Exportieren
+            </button>
+            <div id="reportsSection" class="hidden mt-4 space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="downloadReport('current')" class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold py-3 rounded-xl transition uppercase">Dieser Monat</button>
+                    <button onclick="downloadReport('last')" class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold py-3 rounded-xl transition uppercase">Letzter Monat</button>
+                </div>
+                <p class="text-[9px] text-gray-400 text-center leading-tight">Export erfordert die Eingabe deines PINs im Feld oben.</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -120,6 +135,8 @@
         const trainerSelect = document.getElementById('trainerId');
         const submitBtn = document.getElementById('submitBtn');
         const sessionBadge = document.getElementById('sessionBadge');
+        const btnToggleReports = document.getElementById('btnToggleReports');
+        const reportsSection = document.getElementById('reportsSection');
 
         // Live Uhr
         function updateClock() {
@@ -128,6 +145,43 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Berichte ein/ausblenden
+        btnToggleReports.addEventListener('click', () => {
+            reportsSection.classList.toggle('hidden');
+        });
+
+        // Bericht Download
+        function downloadReport(month) {
+            const trainerId = document.getElementById('trainerId').value || localStorage.getItem('gym_trainer_id');
+            const pin = document.getElementById('pin').value || localStorage.getItem('gym_trainer_pin');
+
+            if (!trainerId || !pin) {
+                alert("Bitte wähle einen Trainer aus und gib deinen PIN ein.");
+                reportsSection.classList.add('hidden');
+                formContainer.classList.remove('hidden');
+                successContainer.classList.add('hidden');
+                successContainer.classList.remove('flex');
+                return;
+            }
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '<%= url("/api/export-trainer") %>';
+
+            const fields = { trainerId, pin, month };
+            for (const [name, value] of Object.entries(fields)) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                form.appendChild(input);
+            }
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
 
         // Session Status prüfen
         async function updateSessionStatus(trainerId) {
