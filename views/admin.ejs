@@ -1,19 +1,11 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<%= locale %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klagenfurter Turnverein - Verwaltung</title>
-    <script src="<%= url('/static/tailwind.js') %>"></script>
+    <title><%= __('ADMIN_DASHBOARD_TITLE') %></title>
+    <link rel="stylesheet" href="<%= url('/static/style.css') %>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
-
-        .bg-ktv { background-color: #76a59d; }
-        .text-ktv { color: #76a59d; }
-        .border-ktv { border-color: #76a59d; }
-        .hover-bg-ktv:hover { background-color: #65918a; }
-        .font-ktv-serif { font-family: 'Playfair Display', serif; }
-
         @media print {
             body * { visibility: hidden; }
             .print-area, .print-area * { visibility: visible; }
@@ -35,14 +27,14 @@
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                 </div>
                 <div>
-                    <h1 class="font-ktv-serif text-xl leading-tight">Klagenfurter Turnverein <span class="text-ktv">1862</span></h1>
-                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">Interne Verwaltung</p>
+                    <h1 class="font-ktv-serif text-xl leading-tight"><%= __('APP_NAME') %> <span class="text-ktv"><%= __('APP_YEAR') %></span></h1>
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= __('ADMIN_INTERNAL') %></p>
                 </div>
             </div>
             <div class="flex items-center gap-6">
-                <a href="<%= url('/admin/protocol') %>" class="text-sm font-bold text-ktv hover:underline">📋 Protokoll & Abrechnung</a>
+                <a href="<%= url('/admin/protocol') %>" class="text-sm font-bold text-ktv hover:underline"><%= __('ADMIN_PROTOCOL_LINK') %></a>
                 <a href="<%= url('/admin/logout') %>" class="text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-2">
-                    Abmelden
+                    <%= __('ADMIN_LOGOUT') %>
                 </a>
             </div>
         </div>
@@ -56,11 +48,11 @@
                 <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
                     <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
                         <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
-                        Turnhallen
+                        <%= __('ADMIN_HALLS') %>
                     </h2>
 
                     <form method="POST" action="<%= url('/admin/add-hall') %>" class="flex gap-2 mb-8">
-                        <input type="text" name="name" placeholder="Name der Halle..." class="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
+                        <input type="text" name="name" placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>" class="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
                         <button class="bg-ktv text-white px-5 rounded-xl hover-bg-ktv transition shadow-md font-bold text-xl">+</button>
                     </form>
 
@@ -89,24 +81,24 @@
                 <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
                     <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
                         <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
-                        Einstellungen
+                        <%= __('ADMIN_SETTINGS') %>
                     </h2>
                     <form method="POST" action="<%= url('/admin/update-settings') %>" class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Max. Session (Min.)</label>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_MAX_SESSION') %></label>
                                 <input type="number" name="max_session_minutes" value="<%= settings.max_session_minutes %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Standard (Min.)</label>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DEFAULT_SESSION') %></label>
                                 <input type="number" name="default_session_minutes" value="<%= settings.default_session_minutes %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Stundensatz (€)</label>
+                            <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HOURLY_WAGE') %></label>
                             <input type="number" step="0.01" name="hourly_wage" value="<%= settings.hourly_wage %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
                         </div>
-                        <button class="w-full bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition">Speichern</button>
+                        <button class="w-full bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition"><%= __('ADMIN_SAVE') %></button>
                     </form>
                 </section>
             </div>
@@ -116,28 +108,28 @@
                 <section class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
                     <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
                         <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
-                        Trainer
+                        <%= __('ADMIN_TRAINERS') %>
                     </h2>
 
                     <details class="mb-6 group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
                         <summary class="p-4 cursor-pointer font-bold text-ktv flex justify-between items-center list-none text-sm">
-                            <span>+ Neu anlegen</span>
+                            <span><%= __('ADMIN_NEW_TRAINER') %></span>
                             <span class="group-open:rotate-180 transition-transform">↓</span>
                         </summary>
                         <form method="POST" action="<%= url('/admin/add-trainer') %>" class="p-4 pt-0 space-y-4">
                             <div class="grid grid-cols-2 gap-4">
-                                <input type="text" name="name" placeholder="Name" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
-                                <input type="text" name="pin" placeholder="PIN (4 Stellen)" pattern="[0-9]{4}" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                                <input type="text" name="name" placeholder="<%= __('ADMIN_NAME') %>" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                                <input type="text" name="pin" placeholder="<%= __('ADMIN_PIN') %>" pattern="[0-9]{4}" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
                             </div>
                             <div class="bg-white p-3 rounded-xl border border-gray-200 text-[11px]">
-                                <p class="font-bold text-gray-400 mb-2 uppercase">Hallen</p>
+                                <p class="font-bold text-gray-400 mb-2 uppercase"><%= __('ADMIN_HALLS_LABEL') %></p>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     <% halls.forEach(hall => { %>
                                         <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded"> <%= hall.name %></label>
                                     <% }) %>
                                 </div>
                             </div>
-                            <button class="w-full bg-ktv text-white font-bold py-2.5 rounded-xl text-sm shadow-md">Hinzufügen</button>
+                            <button class="w-full bg-ktv text-white font-bold py-2.5 rounded-xl text-sm shadow-md"><%= __('ADMIN_ADD') %></button>
                         </form>
                     </details>
 
@@ -148,7 +140,7 @@
                             <details class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                                 <summary class="p-3 cursor-pointer flex justify-between items-center list-none hover:bg-gray-50 text-sm">
                                     <span class="font-bold text-gray-700"><%= trainer.name %></span>
-                                    <span class="text-ktv text-[10px] font-bold uppercase tracking-wider">Bearbeiten</span>
+                                    <span class="text-ktv text-[10px] font-bold uppercase tracking-wider"><%= __('ADMIN_EDIT') %></span>
                                 </summary>
                                 <div class="p-3 border-t bg-gray-50">
                                     <form method="POST" action="<%= url(`/admin/edit-trainer/${trainer.id}`) %>" class="space-y-3">
@@ -156,12 +148,12 @@
                                         <input type="text" name="pin" value="<%= trainer.pin %>" class="w-full bg-white border border-gray-200 p-2 rounded-lg text-xs text-center font-mono" required>
                                         <div class="bg-white p-2 rounded-lg border border-gray-200 text-[10px] space-y-1">
                                             <% halls.forEach(hall => { %>
-                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" <%= trainerAssignments.includes(hall.id) ? 'checked' : '' %>> <%= hall.name %></label>
+                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" <%= trainerAssignments.includes(hall.id) ? 'checked' : '' %> /> <%= hall.name %></label>
                                             <% }) %>
                                         </div>
                                         <div class="flex gap-1">
-                                            <button class="flex-1 bg-ktv text-white py-1.5 rounded-lg text-[10px] font-bold">Speichern</button>
-                                            <button form="del-<%= trainer.id %>" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold">Löschen</button>
+                                            <button class="flex-1 bg-ktv text-white py-1.5 rounded-lg text-[10px] font-bold"><%= __('ADMIN_SAVE') %></button>
+                                            <button form="del-<%= trainer.id %>" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold"><%= __('ADMIN_DELETE') %></button>
                                         </div>
                                     </form>
                                     <form id="del-<%= trainer.id %>" method="POST" action="<%= url(`/admin/delete-trainer/${trainer.id}`) %>" class="hidden"></form>
@@ -182,8 +174,8 @@
             <div class="bg-white p-8 inline-block rounded-[3rem] shadow-xl border border-gray-100">
                 <img id="printImage" class="w-[500px] h-[500px]">
             </div>
-            <p class="font-ktv-serif text-3xl mt-12 text-ktv italic">Der Verein, der bewegt!</p>
-            <p class="text-xl text-gray-400 mt-4 uppercase tracking-[0.4em]">Klagenfurter Turnverein 1862</p>
+            <p class="font-ktv-serif text-3xl mt-12 text-ktv italic"><%= __('APP_SLOGAN') %></p>
+            <p class="text-xl text-gray-400 mt-4 uppercase tracking-[0.4em]"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
         </div>
     </div>
 

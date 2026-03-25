@@ -1,17 +1,10 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="<%= locale %>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KTV - Protokoll & Abrechnung</title>
-    <script src="<%= url('/static/tailwind.js') %>"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap');
-        .bg-ktv { background-color: #76a59d; }
-        .text-ktv { color: #76a59d; }
-        .border-ktv { border-color: #76a59d; }
-        .font-ktv-serif { font-family: 'Playfair Display', serif; }
-    </style>
+    <title><%= __('ADMIN_PROTOCOL_TITLE') %></title>
+    <link rel="stylesheet" href="<%= url('/static/style.css') %>">
 </head>
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
 
@@ -22,28 +15,28 @@
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
-                    <h1 class="font-ktv-serif text-xl leading-tight">Protokoll <span class="text-ktv">& Abrechnung</span></h1>
-                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">Klagenfurter Turnverein 1862</p>
+                    <h1 class="font-ktv-serif text-xl leading-tight"><%= __('ADMIN_PROTOCOL_TITLE') %></h1>
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
                 </div>
             </div>
-            <a href="<%= url('/admin/export?month=' + filters.month) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-[#65918a] transition flex items-center gap-2">
-                📊 Excel Export (<%= filters.month %>)
+            <a href="<%= url('/admin/export?month=' + filters.month) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2">
+                <%= __('ADMIN_EXCEL_EXPORT') %> (<%= filters.month %>)
             </a>
         </div>
     </nav>
 
     <main class="container mx-auto p-6">
-        
+
         <!-- Filter Bar -->
         <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-8">
             <form id="filterForm" method="GET" action="<%= url('/admin/protocol') %>" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
-                <% 
+                <%
                     const [fYear, fMonth] = filters.month.split('-');
-                    const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
                     const currentYear = new Date().getFullYear();
+                    const monthKeys = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
                 %>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Jahr</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_YEAR') %></label>
                     <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
                         <% for(let y = currentYear; y >= currentYear - 5; y--) { %>
                             <option value="<%= y %>" <%= fYear == y ? 'selected' : '' %>><%= y %></option>
@@ -51,38 +44,38 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Monat</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_MONTH') %></label>
                     <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
-                        <% months.forEach((m, i) => { %>
-                            <option value="<%= String(i + 1).padStart(2, '0') %>" <%= fMonth == String(i + 1).padStart(2, '0') ? 'selected' : '' %>><%= m %></option>
-                        <% }) %>
+                        <% monthKeys.forEach((key) => { %>
+                            <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('MONTHS.' + key) %></option>
+                        <% } ) %>
                     </select>
                 </div>
                 <input type="hidden" name="month" id="hiddenMonth" value="<%= filters.month %>">
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Trainer/in</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
                     <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
-                        <option value="">-- Alle --</option>
+                        <option value=""><%= __('ADMIN_ALL') %></option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= filters.trainer == t.id ? 'selected' : '' %>><%= t.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Turnhalle</label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
                     <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
-                        <option value="">-- Alle --</option>
+                        <option value=""><%= __('ADMIN_ALL') %></option>
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>" <%= filters.hall == h.id ? 'selected' : '' %>><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
-                <button type="submit" class="bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition">Filtern</button>
+                <button type="submit" class="bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition"><%= __('ADMIN_FILTER_BTN') %></button>
             </form>
         </section>
 
-        <% 
+        <%
             let totalMins = 0;
             let totalPay = 0;
             const hourlyWage = parseFloat(settings.hourly_wage);
@@ -95,17 +88,17 @@
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Einheiten</p>
+                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_UNITS') %></p>
                 <p class="text-3xl font-ktv-serif text-gray-800"><%= logs.length %></p>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-1">Gesamtzeit</p>
+                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TOTAL_TIME') %></p>
                 <p class="text-3xl font-ktv-serif text-gray-800"><%= Math.floor(totalMins / 60) %>h <%= totalMins % 60 %>m</p>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-ktv/20 shadow-sm bg-ktv/5">
-                <p class="text-xs font-bold text-ktv uppercase mb-1">Gesamtentschädigung</p>
+                <p class="text-xs font-bold text-ktv uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
                 <p class="text-3xl font-ktv-serif text-ktv"><%= totalPay.toFixed(2) %> €</p>
-                <p class="text-[10px] text-gray-400 mt-1">Basis: <%= hourlyWage.toFixed(2) %> € / Std.</p>
+                <p class="text-[10px] text-gray-400 mt-1"><%= __('ADMIN_BASIS') %>: <%= hourlyWage.toFixed(2) %> € / Std.</p>
             </div>
         </div>
 
@@ -115,14 +108,14 @@
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-[0.1em] font-bold">
                         <tr>
-                            <th class="px-6 py-4">Trainer / Halle</th>
-                            <th class="px-6 py-4">Datum / Zeit</th>
-                            <th class="px-6 py-4">Dauer</th>
-                            <th class="px-6 py-4 text-right">Entschädigung</th>
+                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINER_HALL') %></th>
+                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
+                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
+                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_COMPENSATION') %></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
-                        <% logs.forEach(log => { 
+                        <% logs.forEach(log => {
                             const sessionPay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
                         %>
                             <tr class="hover:bg-gray-50 transition">
@@ -132,11 +125,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-gray-800 text-xs font-medium">
-                                        <%= new Date(log.start_timestamp + " UTC").toLocaleDateString('de-AT', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
+                                        <%= new Date(log.start_timestamp + " UTC").toLocaleDateString(locale || 'de', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
                                     </div>
                                     <div class="text-[10px] text-gray-400">
-                                        <%= new Date(log.start_timestamp + " UTC").toLocaleTimeString('de-AT', { hour:'2-digit', minute:'2-digit' }) %> - 
-                                        <%= log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleTimeString('de-AT', { hour:'2-digit', minute:'2-digit' }) : '...' %>
+                                        <%= new Date(log.start_timestamp + " UTC").toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) %> -
+                                        <%= log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) : '...' %>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -146,7 +139,7 @@
                                         </span>
                                     <% } else { %>
                                         <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-[10px] font-bold animate-pulse">
-                                            Läuft...
+                                            <%= __('ADMIN_TABLE_RUNNING') %>
                                         </span>
                                     <% } %>
                                 </td>
@@ -156,7 +149,7 @@
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="4" class="px-6 py-20 text-center text-gray-300 italic">Keine Einträge für diesen Zeitraum gefunden.</td></tr>
+                            <tr><td colspan="4" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>

@@ -1,22 +1,49 @@
 {
   "name": "gym-checkin",
   "version": "1.0.0",
-  "description": "",
+  "description": "KTV Gym Check-in and Administration Tool",
   "main": "index.js",
+  "type": "module",
+  "license": "EUPL-1.2",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "build:css": "npx @tailwindcss/cli -i ./static/input.css -o ./static/style.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./static/input.css -o ./static/style.css --watch",
+    "lint": "eslint . && ejslint views/*.ejs",
+    "format": "prettier --write .",
+    "check-format": "prettier --check ."
   },
-  "keywords": [],
+  "keywords": [
+    "gym",
+    "check-in",
+    "express",
+    "sqlite"
+  ],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
+    "compression": "^1.8.1",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "exceljs": "^4.4.0",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
+    "i18n": "^0.15.3",
+    "morgan": "^1.10.1",
     "qrcode": "^1.5.4",
     "sqlite3": "^6.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/cli": "^4.2.2",
+    "ejs-lint": "^2.0.1",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.4.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.1",
+    "prettier-plugin-ejs": "^1.0.3",
+    "tailwindcss": "^4.2.2"
   }
 }

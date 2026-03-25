@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('playfair-display.ttf') format('truetype');
+}
+
+@theme {
+  --color-ktv: #76a59d;
+  --color-ktv-hover: #65918a;
+}
+
+@layer base {
+  .font-ktv-serif {
+    font-family: 'Playfair Display', serif;
+  }
+}
