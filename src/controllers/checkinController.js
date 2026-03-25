@@ -30,8 +30,7 @@ export const postCheckin = async (req, res) => {
       trainerId,
       pin,
     ]);
-    if (!trainer)
-      return res.status(401).json({ error: req.__('ERROR_INVALID_PIN_RETRY') });
+    if (!trainer) return res.status(401).json({ error: req.__('ERROR_INVALID_PIN_RETRY') });
 
     const settings = await db.getSettings();
     const maxMins = parseInt(settings.max_session_minutes);

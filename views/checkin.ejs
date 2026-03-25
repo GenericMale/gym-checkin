@@ -8,7 +8,7 @@
     <title><%= __('CHECKIN_TITLE') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>" />
     <style>
-      /* Spinner für den Auto-Modus */
+      /* Spinner for auto-mode */
       .loader {
         border: 4px solid #f3f3f3;
         border-top: 4px solid #76a59d;
@@ -19,12 +19,8 @@
         display: inline-block;
       }
       @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
   </head>
@@ -48,18 +44,8 @@
         <h1 class="text-3xl font-bold mb-2 text-gray-800"><%= __('CHECKIN_HEADER') %></h1>
         <p class="text-ktv font-medium flex justify-center items-center gap-2 mb-4">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-            ></path>
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
           </svg>
           <%= hallName %>
         </p>
@@ -68,16 +54,16 @@
         </div>
       </div>
 
-      <!-- Lade-Indikator für Auto-Start -->
+      <!-- Loading indicator for auto-start -->
       <div id="autoLoading" class="hidden text-center py-10">
         <div class="loader mb-4"></div>
         <p class="text-gray-600 font-medium"><%= __('CHECKIN_AUTO_LOADING') %></p>
       </div>
 
-      <!-- Fehlermeldung -->
+      <!-- Status message -->
       <div id="status" class="hidden mb-6 p-4 rounded-xl text-center font-bold"></div>
 
-      <!-- Hauptformular -->
+      <!-- Main Form -->
       <div id="formContainer">
         <form id="checkinForm" class="space-y-6">
           <input type="hidden" id="hallId" value="<%= hallId %>" />
@@ -85,11 +71,7 @@
           <div>
             <div class="flex justify-between items-center mb-2">
               <label class="block text-sm font-semibold text-gray-600"><%= __('CHECKIN_SELECT_TRAINER') %></label>
-              <span
-                id="sessionBadge"
-                class="hidden px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse"
-                ><%= __('CHECKIN_SESSION_RUNNING') %></span
-              >
+              <span id="sessionBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse"><%= __('CHECKIN_SESSION_RUNNING') %></span>
             </div>
             <select
               id="trainerId"
@@ -114,7 +96,7 @@
             />
           </div>
 
-          <!-- AUTO-START OPTION -->
+          <!-- Auto-start option -->
           <div class="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
             <div class="flex items-center h-5">
               <input
@@ -125,9 +107,7 @@
             </div>
             <label for="autoStartToggle" class="text-sm cursor-pointer">
               <span class="font-bold text-gray-700 block"><%= __('CHECKIN_AUTO_START') %></span>
-              <span class="text-xs text-gray-500"
-                ><%= __('CHECKIN_AUTO_START_DESC') %></span
-              >
+              <span class="text-xs text-gray-500"><%= __('CHECKIN_AUTO_START_DESC') %></span>
             </label>
           </div>
 
@@ -141,26 +121,15 @@
         </form>
       </div>
 
-      <!-- Erfolgsmeldung -->
+      <!-- Success message -->
       <div id="successContainer" class="hidden flex-col items-center justify-center py-4">
-        <div
-          class="w-20 h-20 bg-ktv rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(118,165,157,0.5)]"
-        >
+        <div class="w-20 h-20 bg-ktv rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(118,165,157,0.5)]">
           <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="3"
-              d="M5 13l4 4L19 7"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        <h2 id="successTitle" class="text-3xl font-bold text-gray-800 mb-2 text-center">
-        </h2>
-        <p
-          id="successText"
-          class="text-gray-600 text-lg text-center font-medium leading-relaxed"
-        ></p>
+        <h2 id="successTitle" class="text-3xl font-bold text-gray-800 mb-2 text-center"></h2>
+        <p id="successText" class="text-gray-600 text-lg text-center font-medium leading-relaxed"></p>
 
         <div class="mt-8 bg-gray-50 p-4 rounded-xl border border-gray-100 text-center w-full">
           <p class="text-sm text-gray-500 mb-3"><%= __('CHECKIN_SUCCESS_RECORDED') %></p>
@@ -173,19 +142,14 @@
         </div>
       </div>
 
-      <!-- Berichte Bereich -->
+      <!-- Reports Section -->
       <div id="reportsWrapper" class="mt-8 pt-6 border-t border-gray-100">
         <button
           id="btnToggleReports"
           class="text-xs text-gray-400 hover:text-ktv flex items-center gap-1 mx-auto transition-colors uppercase tracking-widest font-bold"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            ></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
           <%= __('CHECKIN_REPORTS_TOGGLE') %>
         </button>
@@ -212,21 +176,30 @@
     </div>
 
     <script>
-      // UI Elemente
-      const formContainer = document.getElementById('formContainer');
-      const successContainer = document.getElementById('successContainer');
-      const autoLoading = document.getElementById('autoLoading');
-      const status = document.getElementById('status');
-      const autoStartToggle = document.getElementById('autoStartToggle');
-      const trainerSelect = document.getElementById('trainerId');
-      const submitBtn = document.getElementById('submitBtn');
-      const sessionBadge = document.getElementById('sessionBadge');
-      const btnToggleReports = document.getElementById('btnToggleReports');
-      const btnExportCurrent = document.getElementById('btnExportCurrent');
-      const btnExportLast = document.getElementById('btnExportLast');
-      const reportsSection = document.getElementById('reportsSection');
+      // DOM Elements
+      const el = {
+        formContainer: document.getElementById('formContainer'),
+        successContainer: document.getElementById('successContainer'),
+        autoLoading: document.getElementById('autoLoading'),
+        status: document.getElementById('status'),
+        autoStartToggle: document.getElementById('autoStartToggle'),
+        trainerSelect: document.getElementById('trainerId'),
+        submitBtn: document.getElementById('submitBtn'),
+        sessionBadge: document.getElementById('sessionBadge'),
+        btnToggleReports: document.getElementById('btnToggleReports'),
+        btnExportCurrent: document.getElementById('btnExportCurrent'),
+        btnExportLast: document.getElementById('btnExportLast'),
+        reportsSection: document.getElementById('reportsSection'),
+        liveClock: document.getElementById('liveClock'),
+        successTitle: document.getElementById('successTitle'),
+        successText: document.getElementById('successText'),
+        btnDisableAuto: document.getElementById('btnDisableAuto'),
+        pinInput: document.getElementById('pin'),
+        hallIdInput: document.getElementById('hallId'),
+        checkinForm: document.getElementById('checkinForm')
+      };
 
-      // Übersetzungen für JS
+      // i18n configurations for JS
       const i18n = {
         submitStart: "<%= __('CHECKIN_SUBMIT_START') %>",
         submitStop: "<%= __('CHECKIN_SUBMIT_STOP') %>",
@@ -237,10 +210,10 @@
         locale: "<%= locale %>"
       };
 
-      // Live Uhr
+      // Update live clock
       function updateClock() {
         const now = new Date();
-        document.getElementById('liveClock').textContent = now.toLocaleTimeString(i18n.locale ||'de', {
+        el.liveClock.textContent = now.toLocaleTimeString(i18n.locale === 'de' ? 'de-AT' : 'en-US', {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',
@@ -249,29 +222,38 @@
       setInterval(updateClock, 1000);
       updateClock();
 
-      // Berichte ein/ausblenden
-      btnToggleReports.addEventListener('click', () => {
-        reportsSection.classList.toggle('hidden');
-      });
-      btnExportCurrent.addEventListener('click', () => {
-        downloadReport('current');
-      });
-      btnExportLast.addEventListener('click', () => {
-        downloadReport('last');
+      // UI Event Listeners
+      el.btnToggleReports.addEventListener('click', () => {
+        el.reportsSection.classList.toggle('hidden');
       });
 
-      // Bericht Download
+      el.btnExportCurrent.addEventListener('click', () => downloadReport('current'));
+      el.btnExportLast.addEventListener('click', () => downloadReport('last'));
+
+      el.trainerSelect.addEventListener('change', (e) => updateSessionStatus(e.target.value));
+
+      el.checkinForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        performCheckin(el.trainerSelect.value, el.pinInput.value, el.hallIdInput.value, false);
+      });
+
+      el.btnDisableAuto.addEventListener('click', () => {
+        localStorage.setItem('gym_auto_start', 'false');
+        alert(i18n.alertAutoDisabled);
+        location.reload();
+      });
+
+      // Download localized report
       function downloadReport(month) {
-        const trainerId =
-          document.getElementById('trainerId').value || localStorage.getItem('gym_trainer_id');
-        const pin = document.getElementById('pin').value || localStorage.getItem('gym_trainer_pin');
+        const trainerId = el.trainerSelect.value || localStorage.getItem('gym_trainer_id');
+        const pin = el.pinInput.value || localStorage.getItem('gym_trainer_pin');
 
         if (!trainerId || !pin) {
           alert(i18n.alertMissingInfo);
-          reportsSection.classList.add('hidden');
-          formContainer.classList.remove('hidden');
-          successContainer.classList.add('hidden');
-          successContainer.classList.remove('flex');
+          el.reportsSection.classList.add('hidden');
+          el.formContainer.classList.remove('hidden');
+          el.successContainer.classList.add('hidden');
+          el.successContainer.classList.remove('flex');
           return;
         }
 
@@ -293,45 +275,40 @@
         document.body.removeChild(form);
       }
 
-      // Session Status prüfen
+      // Check current session status for the selected trainer
       async function updateSessionStatus(trainerId) {
         if (!trainerId) {
-          submitBtn.textContent = i18n.submitStart;
-          sessionBadge.classList.add('hidden');
+          el.submitBtn.textContent = i18n.submitStart;
+          el.sessionBadge.classList.add('hidden');
           return;
         }
         try {
           const res = await fetch('<%= url("/api/session-status/") %>' + trainerId);
           const data = await res.json();
           if (data.active) {
-            submitBtn.textContent = i18n.submitStop;
-            submitBtn.className =
-              'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]';
-            sessionBadge.classList.remove('hidden');
-            sessionBadge.className =
-              'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse bg-red-100 text-red-700 border border-red-200';
+            el.submitBtn.textContent = i18n.submitStop;
+            el.submitBtn.className = 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]';
+            el.sessionBadge.classList.remove('hidden');
+            el.sessionBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse bg-red-100 text-red-700 border border-red-200';
           } else {
-            submitBtn.textContent = i18n.submitStart;
-            submitBtn.className =
-              'w-full bg-ktv hover:bg-ktv-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]';
-            sessionBadge.classList.add('hidden');
+            el.submitBtn.textContent = i18n.submitStart;
+            el.submitBtn.className = 'w-full bg-ktv hover:bg-ktv-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02]';
+            el.sessionBadge.classList.add('hidden');
           }
         } catch (err) {
-          console.error('Status-Check Fehler', err);
+          console.error('Status check error', err);
         }
       }
 
-      trainerSelect.addEventListener('change', (e) => updateSessionStatus(e.target.value));
-
-      // Check-in Funktion (Zentralisiert)
+      // Perform check-in or check-out
       async function performCheckin(trainerId, pin, hallId, isAuto = false) {
         if (isAuto) {
-          formContainer.classList.add('hidden');
-          autoLoading.classList.remove('hidden');
+          el.formContainer.classList.add('hidden');
+          el.autoLoading.classList.remove('hidden');
         }
 
         try {
-          // Vor dem Checkin Status prüfen für korrekten Titel
+          // Check status before perform to set correct title
           const statusRes = await fetch('<%= url("/api/session-status/") %>' + trainerId);
           const statusData = await statusRes.json();
           const wasActive = statusData.active;
@@ -344,73 +321,54 @@
           const data = await res.json();
 
           if (res.ok) {
-            // Speichern für nächstes Mal
+            // Save for future auto-checkins
             localStorage.setItem('gym_trainer_id', trainerId);
             localStorage.setItem('gym_trainer_pin', pin);
-            localStorage.setItem('gym_auto_start', autoStartToggle.checked || isAuto);
+            localStorage.setItem('gym_auto_start', el.autoStartToggle.checked || isAuto);
 
-            autoLoading.classList.add('hidden');
-            formContainer.classList.add('hidden');
-            status.classList.add('hidden');
+            el.autoLoading.classList.add('hidden');
+            el.formContainer.classList.add('hidden');
+            el.status.classList.add('hidden');
 
-            document.getElementById('successTitle').textContent = wasActive
-              ? i18n.successStopped
-              : i18n.successStarted;
-            document.getElementById('successText').textContent = data.message;
-            successContainer.classList.remove('hidden');
-            successContainer.classList.add('flex');
+            el.successTitle.textContent = wasActive ? i18n.successStopped : i18n.successStarted;
+            el.successText.textContent = data.message;
+            el.successContainer.classList.remove('hidden');
+            el.successContainer.classList.add('flex');
 
             if (localStorage.getItem('gym_auto_start') === 'true') {
-              document.getElementById('btnDisableAuto').classList.remove('hidden');
+              el.btnDisableAuto.classList.remove('hidden');
             }
           } else {
             throw new Error(data.error);
           }
         } catch (err) {
-          autoLoading.classList.add('hidden');
-          formContainer.classList.remove('hidden');
-          status.classList.remove('hidden');
-          status.className =
-            'mb-6 p-4 rounded-xl text-center font-bold bg-red-100 text-red-700 border border-red-200';
-          status.textContent = err.message;
+          el.autoLoading.classList.add('hidden');
+          el.formContainer.classList.remove('hidden');
+          el.status.classList.remove('hidden');
+          el.status.className = 'mb-6 p-4 rounded-xl text-center font-bold bg-red-100 text-red-700 border border-red-200';
+          el.status.textContent = err.message;
           localStorage.setItem('gym_auto_start', 'false');
         }
       }
 
-      // Initialisierung beim Laden
+      // Initialize page state from localStorage
       window.addEventListener('load', async () => {
         const savedId = localStorage.getItem('gym_trainer_id');
         const savedPin = localStorage.getItem('gym_trainer_pin');
         const isAutoStartEnabled = localStorage.getItem('gym_auto_start') === 'true';
-        const currentHall = document.getElementById('hallId').value;
+        const currentHall = el.hallIdInput.value;
 
-        autoStartToggle.checked = isAutoStartEnabled;
+        el.autoStartToggle.checked = isAutoStartEnabled;
 
         if (savedId) {
-          trainerSelect.value = savedId;
+          el.trainerSelect.value = savedId;
           await updateSessionStatus(savedId);
         }
-        if (savedPin) document.getElementById('pin').value = savedPin;
+        if (savedPin) el.pinInput.value = savedPin;
 
         if (isAutoStartEnabled && savedId && savedPin) {
           performCheckin(savedId, savedPin, currentHall, true);
         }
-      });
-
-      // Manuelles Formular
-      document.getElementById('checkinForm').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const trainerId = document.getElementById('trainerId').value;
-        const pin = document.getElementById('pin').value;
-        const hallId = document.getElementById('hallId').value;
-        performCheckin(trainerId, pin, hallId, false);
-      });
-
-      // Deaktivierungs-Funktion
-      document.getElementById('btnDisableAuto').addEventListener('click', () => {
-        localStorage.setItem('gym_auto_start', 'false');
-        alert(i18n.alertAutoDisabled);
-        location.reload();
       });
     </script>
   </body>
