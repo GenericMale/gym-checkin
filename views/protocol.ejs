@@ -95,7 +95,7 @@
                 <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TOTAL_TIME') %></p>
                 <p class="text-3xl font-ktv-serif text-gray-800"><%= Math.floor(totalMins / 60) %>h <%= totalMins % 60 %>m</p>
             </div>
-            <div class="bg-white p-6 rounded-3xl border border-ktv/20 shadow-sm bg-ktv/5">
+            <div class="p-6 rounded-3xl border border-ktv/20 shadow-sm bg-ktv/5">
                 <p class="text-xs font-bold text-ktv uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
                 <p class="text-3xl font-ktv-serif text-ktv"><%= totalPay.toFixed(2) %> €</p>
                 <p class="text-[10px] text-gray-400 mt-1"><%= __('ADMIN_BASIS') %>: <%= hourlyWage.toFixed(2) %> € / Std.</p>
@@ -106,7 +106,7 @@
         <section class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-[0.1em] font-bold">
+                    <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-widest font-bold">
                         <tr>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINER_HALL') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
