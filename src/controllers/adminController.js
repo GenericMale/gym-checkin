@@ -181,6 +181,39 @@ export const deleteTrainer = async (req, res) => {
   }
 };
 
+export const deleteCheckin = async (req, res) => {
+  try {
+    await db.run('DELETE FROM checkins WHERE id = ?', [req.params.id]);
+    res.status(200).send('OK');
+  } catch (err) {
+    logger.error('Datenbankfehler in deleteCheckin', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const deleteFilteredCheckins = async (req, res) => {
+  const { month, trainer, hall } = req.body;
+  let query = "DELETE FROM checkins WHERE strftime('%Y-%m', start_timestamp) = ?";
+  const params = [month];
+
+  if (trainer) {
+    query += ' AND trainer_id = ?';
+    params.push(trainer);
+  }
+  if (hall) {
+    query += ' AND hall_id = ?';
+    params.push(hall);
+  }
+
+  try {
+    await db.run(query, params);
+    res.status(200).send('OK');
+  } catch (err) {
+    logger.error('Datenbankfehler in deleteFilteredCheckins', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
 export const exportAll = async (req, res) => {
   const { month } = req.query;
   const now = new Date();

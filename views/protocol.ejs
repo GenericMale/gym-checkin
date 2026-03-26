@@ -9,7 +9,7 @@
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
 
     <nav class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50 shadow-sm">
-        <div class="container mx-auto flex justify-between items-center">
+        <div class="container mx-auto flex justify-between items-center text-sm">
             <div class="flex items-center gap-4">
                 <a href="<%= url('/admin') %>" class="bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
@@ -19,9 +19,17 @@
                     <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
                 </div>
             </div>
-            <a href="<%= url('/admin/export?month=' + filters.month) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2">
-                <%= __('ADMIN_EXCEL_EXPORT') %> (<%= filters.month %>)
-            </a>
+            <div class="flex gap-4">
+                <% if (logs.length > 0) { %>
+                    <button id="deleteAllShown" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <%= __('ADMIN_DELETE_ALL_SHOWN') %>
+                    </button>
+                <% } %>
+                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2">
+                    <%= __('ADMIN_EXCEL_EXPORT') %>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -112,13 +120,14 @@
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
                             <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_COMPENSATION') %></th>
+                            <th class="px-6 py-4"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         <% logs.forEach(log => {
                             const sessionPay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
                         %>
-                            <tr class="hover:bg-gray-50 transition">
+                            <tr class="hover:bg-gray-50 transition group">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-700"><%= log.trainer %></div>
                                     <div class="text-[10px] text-ktv uppercase font-bold"><%= log.hall %></div>
@@ -146,10 +155,15 @@
                                 <td class="px-6 py-4 text-right font-mono font-bold text-gray-700">
                                     <%= sessionPay > 0 ? sessionPay.toFixed(2) + ' €' : '-' %>
                                 </td>
+                                <td class="px-6 py-4 text-right">
+                                    <button class="delete-btn text-gray-300 hover:text-red-600 transition p-2" data-id="<%= log.id %>">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </td>
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="4" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
+                            <tr><td colspan="5" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -163,6 +177,39 @@
             const month = document.getElementById('selectMonth').value;
             document.getElementById('hiddenMonth').value = `${year}-${month}`;
         });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                    const id = this.getAttribute('data-id');
+                    const response = await fetch(`<%= url('/admin/delete-checkin/') %>${id}`, { method: 'POST' });
+                    if (response.ok) {
+                        location.reload();
+                    }
+                }
+            });
+        });
+
+        const deleteAllBtn = document.getElementById('deleteAllShown');
+        if (deleteAllBtn) {
+            deleteAllBtn.addEventListener('click', async function() {
+                if (confirm('<%= __('ADMIN_DELETE_ALL_CONFIRM') %>')) {
+                    const params = new URLSearchParams(window.location.search);
+                    const month = params.get('month') || '<%= filters.month %>';
+                    const trainer = params.get('trainer') || '';
+                    const hall = params.get('hall') || '';
+
+                    const response = await fetch(`<%= url('/admin/delete-filtered-checkins') %>`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ month, trainer, hall })
+                    });
+                    if (response.ok) {
+                        location.reload();
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
