@@ -7,12 +7,20 @@
     <link rel="stylesheet" href="<%= url('/static/style.css') %>">
     <style>
         @media print {
+            @page {
+                size: A5 landscape;
+                margin: 0;
+            }
             body * { visibility: hidden; }
             .print-area, .print-area * { visibility: visible; }
             .print-area {
-                position: absolute; left: 0; top: 0; width: 100%;
-                display: flex; flex-direction: column; align-items: center;
-                justify-content: center; height: 100vh;
+                position: absolute;
+                left: 0; top: 0;
+                width: 210mm; height: 148mm;
+                padding: 10mm;
+                display: flex; flex-direction: column;
+                background: white;
+                box-sizing: border-box;
             }
             .no-print { display: none !important; }
         }
@@ -125,7 +133,7 @@
                                 <p class="font-bold text-gray-400 mb-2 uppercase"><%= __('ADMIN_HALLS_LABEL') %></p>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                     <% halls.forEach(hall => { %>
-                                        <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded"> <%= hall.name %></label>
+                                        <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" checked> <%= hall.name %></label>
                                     <% }) %>
                                 </div>
                             </div>
@@ -169,13 +177,40 @@
 
     <!-- Hidden Print Container -->
     <div id="printArea" class="hidden">
-        <div class="text-center border-10 border-ktv p-20 rounded-[4rem]">
-            <h1 class="font-ktv-serif text-6xl mb-12 text-gray-800" id="printTitle"></h1>
-            <div class="bg-white p-8 inline-block rounded-[3rem] shadow-xl border border-gray-100">
-                <img id="printImage" class="w-125 h-125">
+        <div class="flex-1 border-4 border-gray-800 rounded-[2rem] p-8 flex flex-col items-center justify-between h-full box-border">
+            <h1 class="font-sans font-bold text-6xl text-gray-800 uppercase tracking-tight text-center" id="printTitle"></h1>
+            
+            <div class="flex w-full items-center justify-around flex-1">
+                <!-- QR Code Section -->
+                <div class="flex flex-col items-center gap-4">
+                    <div class="border-4 border-gray-800 p-4 rounded-2xl bg-white">
+                        <img id="printImage" class="w-48 h-48">
+                    </div>
+                </div>
+
+                <!-- NFC Section -->
+                <div class="flex flex-col items-center gap-6 text-center">
+                    <div class="relative flex items-center justify-center">
+                         <!-- NFC Icon with phone -->
+                        <svg class="w-32 h-32 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <path d="M12 18h.01" />
+                            <path d="M17 7.5C18.5 9 18.5 11 17 12.5" />
+                            <path d="M19.5 5C22 7.5 22 12.5 19.5 15" />
+                            <path d="M7 7.5C5.5 9 5.5 11 7 12.5" />
+                            <path d="M4.5 5C2 7.5 2 12.5 4.5 15" />
+                        </svg>
+                        <!-- NFC Tag Placement Circle (25mm) -->
+                        <div class="absolute border-2 border-dashed border-[#76a59d] rounded-full" style="width: 25mm; height: 25mm; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    </div>
+                    <p class="font-bold text-2xl text-gray-800 uppercase tracking-widest"><%= __('ADMIN_PRINT_TAP_HERE') %></p>
+                </div>
             </div>
-            <p class="font-ktv-serif text-3xl mt-12 text-ktv italic"><%= __('APP_SLOGAN') %></p>
-            <p class="text-xl text-gray-400 mt-4 uppercase tracking-[0.4em]"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
+
+            <div class="w-full flex justify-between items-end border-t border-gray-100 pt-4 opacity-40">
+                <p class="font-ktv-serif text-lg text-[#76a59d] italic"><%= __('APP_SLOGAN') %></p>
+                <p class="text-xs text-gray-400 uppercase tracking-widest font-bold"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
+            </div>
         </div>
     </div>
 

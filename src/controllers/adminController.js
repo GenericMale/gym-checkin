@@ -30,13 +30,13 @@ export const getDashboard = async (req, res) => {
   const baseUrl = req.protocol + '://' + req.get('host') + BASE_PATH;
 
   try {
-    const halls = await db.all('SELECT * FROM halls');
+    const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
     for (let hall of halls) {
       hall.url = `${baseUrl}/checkin?hall=${hall.id}`;
       hall.qr = await generateQRCode(hall.url);
     }
 
-    const trainers = await db.all('SELECT * FROM trainers');
+    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
     const assignments = await db.all('SELECT * FROM trainer_halls');
     const settings = await db.getSettings();
 

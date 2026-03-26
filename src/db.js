@@ -35,7 +35,7 @@ const initDb = async () => {
 
   // Initial Settings
   await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('max_session_minutes', '180')");
-  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('default_session_minutes', '90')");
+  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('default_session_minutes', '60')");
   await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('hourly_wage', '20')");
 };
 
