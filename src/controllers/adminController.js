@@ -1,6 +1,6 @@
 import db from '../db.js';
 import { generateQRCode } from '../utils/qrcode.js';
-import { createExportWorkbook, createTrainerWorkbook } from '../utils/excel.js';
+import { generateExport } from '../utils/prae.js';
 import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -278,7 +278,7 @@ export const deleteFilteredCheckins = async (req, res) => {
 };
 
 export const exportAll = async (req, res) => {
-  const { month } = req.query;
+  const { month, trainer, hall } = req.query;
   const now = new Date();
   const selectedMonth =
     month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -287,35 +287,42 @@ export const exportAll = async (req, res) => {
     const settings = await db.getSettings();
     const hourlyWage = parseFloat(settings.hourly_wage);
 
-    const rows = await db.all(
-      `
-            SELECT c.*, COALESCE(t.name, ?) as trainer_name, COALESCE(h.name, ?) as hall_name
+    let query = `
+            SELECT c.*, COALESCE(t.name, ?) as trainer_name
             FROM checkins c
             LEFT JOIN trainers t ON c.trainer_id = t.id
-            LEFT JOIN halls h ON c.hall_id = h.id
             WHERE strftime('%Y-%m', c.start_timestamp) = ?
-            ORDER BY t.name ASC, c.start_timestamp ASC
-        `,
-      [req.__('ERROR_UNKNOWN'), req.__('ERROR_DELETED'), selectedMonth]
-    );
+        `;
+    const params = [req.__('ERROR_UNKNOWN'), selectedMonth];
 
-    const workbook = await createExportWorkbook(
-      rows,
+    if (trainer) {
+      query += ' AND c.trainer_id = ?';
+      params.push(trainer);
+    }
+    if (hall) {
+      query += ' AND c.hall_id = ?';
+      params.push(hall);
+    }
+
+    query += ' ORDER BY t.name ASC, c.start_timestamp ASC';
+
+    const rows = await db.all(query, params);
+
+    const rowsByTrainer = {};
+    rows.forEach((row) => {
+      if (!rowsByTrainer[row.trainer_name]) rowsByTrainer[row.trainer_name] = [];
+      rowsByTrainer[row.trainer_name].push(row);
+    });
+
+    const { buffer, filename, contentType } = await generateExport(
+      rowsByTrainer,
       hourlyWage,
-      req.__.bind(req),
-      req.getLocale() || 'de'
+      selectedMonth
     );
 
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=ktv-abrechnung-${selectedMonth}.xlsx`
-    );
-    await workbook.xlsx.write(res);
-    res.end();
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.send(buffer);
   } catch (err) {
     logger.error('Exportfehler in exportAll', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -346,33 +353,24 @@ export const exportTrainer = async (req, res) => {
 
     const rows = await db.all(
       `
-            SELECT c.*, COALESCE(h.name, ?) as hall_name
+            SELECT c.*
             FROM checkins c
-            LEFT JOIN halls h ON c.hall_id = h.id
             WHERE c.trainer_id = ? AND strftime('%Y-%m', c.start_timestamp) = ?
             ORDER BY c.start_timestamp ASC
         `,
-      [req.__('ERROR_DELETED'), trainerId, selectedMonth]
+      [trainerId, selectedMonth]
     );
 
-    const workbook = await createTrainerWorkbook(
-      trainer.name,
-      rows,
+    const rowsByTrainer = { [trainer.name]: rows };
+    const { buffer, filename, contentType } = await generateExport(
+      rowsByTrainer,
       hourlyWage,
-      req.__.bind(req),
-      req.getLocale() || 'de'
+      selectedMonth
     );
 
-    res.setHeader(
-      'Content-Type',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    );
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename=ktv-abrechnung-${trainer.name.replace(/\s+/g, '_')}-${selectedMonth}.xlsx`
-    );
-    await workbook.xlsx.write(res);
-    res.end();
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+    res.send(buffer);
   } catch (err) {
     logger.error('Exportfehler in exportTrainer', err);
     res.status(500).send(req.__('ERROR_DB'));
