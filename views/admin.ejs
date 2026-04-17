@@ -24,6 +24,23 @@
             }
             .no-print { display: none !important; }
         }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
@@ -39,8 +56,8 @@
                 </div>
             </div>
             <div class="flex items-center gap-6">
-                <a href="<%= url('/admin/protocol') %>" class="text-sm font-bold text-ktv hover:underline"><%= __('ADMIN_PROTOCOL_LINK') %></a>
-                <a href="<%= url('/admin/logout') %>" class="text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-2">
+                <a href="<%= url('/admin/protocol') %>" class="text-sm font-bold text-ktv hover:underline cursor-pointer"><%= __('ADMIN_PROTOCOL_LINK') %></a>
+                <a href="<%= url('/admin/logout') %>" class="text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors flex items-center gap-2 cursor-pointer">
                     <%= __('ADMIN_LOGOUT') %>
                 </a>
             </div>
@@ -53,15 +70,15 @@
             <!-- Hallen Management -->
             <div class="lg:col-span-4 space-y-8">
                 <section class="bg-white rounded-4xl shadow-sm border border-gray-100 p-6">
-                    <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
-                        <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
-                        <%= __('ADMIN_HALLS') %>
-                    </h2>
-
-                    <form method="POST" action="<%= url('/admin/add-hall') %>" class="flex gap-2 mb-8">
-                        <input type="text" name="name" placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>" class="flex-1 bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
-                        <button class="bg-ktv text-white px-5 rounded-xl hover-bg-ktv transition shadow-md font-bold text-xl">+</button>
-                    </form>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-ktv-serif text-2xl flex items-center gap-3">
+                            <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                            <%= __('ADMIN_HALLS') %>
+                        </h2>
+                        <button onclick="openModal('addHallModal')" class="bg-ktv text-white px-4 py-2 rounded-xl hover:bg-ktv-hover transition shadow-md font-bold text-sm flex items-center gap-2 cursor-pointer">
+                             <span>+</span> <%= __('ADMIN_ADD') %>
+                        </button>
+                    </div>
 
                     <div class="space-y-3">
                         <% halls.forEach(hall => { %>
@@ -70,15 +87,13 @@
                                     <h3 class="font-bold text-gray-700 truncate"><%= hall.name %></h3>
                                     <p class="text-[10px] text-ktv font-mono truncate opacity-60 group-hover:opacity-100 transition"><%= hall.url %></p>
                                 </div>
-                                <div class="flex gap-2 shrink-0">
-                                    <button class="print-btn" data-hall="<%= hall.name %>" data-qr="<%= hall.qr %>" class="p-2 bg-white border border-gray-200 text-gray-400 hover:text-ktv hover:border-ktv rounded-lg transition shadow-sm" title="QR-Code drucken">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                <div class="flex gap-1 shrink-0">
+                                    <button class="print-btn text-gray-300 group-hover:text-ktv transition p-2 cursor-pointer" data-hall="<%= hall.name %>" data-qr="<%= hall.qr %>" title="QR-Code drucken">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                     </button>
-                                    <form method="POST" action="<%= url(`/admin/delete-hall/${hall.id}`) %>">
-                                        <button class="p-2 bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 rounded-lg transition shadow-sm">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                        </button>
-                                    </form>
+                                    <button onclick="openEditHallModal('<%= hall.id %>', '<%= hall.name %>')" class="text-gray-300 group-hover:text-ktv transition p-2 cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
                                 </div>
                             </div>
                         <% }) %>
@@ -105,7 +120,7 @@
                             <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HOURLY_WAGE') %></label>
                             <input type="number" step="0.01" name="hourly_wage" value="<%= settings.hourly_wage %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
                         </div>
-                        <button class="w-full bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition"><%= __('ADMIN_SAVE') %></button>
+                        <button class="w-full bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition cursor-pointer"><%= __('ADMIN_SAVE') %></button>
                     </form>
                 </section>
             </div>
@@ -113,59 +128,29 @@
             <!-- Trainer Management -->
             <div class="lg:col-span-8">
                 <section class="bg-white rounded-4xl shadow-sm border border-gray-100 p-6">
-                    <h2 class="font-ktv-serif text-2xl mb-6 flex items-center gap-3">
-                        <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
-                        <%= __('ADMIN_TRAINERS') %>
-                    </h2>
-
-                    <details class="mb-6 group bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
-                        <summary class="p-4 cursor-pointer font-bold text-ktv flex justify-between items-center list-none text-sm">
-                            <span><%= __('ADMIN_NEW_TRAINER') %></span>
-                            <span class="group-open:rotate-180 transition-transform">↓</span>
-                        </summary>
-                        <form method="POST" action="<%= url('/admin/add-trainer') %>" class="p-4 pt-0 space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <input type="text" name="name" placeholder="<%= __('ADMIN_NAME') %>" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
-                                <input type="text" name="pin" placeholder="<%= __('ADMIN_PIN') %>" pattern="[0-9]{4}" class="bg-white border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
-                            </div>
-                            <div class="bg-white p-3 rounded-xl border border-gray-200 text-[11px]">
-                                <p class="font-bold text-gray-400 mb-2 uppercase"><%= __('ADMIN_HALLS_LABEL') %></p>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    <% halls.forEach(hall => { %>
-                                        <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" checked> <%= hall.name %></label>
-                                    <% }) %>
-                                </div>
-                            </div>
-                            <button class="w-full bg-ktv text-white font-bold py-2.5 rounded-xl text-sm shadow-md"><%= __('ADMIN_ADD') %></button>
-                        </form>
-                    </details>
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="font-ktv-serif text-2xl flex items-center gap-3">
+                            <span class="w-1.5 h-6 bg-ktv rounded-full"></span>
+                            <%= __('ADMIN_TRAINERS') %>
+                        </h2>
+                        <button onclick="openModal('addTrainerModal')" class="bg-ktv text-white px-4 py-2 rounded-xl hover:bg-ktv-hover transition shadow-md font-bold text-sm flex items-center gap-2 cursor-pointer">
+                             <span>+</span> <%= __('ADMIN_ADD') %>
+                        </button>
+                    </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <% trainers.forEach(trainer => {
                             const trainerAssignments = assignments.filter(a => a.trainer_id === trainer.id).map(a => a.hall_id);
                         %>
-                            <details class="group bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-                                <summary class="p-3 cursor-pointer flex justify-between items-center list-none hover:bg-gray-50 text-sm">
-                                    <span class="font-bold text-gray-700"><%= trainer.name %></span>
-                                    <span class="text-ktv text-[10px] font-bold uppercase tracking-wider"><%= __('ADMIN_EDIT') %></span>
-                                </summary>
-                                <div class="p-3 border-t bg-gray-50">
-                                    <form method="POST" action="<%= url(`/admin/edit-trainer/${trainer.id}`) %>" class="space-y-3">
-                                        <input type="text" name="name" value="<%= trainer.name %>" class="w-full bg-white border border-gray-200 p-2 rounded-lg text-xs outline-none focus:ring-1 ring-ktv" required>
-                                        <input type="text" name="pin" value="<%= trainer.pin %>" class="w-full bg-white border border-gray-200 p-2 rounded-lg text-xs text-center font-mono" required>
-                                        <div class="bg-white p-2 rounded-lg border border-gray-200 text-[10px] space-y-1">
-                                            <% halls.forEach(hall => { %>
-                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded" <%= trainerAssignments.includes(hall.id) ? 'checked' : '' %> /> <%= hall.name %></label>
-                                            <% }) %>
-                                        </div>
-                                        <div class="flex gap-1">
-                                            <button class="flex-1 bg-ktv text-white py-1.5 rounded-lg text-[10px] font-bold"><%= __('ADMIN_SAVE') %></button>
-                                            <button form="del-<%= trainer.id %>" class="bg-red-50 text-red-600 px-3 py-1.5 rounded-lg text-[10px] font-bold"><%= __('ADMIN_DELETE') %></button>
-                                        </div>
-                                    </form>
-                                    <form id="del-<%= trainer.id %>" method="POST" action="<%= url(`/admin/delete-trainer/${trainer.id}`) %>" class="hidden"></form>
+                            <div class="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex items-center justify-between group">
+                                <div>
+                                    <h3 class="font-bold text-gray-700"><%= trainer.name %></h3>
+                                    <p class="text-[10px] text-gray-400 font-mono uppercase tracking-wider">PIN: <%= trainer.pin %></p>
                                 </div>
-                            </details>
+                                <button onclick="openEditTrainerModal('<%= trainer.id %>', '<%= trainer.name %>', '<%= trainer.pin %>', [<%= trainerAssignments.join(',') %>])" class="text-gray-300 group-hover:text-ktv transition p-2 cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                            </div>
                         <% }) %>
                     </div>
                 </section>
@@ -174,23 +159,147 @@
         </div>
     </main>
 
+    <!-- Modals -->
+    
+    <!-- Add Hall Modal -->
+    <div id="addHallModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_ADD_HALL') %></h2>
+                <button onclick="closeModal('addHallModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form action="<%= url('/admin/add-hall') %>" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_NAME') %></label>
+                    <input type="text" name="name" placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
+                </div>
+                <button type="submit" class="w-full bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition mt-2 cursor-pointer">
+                    <%= __('ADMIN_ADD') %>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Hall Modal -->
+    <div id="editHallModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_EDIT_HALL') %></h2>
+                <button onclick="closeModal('editHallModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="editHallForm" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_NAME') %></label>
+                    <input type="text" name="name" id="editHallName" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl focus:outline-none focus:ring-2 ring-ktv transition text-sm" required>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="submit" class="flex-1 bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition cursor-pointer">
+                        <%= __('ADMIN_SAVE') %>
+                    </button>
+                    <button type="button" id="deleteHallBtn" class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition cursor-pointer">
+                        <%= __('ADMIN_DELETE') %>
+                    </button>
+                </div>
+            </form>
+            <form id="deleteHallForm" method="POST" class="hidden"></form>
+        </div>
+    </div>
+
+    <!-- Add Trainer Modal -->
+    <div id="addTrainerModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_ADD_TRAINER') %></h2>
+                <button onclick="closeModal('addTrainerModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form action="<%= url('/admin/add-trainer') %>" method="POST" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_NAME') %></label>
+                        <input type="text" name="name" placeholder="<%= __('ADMIN_NAME') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_PIN') %></label>
+                        <input type="text" name="pin" placeholder="<%= __('ADMIN_PIN') %>" pattern="[0-9]{4}" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-[11px]">
+                    <p class="font-bold text-gray-400 mb-2 uppercase"><%= __('ADMIN_HALLS_LABEL') %></p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <% halls.forEach(hall => { %>
+                            <label class="flex items-center gap-2 mb-1 cursor-pointer"><input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded cursor-pointer" checked> <%= hall.name %></label>
+                        <% }) %>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition mt-2 cursor-pointer">
+                    <%= __('ADMIN_ADD') %>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Trainer Modal -->
+    <div id="editTrainerModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_EDIT_TRAINER') %></h2>
+                <button onclick="closeModal('editTrainerModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="editTrainerForm" method="POST" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_NAME') %></label>
+                        <input type="text" name="name" id="editTrainerName" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_PIN') %></label>
+                        <input type="text" name="pin" id="editTrainerPin" pattern="[0-9]{4}" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv" required>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-[11px]">
+                    <p class="font-bold text-gray-400 mb-2 uppercase"><%= __('ADMIN_HALLS_LABEL') %></p>
+                    <div class="grid grid-cols-2 gap-2" id="editTrainerHalls">
+                        <% halls.forEach(hall => { %>
+                            <label class="flex items-center gap-2 mb-1 cursor-pointer">
+                                <input type="checkbox" name="halls" value="<%= hall.id %>" class="text-ktv rounded trainer-hall-checkbox cursor-pointer"> <%= hall.name %>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="submit" class="flex-1 bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition cursor-pointer">
+                        <%= __('ADMIN_SAVE') %>
+                    </button>
+                    <button type="button" id="deleteTrainerBtn" class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition cursor-pointer">
+                        <%= __('ADMIN_DELETE') %>
+                    </button>
+                </div>
+            </form>
+            <form id="deleteTrainerForm" method="POST" class="hidden"></form>
+        </div>
+    </div>
+
     <!-- Hidden Print Container -->
     <div id="printArea" class="hidden">
-        <div class="flex-1 border-4 border-gray-800 rounded-[2rem] p-8 flex flex-col items-center justify-between h-full box-border">
+        <div class="flex-1 border-4 border-gray-800 rounded-4xl p-8 flex flex-col items-center justify-between h-full box-border">
             <h1 class="font-sans font-bold text-6xl text-gray-800 uppercase tracking-tight text-center" id="printTitle"></h1>
 
             <div class="flex w-full items-center justify-around flex-1">
-                <!-- QR Code Section -->
                 <div class="flex flex-col items-center gap-4">
                     <div class="border-4 border-gray-800 p-4 rounded-2xl bg-white">
                         <img id="printImage" class="w-48 h-48">
                     </div>
                 </div>
-
-                <!-- NFC Section -->
                 <div class="flex flex-col items-center gap-6 text-center">
                     <div class="relative flex items-center justify-center">
-                         <!-- NFC Icon with phone -->
                         <svg class="w-32 h-32 text-gray-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
                             <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                             <path d="M12 18h.01" />
@@ -199,21 +308,66 @@
                             <path d="M7 7.5C5.5 9 5.5 11 7 12.5" />
                             <path d="M4.5 5C2 7.5 2 12.5 4.5 15" />
                         </svg>
-                        <!-- NFC Tag Placement Circle (25mm) -->
-                        <div class="absolute border-2 border-dashed border-[#76a59d] rounded-full" style="width: 25mm; height: 25mm; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                        <div class="absolute border-2 border-dashed border-ktv rounded-full" style="width: 25mm; height: 25mm; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
                     </div>
                     <p class="font-bold text-2xl text-gray-800 uppercase tracking-widest"><%= __('ADMIN_PRINT_TAP_HERE') %></p>
                 </div>
             </div>
 
             <div class="w-full flex justify-between items-end border-t border-gray-100 pt-4 opacity-40">
-                <p class="font-ktv-serif text-lg text-[#76a59d] italic"><%= __('APP_SLOGAN') %></p>
+                <p class="font-ktv-serif text-lg text-ktv italic"><%= __('APP_SLOGAN') %></p>
                 <p class="text-xs text-gray-400 uppercase tracking-widest font-bold"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
             </div>
         </div>
     </div>
 
     <script>
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal.id);
+            });
+        });
+
+        function openEditHallModal(id, name) {
+            document.getElementById('editHallName').value = name;
+            document.getElementById('editHallForm').action = `<%= url('/admin/edit-hall/') %>${id}`;
+            document.getElementById('deleteHallForm').action = `<%= url('/admin/delete-hall/') %>${id}`;
+            document.getElementById('deleteHallBtn').onclick = () => {
+                if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                    document.getElementById('deleteHallForm').submit();
+                }
+            };
+            openModal('editHallModal');
+        }
+
+        function openEditTrainerModal(id, name, pin, assignedHallIds) {
+            document.getElementById('editTrainerName').value = name;
+            document.getElementById('editTrainerPin').value = pin;
+            document.getElementById('editTrainerForm').action = `<%= url('/admin/edit-trainer/') %>${id}`;
+            document.getElementById('deleteTrainerForm').action = `<%= url('/admin/delete-trainer/') %>${id}`;
+            
+            // Set checkboxes
+            document.querySelectorAll('.trainer-hall-checkbox').forEach(cb => {
+                cb.checked = assignedHallIds.includes(parseInt(cb.value));
+            });
+
+            document.getElementById('deleteTrainerBtn').onclick = () => {
+                if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                    document.getElementById('deleteTrainerForm').submit();
+                }
+            };
+            openModal('editTrainerModal');
+        }
+
         document.querySelectorAll('.print-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const hallName = btn.getAttribute('data-hall');

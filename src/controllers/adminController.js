@@ -120,6 +120,18 @@ export const addHall = async (req, res) => {
   }
 };
 
+export const editHall = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  try {
+    await db.run('UPDATE halls SET name = ? WHERE id = ?', [name, id]);
+    redirect(res, '/admin');
+  } catch (err) {
+    logger.error('Datenbankfehler in editHall', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
 export const deleteHall = async (req, res) => {
   try {
     await db.run('DELETE FROM halls WHERE id = ?', [req.params.id]);
@@ -187,6 +199,57 @@ export const deleteCheckin = async (req, res) => {
     res.status(200).send('OK');
   } catch (err) {
     logger.error('Datenbankfehler in deleteCheckin', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const addCheckin = async (req, res) => {
+  const { trainer_id, hall_id, date, start_time, end_time } = req.body;
+  try {
+    const start = new Date(`${date}T${start_time}`);
+    const end = new Date(`${date}T${end_time}`);
+    if (end < start) end.setDate(end.getDate() + 1);
+    const durationMinutes = Math.round((end - start) / (1000 * 60));
+
+    const toSqlTimestamp = (date) => {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+    };
+
+    await db.run(
+      'INSERT INTO checkins (trainer_id, hall_id, start_timestamp, end_timestamp, duration_minutes) VALUES (?, ?, ?, ?, ?)',
+      [trainer_id, hall_id, toSqlTimestamp(start), toSqlTimestamp(end), durationMinutes]
+    );
+
+    redirect(res, '/admin/protocol');
+  } catch (err) {
+    logger.error('Datenbankfehler in addCheckin', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const editCheckin = async (req, res) => {
+  const { id } = req.params;
+  const { trainer_id, hall_id, date, start_time, end_time } = req.body;
+  try {
+    const start = new Date(`${date}T${start_time}`);
+    const end = new Date(`${date}T${end_time}`);
+    if (end < start) end.setDate(end.getDate() + 1);
+    const durationMinutes = Math.round((end - start) / (1000 * 60));
+
+    const toSqlTimestamp = (date) => {
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
+    };
+
+    await db.run(
+      'UPDATE checkins SET trainer_id = ?, hall_id = ?, start_timestamp = ?, end_timestamp = ?, duration_minutes = ? WHERE id = ?',
+      [trainer_id, hall_id, toSqlTimestamp(start), toSqlTimestamp(end), durationMinutes, id]
+    );
+
+    redirect(res, '/admin/protocol');
+  } catch (err) {
+    logger.error('Datenbankfehler in editCheckin', err);
     res.status(500).send(req.__('ERROR_DB'));
   }
 };

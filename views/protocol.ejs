@@ -5,13 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= __('ADMIN_PROTOCOL_TITLE') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>">
+    <style>
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-overlay.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
 
     <nav class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50 shadow-sm">
         <div class="container mx-auto flex justify-between items-center text-sm">
             <div class="flex items-center gap-4">
-                <a href="<%= url('/admin') %>" class="bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition">
+                <a href="<%= url('/admin') %>" class="bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition cursor-pointer">
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
@@ -20,13 +39,17 @@
                 </div>
             </div>
             <div class="flex gap-4">
+                <button onclick="openModal('addCheckinModal')" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    <%= __('ADMIN_ADD_CHECKIN') %>
+                </button>
                 <% if (logs.length > 0) { %>
-                    <button id="deleteAllShown" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition flex items-center gap-2">
+                    <button id="deleteAllShown" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition flex items-center gap-2 cursor-pointer">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         <%= __('ADMIN_DELETE_ALL_SHOWN') %>
                     </button>
                 <% } %>
-                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2">
+                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2 cursor-pointer">
                     <%= __('ADMIN_EXCEL_EXPORT') %>
                 </a>
             </div>
@@ -45,7 +68,7 @@
                 %>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_YEAR') %></label>
-                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
                         <% for(let y = currentYear; y >= currentYear - 5; y--) { %>
                             <option value="<%= y %>" <%= fYear == y ? 'selected' : '' %>><%= y %></option>
                         <% } %>
@@ -53,7 +76,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_MONTH') %></label>
-                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
                         <% monthKeys.forEach((key) => { %>
                             <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('MONTHS.' + key) %></option>
                         <% } ) %>
@@ -63,7 +86,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= filters.trainer == t.id ? 'selected' : '' %>><%= t.name %></option>
@@ -72,14 +95,14 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>" <%= filters.hall == h.id ? 'selected' : '' %>><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
-                <button type="submit" class="bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition"><%= __('ADMIN_FILTER_BTN') %></button>
+                <button type="submit" class="bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition cursor-pointer"><%= __('ADMIN_FILTER_BTN') %></button>
             </form>
         </section>
 
@@ -126,19 +149,22 @@
                     <tbody class="divide-y divide-gray-50">
                         <% logs.forEach(log => {
                             const sessionPay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
+                            const startDate = new Date(log.start_timestamp + " UTC");
+                            const endDate = log.end_timestamp ? new Date(log.end_timestamp + " UTC") : null;
                         %>
-                            <tr class="hover:bg-gray-50 transition group">
+                            <tr class="hover:bg-gray-50 transition group cursor-pointer" 
+                                onclick="openEditCheckinModal('<%= log.id %>', '<%= log.trainer_id %>', '<%= log.hall_id %>', '<%= startDate.toISOString().split('T')[0] %>', '<%= startDate.toTimeString().slice(0,5) %>', '<%= endDate ? endDate.toTimeString().slice(0,5) : '' %>')">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-700"><%= log.trainer %></div>
                                     <div class="text-[10px] text-ktv uppercase font-bold"><%= log.hall %></div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-gray-800 text-xs font-medium">
-                                        <%= new Date(log.start_timestamp + " UTC").toLocaleDateString(locale || 'de', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
+                                        <%= startDate.toLocaleDateString(locale || 'de', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
                                     </div>
                                     <div class="text-[10px] text-gray-400">
-                                        <%= new Date(log.start_timestamp + " UTC").toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) %> -
-                                        <%= log.end_timestamp ? new Date(log.end_timestamp + " UTC").toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) : '...' %>
+                                        <%= startDate.toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) %> -
+                                        <%= endDate ? endDate.toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) : '...' %>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -156,8 +182,8 @@
                                     <%= sessionPay > 0 ? sessionPay.toFixed(2) + ' €' : '-' %>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="delete-btn text-gray-300 hover:text-red-600 transition p-2" data-id="<%= log.id %>">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <button class="text-gray-300 group-hover:text-ktv transition p-2 cursor-pointer">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                 </td>
                             </tr>
@@ -171,23 +197,146 @@
         </section>
     </main>
 
+    <!-- Modals -->
+
+    <!-- Add Checkin Modal -->
+    <div id="addCheckinModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_ADD_CHECKIN') %></h2>
+                <button onclick="closeModal('addCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form action="<%= url('/admin/add-checkin') %>" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
+                    <select name="trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                        <% trainers.forEach(t => { %>
+                            <option value="<%= t.id %>"><%= t.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <select name="hall_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                        <% halls.forEach(h => { %>
+                            <option value="<%= h.id %>"><%= h.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
+                    <input type="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
+                        <input type="time" name="start_time" required value="17:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
+                        <input type="time" name="end_time" required value="19:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition mt-2 cursor-pointer">
+                    <%= __('ADMIN_ADD_CHECKIN_SUBMIT') %>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Checkin Modal -->
+    <div id="editCheckinModal" class="modal-overlay hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
+                <button onclick="closeModal('editCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <form id="editCheckinForm" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
+                    <select name="trainer_id" id="editCheckinTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                        <% trainers.forEach(t => { %>
+                            <option value="<%= t.id %>"><%= t.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                        <% halls.forEach(h => { %>
+                            <option value="<%= h.id %>"><%= h.name %></option>
+                        <% }) %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
+                    <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
+                        <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
+                        <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-2">
+                    <button type="submit" class="flex-1 bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition cursor-pointer">
+                        <%= __('ADMIN_SAVE') %>
+                    </button>
+                    <button type="button" id="deleteCheckinBtn" class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition cursor-pointer">
+                        <%= __('ADMIN_DELETE') %>
+                    </button>
+                </div>
+            </form>
+            <form id="deleteCheckinForm" method="POST" class="hidden"></form>
+        </div>
+    </div>
+
     <script>
-        document.getElementById('filterForm').addEventListener('submit', function() {
-            const year = document.getElementById('selectYear').value;
-            const month = document.getElementById('selectMonth').value;
-            document.getElementById('hiddenMonth').value = `${year}-${month}`;
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        // Close modal on background click
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal(modal.id);
+            });
         });
 
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
+        function openEditCheckinModal(id, trainerId, hallId, date, start, end) {
+            document.getElementById('editCheckinTrainer').value = trainerId;
+            document.getElementById('editCheckinHall').value = hallId;
+            document.getElementById('editCheckinDate').value = date;
+            document.getElementById('editCheckinStart').value = start;
+            document.getElementById('editCheckinEnd').value = end || '';
+            document.getElementById('editCheckinForm').action = `<%= url('/admin/edit-checkin/') %>${id}`;
+            document.getElementById('deleteCheckinBtn').onclick = async () => {
                 if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
-                    const id = this.getAttribute('data-id');
                     const response = await fetch(`<%= url('/admin/delete-checkin/') %>${id}`, { method: 'POST' });
                     if (response.ok) {
                         location.reload();
                     }
                 }
-            });
+            };
+            openModal('editCheckinModal');
+        }
+
+        document.getElementById('filterForm').addEventListener('submit', function() {
+            const year = document.getElementById('selectYear').value;
+            const month = document.getElementById('selectMonth').value;
+            document.getElementById('hiddenMonth').value = `${year}-${month}`;
         });
 
         const deleteAllBtn = document.getElementById('deleteAllShown');
