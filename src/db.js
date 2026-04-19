@@ -1,7 +1,16 @@
 import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
 
-const dbPath = process.env.DB_PATH || './data/gym.db';
+const dbDir = process.env.DB_PATH || './data';
+const dbPath = path.join(dbDir, 'gym.db');
+
+// Ensure directory exists
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
 const db = new sqlite3.Database(dbPath);
 
 const dbGet = promisify(db.get.bind(db));

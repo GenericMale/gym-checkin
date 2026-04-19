@@ -1,7 +1,7 @@
 {
   "name": "gym-checkin",
   "version": "1.0.0",
-  "description": "KTV Gym Check-in and Administration Tool",
+  "description": "Gym Check-in and Administration Tool",
   "main": "index.js",
   "type": "module",
   "license": "EUPL-1.2",
@@ -24,6 +24,7 @@
   "dependencies": {
     "carbone": "^3.8.2",
     "compression": "^1.8.1",
+    "connect-sqlite3": "^0.9.16",
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",

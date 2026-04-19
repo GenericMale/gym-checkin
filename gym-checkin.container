@@ -1,0 +1,21 @@
+[Unit]
+Description=Gym Checkin
+
+[Container]
+ContainerName=%N
+AutoUpdate=registry
+
+Image=gym-checkin:latest
+PublishPort=3000:3000
+Volume=%S/%N:/app/data:U
+
+Environment=SESSION_SECRET=super_secret_session_key
+Environment=ADMIN_PASSWORD=admin
+#Environment=BASE_PATH=
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=900
+
+[Install]
+WantedBy=default.target

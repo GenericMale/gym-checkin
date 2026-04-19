@@ -1,5 +1,6 @@
 import express from 'express';
 import session from 'express-session';
+import SQLiteStoreFactory from 'connect-sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import helmet from 'helmet';
@@ -12,6 +13,7 @@ import logger from './utils/logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const SQLiteStore = SQLiteStoreFactory(session);
 
 const i18n = new I18n({
   locales: ['de'],
@@ -26,6 +28,7 @@ const i18n = new I18n({
 
 const app = express();
 const BASE_PATH = process.env.BASE_PATH || '';
+const DB_DIR = process.env.DB_PATH || './data';
 
 // Security, logging, compression
 app.use(
@@ -57,10 +60,14 @@ app.use(`${BASE_PATH}/static`, express.static(path.join(__dirname, '../static'))
 // Session
 app.use(
   session({
+    store: new SQLiteStore({ dir: DB_DIR }),
     secret: process.env.SESSION_SECRET || 'fallback-secret',
     resave: false,
-    saveUninitialized: true,
-    cookie: { secure: process.env.NODE_ENV === 'production' },
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
   })
 );
 
