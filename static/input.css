@@ -9,12 +9,12 @@
 }
 
 @theme {
-  --color-ktv: #76a59d;
-  --color-ktv-hover: #65918a;
+  --color-primary: #76a59d;
+  --color-primary-hover: #65918a;
 }
 
 @layer base {
-  .font-ktv-serif {
+  .font-brand-serif {
     font-family: 'Playfair Display', serif;
   }
 }

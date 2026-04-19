@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= __('ADMIN_PROTOCOL_TITLE') %></title>
+    <title><%= branding.shortName %> - <%= __('ADMIN_PROTOCOL_TITLE') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>">
     <style>
+        :root {
+            --color-primary: <%= branding.colors.primary %>;
+            --color-primary-hover: <%= branding.colors.primaryHover %>;
+        }
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -34,8 +38,8 @@
                     <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                 </a>
                 <div>
-                    <h1 class="font-ktv-serif text-xl leading-tight"><%= __('ADMIN_PROTOCOL_TITLE') %></h1>
-                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= __('APP_NAME') %> <%= __('APP_YEAR') %></p>
+                    <h1 class="font-brand-serif text-xl leading-tight"><%= __('ADMIN_PROTOCOL_TITLE') %></h1>
+                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= branding.name %> <%= branding.accentText %></p>
                 </div>
             </div>
             <div class="flex gap-4">
@@ -49,7 +53,7 @@
                         <%= __('ADMIN_DELETE_ALL_SHOWN') %>
                     </button>
                 <% } %>
-                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-ktv text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-ktv-hover transition flex items-center gap-2 cursor-pointer">
+                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-primary-hover transition flex items-center gap-2 cursor-pointer">
                     <%= __('ADMIN_EXCEL_EXPORT') %>
                 </a>
             </div>
@@ -68,7 +72,7 @@
                 %>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_YEAR') %></label>
-                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% for(let y = currentYear; y >= currentYear - 5; y--) { %>
                             <option value="<%= y %>" <%= fYear == y ? 'selected' : '' %>><%= y %></option>
                         <% } %>
@@ -76,7 +80,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_MONTH') %></label>
-                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% monthKeys.forEach((key) => { %>
                             <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('MONTHS.' + key) %></option>
                         <% } ) %>
@@ -86,7 +90,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= filters.trainer == t.id ? 'selected' : '' %>><%= t.name %></option>
@@ -95,7 +99,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>" <%= filters.hall == h.id ? 'selected' : '' %>><%= h.name %></option>
@@ -120,15 +124,15 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                 <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_UNITS') %></p>
-                <p class="text-3xl font-ktv-serif text-gray-800"><%= logs.length %></p>
+                <p class="text-3xl font-brand-serif text-gray-800"><%= logs.length %></p>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                 <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TOTAL_TIME') %></p>
-                <p class="text-3xl font-ktv-serif text-gray-800"><%= Math.floor(totalMins / 60) %>h <%= totalMins % 60 %>m</p>
+                <p class="text-3xl font-brand-serif text-gray-800"><%= Math.floor(totalMins / 60) %>h <%= totalMins % 60 %>m</p>
             </div>
-            <div class="p-6 rounded-3xl border border-ktv/20 shadow-sm bg-ktv/5">
-                <p class="text-xs font-bold text-ktv uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
-                <p class="text-3xl font-ktv-serif text-ktv"><%= totalPay.toFixed(2) %> €</p>
+            <div class="p-6 rounded-3xl border border-primary/20 shadow-sm bg-primary/5">
+                <p class="text-xs font-bold text-primary uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
+                <p class="text-3xl font-brand-serif text-primary"><%= totalPay.toFixed(2) %> €</p>
                 <p class="text-[10px] text-gray-400 mt-1"><%= __('ADMIN_BASIS') %>: <%= hourlyWage.toFixed(2) %> € / Std.</p>
             </div>
         </div>
@@ -152,11 +156,11 @@
                             const startDate = new Date(log.start_timestamp + " UTC");
                             const endDate = log.end_timestamp ? new Date(log.end_timestamp + " UTC") : null;
                         %>
-                            <tr class="hover:bg-gray-50 transition group cursor-pointer" 
+                            <tr class="hover:bg-gray-50 transition group cursor-pointer"
                                 onclick="openEditCheckinModal('<%= log.id %>', '<%= log.trainer_id %>', '<%= log.hall_id %>', '<%= startDate.toISOString().split('T')[0] %>', '<%= startDate.toTimeString().slice(0,5) %>', '<%= endDate ? endDate.toTimeString().slice(0,5) : '' %>')">
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-gray-700"><%= log.trainer %></div>
-                                    <div class="text-[10px] text-ktv uppercase font-bold"><%= log.hall %></div>
+                                    <div class="text-[10px] text-primary uppercase font-bold"><%= log.hall %></div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-gray-800 text-xs font-medium">
@@ -169,7 +173,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <% if (log.end_timestamp !== null) { %>
-                                        <span class="px-2 py-1 bg-ktv/10 text-ktv rounded-md text-[10px] font-bold">
+                                        <span class="px-2 py-1 bg-primary/10 text-primary rounded-md text-[10px] font-bold">
                                             <%= log.duration_minutes %> Min.
                                         </span>
                                     <% } else { %>
@@ -182,7 +186,7 @@
                                     <%= sessionPay > 0 ? sessionPay.toFixed(2) + ' €' : '-' %>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="text-gray-300 group-hover:text-ktv transition p-2 cursor-pointer">
+                                    <button class="text-gray-300 group-hover:text-primary transition p-2 cursor-pointer">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                 </td>
@@ -203,7 +207,7 @@
     <div id="addCheckinModal" class="modal-overlay hidden">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_ADD_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl"><%= __('ADMIN_ADD_CHECKIN') %></h2>
                 <button onclick="closeModal('addCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -211,7 +215,7 @@
             <form action="<%= url('/admin/add-checkin') %>" method="POST" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
@@ -219,7 +223,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="hall_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>"><%= h.name %></option>
                         <% }) %>
@@ -227,19 +231,19 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
-                    <input type="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <input type="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
-                        <input type="time" name="start_time" required value="17:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                        <input type="time" name="start_time" required value="17:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
-                        <input type="time" name="end_time" required value="19:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                        <input type="time" name="end_time" required value="19:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition mt-2 cursor-pointer">
+                <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-hover transition mt-2 cursor-pointer">
                     <%= __('ADMIN_ADD_CHECKIN_SUBMIT') %>
                 </button>
             </form>
@@ -250,7 +254,7 @@
     <div id="editCheckinModal" class="modal-overlay hidden">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-ktv-serif text-xl"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
                 <button onclick="closeModal('editCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
@@ -258,7 +262,7 @@
             <form id="editCheckinForm" method="POST" class="p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer_id" id="editCheckinTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="trainer_id" id="editCheckinTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
@@ -266,7 +270,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv cursor-pointer">
+                    <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>"><%= h.name %></option>
                         <% }) %>
@@ -274,20 +278,20 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
-                    <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                    <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
-                        <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                        <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
-                        <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-ktv">
+                        <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
                     </div>
                 </div>
                 <div class="flex gap-2 mt-2">
-                    <button type="submit" class="flex-1 bg-ktv text-white font-bold py-3 rounded-xl shadow-lg hover:bg-ktv-hover transition cursor-pointer">
+                    <button type="submit" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-hover transition cursor-pointer">
                         <%= __('ADMIN_SAVE') %>
                     </button>
                     <button type="button" id="deleteCheckinBtn" class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition cursor-pointer">

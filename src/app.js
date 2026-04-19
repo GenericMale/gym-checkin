@@ -10,6 +10,7 @@ import { I18n } from 'i18n';
 import adminRoutes from './routes/adminRoutes.js';
 import checkinRoutes from './routes/checkinRoutes.js';
 import logger from './utils/logger.js';
+import { branding } from './utils/config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,9 @@ const i18n = new I18n({
 });
 
 const app = express();
+
+// Set branding as local variable for all templates
+app.locals.branding = branding;
 const BASE_PATH = process.env.BASE_PATH || '';
 const DB_DIR = process.env.DB_PATH || './data';
 
@@ -60,7 +64,7 @@ app.use(`${BASE_PATH}/static`, express.static(path.join(__dirname, '../static'))
 // Session
 app.use(
   session({
-    store: new SQLiteStore({ dir: DB_DIR }),
+    store: new SQLiteStore({ dir: DB_DIR, db: 'sessions.db' }),
     secret: process.env.SESSION_SECRET || 'fallback-secret',
     resave: false,
     saveUninitialized: false,

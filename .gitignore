@@ -12,13 +12,7 @@ yarn-error.log*
 .env.production.local
 
 # Database
-data/*.db
-data/*.db-journal
-data/*.db-shm
-data/*.db-wal
-
-# Build outputs
-static/style.css
+data/
 
 # IDEs
 .vscode/
