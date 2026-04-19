@@ -14,13 +14,6 @@ yarn-error.log*
 # Database
 data/
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-
 # Logs
 logs/
 *.log
