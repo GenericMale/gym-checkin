@@ -34,6 +34,10 @@ const initDb = async () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT,
       pin TEXT,
+      svn TEXT DEFAULT '',
+      birth_date TEXT DEFAULT '',
+      address TEXT DEFAULT '',
+      iban TEXT DEFAULT '',
       main_wage_first_hour REAL DEFAULT 0.0,
       main_wage_additional REAL DEFAULT 0.0,
       helper_wage REAL DEFAULT 0.0
@@ -47,6 +51,18 @@ const initDb = async () => {
   } catch (_e) {}
   try {
     await run('ALTER TABLE trainers ADD COLUMN helper_wage REAL DEFAULT 0.0');
+  } catch (_e) {}
+  try {
+    await run("ALTER TABLE trainers ADD COLUMN svn TEXT DEFAULT ''");
+  } catch (_e) {}
+  try {
+    await run("ALTER TABLE trainers ADD COLUMN birth_date TEXT DEFAULT ''");
+  } catch (_e) {}
+  try {
+    await run("ALTER TABLE trainers ADD COLUMN address TEXT DEFAULT ''");
+  } catch (_e) {}
+  try {
+    await run("ALTER TABLE trainers ADD COLUMN iban TEXT DEFAULT ''");
   } catch (_e) {}
   try {
     await run('UPDATE trainers SET main_wage_first_hour = main_wage, main_wage_additional = main_wage WHERE (main_wage_first_hour IS NULL OR main_wage_first_hour = 0) AND main_wage IS NOT NULL');

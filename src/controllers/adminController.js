@@ -224,14 +224,18 @@ export const deleteHall = async (req, res) => {
 };
 
 export const addTrainer = async (req, res) => {
-  const { name, pin, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
+  const { name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
   try {
     await db.run(
-      `INSERT INTO trainers (name, pin, main_wage_first_hour, main_wage_additional, helper_wage)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO trainers (name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         pin,
+        svn || '',
+        birth_date || '',
+        address || '',
+        iban || '',
         parseFloat(main_wage_first_hour) || 0,
         parseFloat(main_wage_additional) || 0,
         parseFloat(helper_wage) || 0,
@@ -246,15 +250,20 @@ export const addTrainer = async (req, res) => {
 
 export const editTrainer = async (req, res) => {
   const trainerId = req.params.id;
-  const { name, pin, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
+  const { name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
   try {
     await db.run(
       `UPDATE trainers
-       SET name = ?, pin = ?, main_wage_first_hour = ?, main_wage_additional = ?, helper_wage = ?
+       SET name = ?, pin = ?, svn = ?, birth_date = ?, address = ?, iban = ?,
+           main_wage_first_hour = ?, main_wage_additional = ?, helper_wage = ?
        WHERE id = ?`,
       [
         name,
         pin,
+        svn || '',
+        birth_date || '',
+        address || '',
+        iban || '',
         parseFloat(main_wage_first_hour) || 0,
         parseFloat(main_wage_additional) || 0,
         parseFloat(helper_wage) || 0,
@@ -568,7 +577,7 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     });
 
     if (trainerRows.length > 0) {
-      rowsByTrainer[t.name] = trainerRows;
+      rowsByTrainer[t.name] = { trainer: t, rows: trainerRows };
     }
   }
 
@@ -615,7 +624,7 @@ export const exportTrainer = async (req, res) => {
 
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainerId);
     if (!rowsByTrainer[trainer.name]) {
-      rowsByTrainer[trainer.name] = [];
+      rowsByTrainer[trainer.name] = { trainer, rows: [] };
     }
 
     const { buffer, filename, contentType } = await generateExport(rowsByTrainer, selectedMonth);
