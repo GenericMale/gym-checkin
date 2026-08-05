@@ -1,4 +1,4 @@
-FROM cgr.dev/chainguard/node:latest
+FROM node:24-trixie-slim
 
 WORKDIR /app
 VOLUME /app/data
