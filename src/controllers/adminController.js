@@ -1,6 +1,7 @@
 import db from '../db.js';
 import { generateQRCode } from '../utils/qrcode.js';
 import { generateExport } from '../utils/prae.js';
+import { calculateTrainerDailyWage } from '../utils/wage.js';
 import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -82,10 +83,11 @@ export const getProtocol = async (req, res) => {
   try {
     let query = `
       SELECT c.*,
-             COALESCE(tp.name, c.remarks, ?) as course_name,
-             COALESCE(h.name, ?) as hall_name,
-             COALESCE(mt.name, ?) as main_trainer_name,
-             COALESCE(mt.main_wage, 0) as main_wage
+             COALESCE(c.course_name, tp.name, c.remarks, ?) as course_name,
+             COALESCE(c.hall_name, h.name, ?) as hall_name,
+             COALESCE(c.main_trainer_name, mt.name, ?) as main_trainer_name,
+             COALESCE(c.main_wage_first_hour, mt.main_wage_first_hour, 0) as main_wage_first_hour,
+             COALESCE(c.main_wage_additional, mt.main_wage_additional, 0) as main_wage_additional
       FROM checkins c
       LEFT JOIN turnplan tp ON c.turnplan_id = tp.id
       LEFT JOIN halls h ON c.hall_id = h.id
@@ -107,9 +109,9 @@ export const getProtocol = async (req, res) => {
 
     const checkinRows = await db.all(query, params);
     const allHelpers = await db.all(`
-      SELECT ch.checkin_id, t.id as trainer_id, t.name, COALESCE(t.helper_wage, 0) as helper_wage
+      SELECT ch.checkin_id, ch.trainer_id, COALESCE(ch.trainer_name, t.name) as name, COALESCE(ch.helper_wage, t.helper_wage, 0) as helper_wage
       FROM checkin_helpers ch
-      JOIN trainers t ON ch.trainer_id = t.id
+      LEFT JOIN trainers t ON ch.trainer_id = t.id
     `);
 
     const helpersByCheckin = {};
@@ -118,10 +120,32 @@ export const getProtocol = async (req, res) => {
       helpersByCheckin[h.checkin_id].push(h);
     });
 
+    // Group main checkins by (main_trainer_id, date) for daily tiered wage calculation
+    const mainSessionsByTrainerDate = {};
+    const helperSessionsByCheckin = {};
+
+    checkinRows.forEach((c) => {
+      const tId = c.main_trainer_id;
+      const date = c.date || (c.start_timestamp ? c.start_timestamp.split(' ')[0] : '');
+      const key = `${tId}_${date}`;
+      if (!mainSessionsByTrainerDate[key]) mainSessionsByTrainerDate[key] = [];
+      mainSessionsByTrainerDate[key].push(c);
+    });
+
+    // Pre-calculate session breakdown per (main_trainer_id, date)
+    const sessionMainPayMap = {};
+    Object.keys(mainSessionsByTrainerDate).forEach((key) => {
+      const mainSessions = mainSessionsByTrainerDate[key];
+      const { mainBreakdown } = calculateTrainerDailyWage(mainSessions, []);
+      Object.keys(mainBreakdown).forEach((checkinId) => {
+        sessionMainPayMap[checkinId] = mainBreakdown[checkinId].pay;
+      });
+    });
+
     const logs = checkinRows.map((c) => {
       const helpers = helpersByCheckin[c.id] || [];
       const durationHours = (c.duration_minutes || 0) / 60;
-      const mainPay = durationHours * (c.main_wage || 0);
+      const mainPay = typeof sessionMainPayMap[c.id] === 'number' ? sessionMainPayMap[c.id] : 0;
       const helperPay = helpers.reduce((sum, h) => sum + durationHours * (h.helper_wage || 0), 0);
       const totalPay = mainPay + helperPay;
 
@@ -200,11 +224,18 @@ export const deleteHall = async (req, res) => {
 };
 
 export const addTrainer = async (req, res) => {
-  const { name, pin, main_wage, helper_wage } = req.body;
+  const { name, pin, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
   try {
     await db.run(
-      'INSERT INTO trainers (name, pin, main_wage, helper_wage) VALUES (?, ?, ?, ?)',
-      [name, pin, parseFloat(main_wage) || 0, parseFloat(helper_wage) || 0]
+      `INSERT INTO trainers (name, pin, main_wage_first_hour, main_wage_additional, helper_wage)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        name,
+        pin,
+        parseFloat(main_wage_first_hour) || 0,
+        parseFloat(main_wage_additional) || 0,
+        parseFloat(helper_wage) || 0,
+      ]
     );
     redirect(res, '/admin/trainers');
   } catch (err) {
@@ -215,11 +246,20 @@ export const addTrainer = async (req, res) => {
 
 export const editTrainer = async (req, res) => {
   const trainerId = req.params.id;
-  const { name, pin, main_wage, helper_wage } = req.body;
+  const { name, pin, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
   try {
     await db.run(
-      'UPDATE trainers SET name = ?, pin = ?, main_wage = ?, helper_wage = ? WHERE id = ?',
-      [name, pin, parseFloat(main_wage) || 0, parseFloat(helper_wage) || 0, trainerId]
+      `UPDATE trainers
+       SET name = ?, pin = ?, main_wage_first_hour = ?, main_wage_additional = ?, helper_wage = ?
+       WHERE id = ?`,
+      [
+        name,
+        pin,
+        parseFloat(main_wage_first_hour) || 0,
+        parseFloat(main_wage_additional) || 0,
+        parseFloat(helper_wage) || 0,
+        trainerId,
+      ]
     );
     redirect(res, '/admin/trainers');
   } catch (err) {
@@ -315,22 +355,56 @@ export const deleteCheckin = async (req, res) => {
 export const addCheckin = async (req, res) => {
   const { turnplan_id, hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
   try {
+    const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hall_id]);
+    const trainer = await db.get('SELECT * FROM trainers WHERE id = ?', [main_trainer_id]);
+
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
     let durationMinutes = eH * 60 + eM - (sH * 60 + sM);
     if (durationMinutes < 0) durationMinutes += 24 * 60;
 
+    let courseName = remarks || req.__('DEFAULT_UNIT_NAME');
+    if (turnplan_id) {
+      const course = await db.get('SELECT * FROM turnplan WHERE id = ?', [turnplan_id]);
+      if (course) courseName = course.name;
+    }
+
     const result = await db.run(
-      `INSERT INTO checkins (turnplan_id, hall_id, main_trainer_id, date, start_time, end_time, duration_minutes, remarks)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [turnplan_id || null, hall_id, main_trainer_id, date, start_time, end_time, durationMinutes, remarks || '']
+      `INSERT INTO checkins (
+        turnplan_id, hall_id, hall_name,
+        main_trainer_id, main_trainer_name,
+        course_name, date, start_time, end_time,
+        duration_minutes, main_wage_first_hour, main_wage_additional, remarks
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        turnplan_id || null,
+        hall_id,
+        hall ? hall.name : '',
+        main_trainer_id,
+        trainer ? trainer.name : '',
+        courseName,
+        date,
+        start_time,
+        end_time,
+        durationMinutes,
+        trainer ? (parseFloat(trainer.main_wage_first_hour) || 0) : 0,
+        trainer ? (parseFloat(trainer.main_wage_additional) || 0) : 0,
+        remarks || '',
+      ]
     );
 
     const checkinId = result.lastID;
     const helpers = Array.isArray(helper_ids) ? helper_ids : helper_ids ? [helper_ids] : [];
     for (const hId of helpers) {
       if (hId && parseInt(hId) !== parseInt(main_trainer_id)) {
-        await db.run('INSERT INTO checkin_helpers (checkin_id, trainer_id) VALUES (?, ?)', [checkinId, hId]);
+        const hTrainer = await db.get('SELECT * FROM trainers WHERE id = ?', [hId]);
+        if (hTrainer) {
+          await db.run(
+            `INSERT INTO checkin_helpers (checkin_id, trainer_id, trainer_name, helper_wage)
+             VALUES (?, ?, ?, ?)`,
+            [checkinId, hTrainer.id, hTrainer.name, parseFloat(hTrainer.helper_wage) || 0]
+          );
+        }
       }
     }
 
@@ -345,6 +419,9 @@ export const editCheckin = async (req, res) => {
   const { id } = req.params;
   const { hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
   try {
+    const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hall_id]);
+    const trainer = await db.get('SELECT * FROM trainers WHERE id = ?', [main_trainer_id]);
+
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
     let durationMinutes = eH * 60 + eM - (sH * 60 + sM);
@@ -352,16 +429,39 @@ export const editCheckin = async (req, res) => {
 
     await db.run(
       `UPDATE checkins
-       SET hall_id = ?, main_trainer_id = ?, date = ?, start_time = ?, end_time = ?, duration_minutes = ?, remarks = ?
+       SET hall_id = ?, hall_name = ?,
+           main_trainer_id = ?, main_trainer_name = ?,
+           date = ?, start_time = ?, end_time = ?, duration_minutes = ?,
+           main_wage_first_hour = ?, main_wage_additional = ?, remarks = ?
        WHERE id = ?`,
-      [hall_id, main_trainer_id, date, start_time, end_time, durationMinutes, remarks || '', id]
+      [
+        hall_id,
+        hall ? hall.name : '',
+        main_trainer_id,
+        trainer ? trainer.name : '',
+        date,
+        start_time,
+        end_time,
+        durationMinutes,
+        trainer ? (parseFloat(trainer.main_wage_first_hour) || 0) : 0,
+        trainer ? (parseFloat(trainer.main_wage_additional) || 0) : 0,
+        remarks || '',
+        id,
+      ]
     );
 
     await db.run('DELETE FROM checkin_helpers WHERE checkin_id = ?', [id]);
     const helpers = Array.isArray(helper_ids) ? helper_ids : helper_ids ? [helper_ids] : [];
     for (const hId of helpers) {
       if (hId && parseInt(hId) !== parseInt(main_trainer_id)) {
-        await db.run('INSERT INTO checkin_helpers (checkin_id, trainer_id) VALUES (?, ?)', [id, hId]);
+        const hTrainer = await db.get('SELECT * FROM trainers WHERE id = ?', [hId]);
+        if (hTrainer) {
+          await db.run(
+            `INSERT INTO checkin_helpers (checkin_id, trainer_id, trainer_name, helper_wage)
+             VALUES (?, ?, ?, ?)`,
+            [id, hTrainer.id, hTrainer.name, parseFloat(hTrainer.helper_wage) || 0]
+          );
+        }
       }
     }
 
@@ -418,7 +518,7 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     if (filterTrainerId && parseInt(filterTrainerId) !== t.id) continue;
 
     let mainQuery = `
-      SELECT c.date, c.start_timestamp, c.duration_minutes
+      SELECT c.id, c.date, c.start_time, c.start_timestamp, c.duration_minutes, c.main_wage_first_hour, c.main_wage_additional
       FROM checkins c
       WHERE c.main_trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
     `;
@@ -430,7 +530,7 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     const mainSessions = await db.all(mainQuery, mainParams);
 
     let helperQuery = `
-      SELECT c.date, c.start_timestamp, c.duration_minutes
+      SELECT c.id, c.date, c.start_time, c.start_timestamp, c.duration_minutes, ch.helper_wage
       FROM checkins c
       JOIN checkin_helpers ch ON c.id = ch.checkin_id
       WHERE ch.trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
@@ -442,20 +542,28 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     }
     const helperSessions = await db.all(helperQuery, helperParams);
 
-    const trainerRows = [];
+    // Group by date (YYYY-MM-DD)
+    const sessionsByDate = {};
     mainSessions.forEach((s) => {
-      const durationHours = (s.duration_minutes || 0) / 60;
-      trainerRows.push({
-        date: s.date || s.start_timestamp,
-        pay: durationHours * (t.main_wage || 0),
-      });
+      const date = s.date || (s.start_timestamp ? s.start_timestamp.split(' ')[0] : '');
+      if (!sessionsByDate[date]) sessionsByDate[date] = { main: [], helper: [] };
+      sessionsByDate[date].main.push(s);
+    });
+    helperSessions.forEach((s) => {
+      const date = s.date || (s.start_timestamp ? s.start_timestamp.split(' ')[0] : '');
+      if (!sessionsByDate[date]) sessionsByDate[date] = { main: [], helper: [] };
+      sessionsByDate[date].helper.push(s);
     });
 
-    helperSessions.forEach((s) => {
-      const durationHours = (s.duration_minutes || 0) / 60;
+    const trainerRows = [];
+    Object.keys(sessionsByDate).forEach((date) => {
+      const { totalPay } = calculateTrainerDailyWage(
+        sessionsByDate[date].main,
+        sessionsByDate[date].helper
+      );
       trainerRows.push({
-        date: s.date || s.start_timestamp,
-        pay: durationHours * (t.helper_wage || 0),
+        date,
+        pay: totalPay,
       });
     });
 

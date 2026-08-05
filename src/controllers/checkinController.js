@@ -79,6 +79,9 @@ export const postCheckin = async (req, res) => {
     const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [trainerId, pin]);
     if (!trainer) return res.status(401).json({ error: req.__('ERROR_INVALID_PIN_RETRY') });
 
+    const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hallId]);
+    const hallName = hall ? hall.name : '';
+
     let course = null;
     if (turnplanId) {
       course = await db.get('SELECT * FROM turnplan WHERE id = ?', [turnplanId]);
@@ -95,19 +98,29 @@ export const postCheckin = async (req, res) => {
     let eMins = timeToMinutes(endTime);
     if (eMins < sMins) eMins += 24 * 60;
     const durationMinutes = course ? eMins - sMins : 60;
+    const courseName = course ? course.name : req.__('DEFAULT_UNIT_NAME');
 
     const result = await db.run(
-      `INSERT INTO checkins (turnplan_id, hall_id, main_trainer_id, date, start_time, end_time, duration_minutes, remarks)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO checkins (
+        turnplan_id, hall_id, hall_name,
+        main_trainer_id, main_trainer_name,
+        course_name, date, start_time, end_time,
+        duration_minutes, main_wage_first_hour, main_wage_additional, remarks
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         turnplanId || null,
         hallId || (course ? course.hall_id : null),
+        hallName,
         trainerId,
+        trainer.name,
+        courseName,
         dateStr,
         startTime,
         endTime,
         durationMinutes,
-        course ? course.name : '',
+        parseFloat(trainer.main_wage_first_hour) || 0,
+        parseFloat(trainer.main_wage_additional) || 0,
+        course ? course.remarks : '',
       ]
     );
 
@@ -115,16 +128,20 @@ export const postCheckin = async (req, res) => {
     const helpers = Array.isArray(helperIds) ? helperIds : helperIds ? [helperIds] : [];
     for (const hId of helpers) {
       if (hId && parseInt(hId) !== parseInt(trainerId)) {
-        await db.run('INSERT INTO checkin_helpers (checkin_id, trainer_id) VALUES (?, ?)', [
-          checkinId,
-          hId,
-        ]);
+        const hTrainer = await db.get('SELECT * FROM trainers WHERE id = ?', [hId]);
+        if (hTrainer) {
+          await db.run(
+            `INSERT INTO checkin_helpers (checkin_id, trainer_id, trainer_name, helper_wage)
+             VALUES (?, ?, ?, ?)`,
+            [checkinId, hTrainer.id, hTrainer.name, parseFloat(hTrainer.helper_wage) || 0]
+          );
+        }
       }
     }
 
     res.json({
       success: true,
-      message: req.__('MESSAGE_SESSION_CONFIRMED', trainer.name, course ? course.name : req.__('DEFAULT_UNIT_NAME')),
+      message: req.__('MESSAGE_SESSION_CONFIRMED', trainer.name, courseName),
     });
   } catch (err) {
     logger.error('Datenbankfehler in postCheckin', err);
