@@ -2,6 +2,7 @@ import sqlite3 from 'sqlite3';
 import { promisify } from 'util';
 import fs from 'fs';
 import path from 'path';
+import { formatUtcTimestampInAppZone } from './utils/time.js';
 
 const dbDir = process.env.DB_PATH || './data';
 const dbPath = path.join(dbDir, 'gym.db');
@@ -176,10 +177,17 @@ const initDb = async () => {
       'UPDATE checkins SET main_trainer_id = trainer_id WHERE main_trainer_id IS NULL AND trainer_id IS NOT NULL'
     );
   } catch (_e) {}
+  // Backfill missing dates from the UTC start_timestamp, converted to the app timezone
   try {
-    await run(
-      "UPDATE checkins SET date = strftime('%Y-%m-%d', start_timestamp) WHERE date IS NULL AND start_timestamp IS NOT NULL"
+    const legacyRows = await all(
+      'SELECT id, start_timestamp FROM checkins WHERE date IS NULL AND start_timestamp IS NOT NULL'
     );
+    for (const row of legacyRows) {
+      await run('UPDATE checkins SET date = ? WHERE id = ?', [
+        formatUtcTimestampInAppZone(row.start_timestamp),
+        row.id,
+      ]);
+    }
   } catch (_e) {}
 
   await run(`CREATE TABLE IF NOT EXISTS checkin_helpers (

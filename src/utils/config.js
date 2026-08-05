@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+export const appTimeZone = process.env.APP_TIMEZONE || 'Europe/Vienna';
+
 export const branding = {
   name: process.env.APP_NAME || 'Gym Check-In',
   shortName: process.env.APP_SHORT_NAME || 'Gym',

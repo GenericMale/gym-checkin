@@ -2,10 +2,15 @@ import carbone from 'carbone';
 import JSZip from 'jszip';
 import path from 'path';
 import { promisify } from 'util';
+import { getZonedNow, formatUtcTimestampInAppZone } from './time.js';
 
 const render = promisify(carbone.render);
 
-const TEMPLATE_PATH = path.join(process.cwd(), 'resources', 'Pauschale_Reiseaufwandsentschaedigung.xlsx');
+const TEMPLATE_PATH = path.join(
+  process.cwd(),
+  'resources',
+  'Pauschale_Reiseaufwandsentschaedigung.xlsx'
+);
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -20,8 +25,8 @@ const formatDate = (dateStr) => {
 export const preparePraeData = (trainer, rows, selectedMonth) => {
   const [year, month] = selectedMonth.split('-');
 
-  const now = new Date();
-  const generationDate = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')}.${now.getFullYear()}`;
+  const { year: gy, month: gm, day: gd } = getZonedNow();
+  const generationDate = `${String(gd).padStart(2, '0')}.${String(gm).padStart(2, '0')}.${gy}`;
 
   const data = {
     trainerName: trainer.name,
@@ -46,8 +51,8 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
       const parts = row.date.split('-');
       day = parseInt(parts[2], 10);
     } else if (row.start_timestamp) {
-      const date = new Date(row.start_timestamp + (row.start_timestamp.includes('Z') ? '' : ' UTC'));
-      day = date.getUTCDate();
+      const parts = formatUtcTimestampInAppZone(row.start_timestamp).split('-');
+      day = parseInt(parts[2], 10);
     }
 
     if (day >= 1 && day <= 31) {

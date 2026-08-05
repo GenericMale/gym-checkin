@@ -278,6 +278,7 @@
       const HELPERS = <%- JSON.stringify(helpers).replace(/<\//g, '<\\/') %>;
       const TRAINERS = <%- JSON.stringify(trainers).replace(/<\//g, '<\\/') %>;
       const HALL_ID = '<%- hallId %>';
+      const APP_TIMEZONE = '<%- appTimeZone %>';
 
       const el = {
         clock: document.getElementById('liveClock'),
@@ -326,12 +327,12 @@
       }
 
       function updateClock() {
-        const now = new Date();
-        el.clock.textContent = now.toLocaleTimeString(i18n.locale === 'de' ? 'de-AT' : 'en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        });
+        const opts = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        if (APP_TIMEZONE) opts.timeZone = APP_TIMEZONE;
+        el.clock.textContent = new Intl.DateTimeFormat(
+          i18n.locale === 'de' ? 'de-AT' : 'en-US',
+          opts
+        ).format(new Date());
       }
       setInterval(updateClock, 1000);
       updateClock();

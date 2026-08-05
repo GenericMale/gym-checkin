@@ -2,6 +2,7 @@ import db from '../db.js';
 import { generateQRCode } from '../utils/qrcode.js';
 import { generateExport } from '../utils/prae.js';
 import { calculateTrainerDailyWage } from '../utils/wage.js';
+import { getZonedNow, getZonedMonthStr } from '../utils/time.js';
 import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -117,8 +118,7 @@ export const getHalls = async (req, res) => {
 export const getProtocol = async (req, res) => {
   const { month, trainer, hall } = req.query;
 
-  const now = new Date();
-  const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const defaultMonth = getZonedMonthStr();
   const selectedMonth = month || defaultMonth;
 
   try {
@@ -133,13 +133,12 @@ export const getProtocol = async (req, res) => {
       LEFT JOIN turnplan tp ON c.turnplan_id = tp.id
       LEFT JOIN halls h ON c.hall_id = h.id
       LEFT JOIN trainers mt ON c.main_trainer_id = mt.id
-      WHERE (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+      WHERE strftime('%Y-%m', c.date) = ?
     `;
     const params = [
       req.__('DEFAULT_UNIT_NAME'),
       req.__('ERROR_DELETED'),
       req.__('ERROR_DELETED'),
-      selectedMonth,
       selectedMonth,
     ];
 
@@ -173,7 +172,7 @@ export const getProtocol = async (req, res) => {
 
     checkinRows.forEach((c) => {
       const tId = c.main_trainer_id;
-      const date = c.date || (c.start_timestamp ? c.start_timestamp.split(' ')[0] : '');
+      const date = c.date;
       const key = `${tId}_${date}`;
       if (!mainSessionsByTrainerDate[key]) mainSessionsByTrainerDate[key] = [];
       mainSessionsByTrainerDate[key].push(c);
@@ -589,9 +588,8 @@ export const editCheckin = async (req, res) => {
 
 export const deleteFilteredCheckins = async (req, res) => {
   const { month, trainer, hall } = req.body;
-  let query =
-    "DELETE FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
-  const params = [month, month];
+  let query = "DELETE FROM checkins WHERE strftime('%Y-%m', date) = ?";
+  const params = [month];
 
   if (trainer) {
     query += ` AND (main_trainer_id = ? OR id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
@@ -603,9 +601,8 @@ export const deleteFilteredCheckins = async (req, res) => {
   }
 
   try {
-    let subQuery =
-      "SELECT id FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
-    const subParams = [month, month];
+    let subQuery = "SELECT id FROM checkins WHERE strftime('%Y-%m', date) = ?";
+    const subParams = [month];
     if (trainer) {
       subQuery += ` AND (main_trainer_id = ? OR id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
       subParams.push(trainer, trainer);
@@ -637,9 +634,9 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     let mainQuery = `
       SELECT c.id, c.date, c.start_time, c.start_timestamp, c.duration_minutes, c.main_wage_first_hour, c.main_wage_additional
       FROM checkins c
-      WHERE c.main_trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+      WHERE c.main_trainer_id = ? AND strftime('%Y-%m', c.date) = ?
     `;
-    const mainParams = [t.id, selectedMonth, selectedMonth];
+    const mainParams = [t.id, selectedMonth];
     if (filterHallId) {
       mainQuery += ' AND c.hall_id = ?';
       mainParams.push(filterHallId);
@@ -650,9 +647,9 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
       SELECT c.id, c.date, c.start_time, c.start_timestamp, c.duration_minutes, ch.helper_wage
       FROM checkins c
       JOIN checkin_helpers ch ON c.id = ch.checkin_id
-      WHERE ch.trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+      WHERE ch.trainer_id = ? AND strftime('%Y-%m', c.date) = ?
     `;
-    const helperParams = [t.id, selectedMonth, selectedMonth];
+    const helperParams = [t.id, selectedMonth];
     if (filterHallId) {
       helperQuery += ' AND c.hall_id = ?';
       helperParams.push(filterHallId);
@@ -662,12 +659,12 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
     // Group by date (YYYY-MM-DD)
     const sessionsByDate = {};
     mainSessions.forEach((s) => {
-      const date = s.date || (s.start_timestamp ? s.start_timestamp.split(' ')[0] : '');
+      const date = s.date;
       if (!sessionsByDate[date]) sessionsByDate[date] = { main: [], helper: [] };
       sessionsByDate[date].main.push(s);
     });
     helperSessions.forEach((s) => {
-      const date = s.date || (s.start_timestamp ? s.start_timestamp.split(' ')[0] : '');
+      const date = s.date;
       if (!sessionsByDate[date]) sessionsByDate[date] = { main: [], helper: [] };
       sessionsByDate[date].helper.push(s);
     });
@@ -694,9 +691,7 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
 
 export const exportAll = async (req, res) => {
   const { month, trainer, hall } = req.query;
-  const now = new Date();
-  const selectedMonth =
-    month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const selectedMonth = month || getZonedMonthStr();
 
   try {
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainer, hall);
@@ -726,12 +721,11 @@ export const exportTrainer = async (req, res) => {
     if (!trainer) return res.status(401).send(req.__('ERROR_INVALID_PIN'));
 
     let selectedMonth = month;
-    const now = new Date();
     if (month === 'current') {
-      selectedMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      selectedMonth = getZonedMonthStr();
     } else if (month === 'last') {
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      selectedMonth = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+      const { year, month: m } = getZonedNow();
+      selectedMonth = m === 1 ? `${year - 1}-12` : `${year}-${String(m - 1).padStart(2, '0')}`;
     }
 
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainerId);

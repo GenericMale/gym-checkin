@@ -1,10 +1,6 @@
 import db from '../db.js';
 import logger from '../utils/logger.js';
-
-const getDayCode = (date = new Date()) => {
-  const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-  return days[date.getDay()];
-};
+import { getZonedNow, getZonedDateStr, getAppTimeZone } from '../utils/time.js';
 
 const timeToMinutes = (timeStr) => {
   if (!timeStr) return 0;
@@ -48,9 +44,9 @@ export const getCheckinPage = async (req, res) => {
     const settings = await db.getSettings();
     const gracePeriod = parseInt(settings.grace_period_minutes || '30', 10);
 
-    const now = new Date();
-    const currentDay = getDayCode(now);
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const now = getZonedNow();
+    const currentDay = now.dayCode;
+    const currentMinutes = now.hour * 60 + now.minute;
 
     const courses = [];
     turnplanEntries.forEach((entry) => {
@@ -103,6 +99,7 @@ export const getCheckinPage = async (req, res) => {
       trainers,
       helpers,
       gracePeriod,
+      appTimeZone: getAppTimeZone(),
     });
   } catch (err) {
     logger.error('Datenbankfehler in getCheckinPage', err);
@@ -138,9 +135,9 @@ export const postCheckin = async (req, res) => {
       }
     }
 
-    const now = new Date();
+    const now = getZonedNow();
     const pad = (n) => String(n).padStart(2, '0');
-    const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    const dateStr = getZonedDateStr();
 
     if (turnplanId) {
       const existing = await db.get('SELECT id FROM checkins WHERE turnplan_id = ? AND date = ?', [
@@ -152,7 +149,7 @@ export const postCheckin = async (req, res) => {
       }
     }
 
-    const startTime = course ? course.time_from : `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const startTime = course ? course.time_from : `${pad(now.hour)}:${pad(now.minute)}`;
     const endTime = course ? course.time_to : startTime;
 
     const sMins = timeToMinutes(startTime);
@@ -229,9 +226,9 @@ export const getSessionStatus = async (req, res) => {
       [hallId]
     );
 
-    const now = new Date();
-    const currentDay = getDayCode(now);
-    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    const now = getZonedNow();
+    const currentDay = now.dayCode;
+    const currentMinutes = now.hour * 60 + now.minute;
 
     const active = turnplanEntries.find((entry) => {
       let weekdays = [];
