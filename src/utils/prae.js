@@ -10,7 +10,7 @@ const TEMPLATE_PATH = path.join(process.cwd(), 'resources', 'Pauschale_Reiseaufw
 /**
  * Generiert die PRAE-Daten für einen Trainer für einen bestimmten Monat.
  */
-export const preparePraeData = (trainerName, rows, hourlyWage, selectedMonth) => {
+export const preparePraeData = (trainerName, rows, selectedMonth) => {
   const [year, month] = selectedMonth.split('-');
 
   const data = {
@@ -26,10 +26,19 @@ export const preparePraeData = (trainerName, rows, hourlyWage, selectedMonth) =>
 
   // Gruppiere nach Tag und summiere die Vergütung
   rows.forEach((row) => {
-    const date = new Date(row.start_timestamp + ' UTC');
-    const day = date.getUTCDate();
-    const pay = row.duration_minutes ? (row.duration_minutes / 60) * hourlyWage : 0;
-    data[`day${day}`] += pay;
+    let day = 0;
+    if (row.date) {
+      const parts = row.date.split('-');
+      day = parseInt(parts[2], 10);
+    } else if (row.start_timestamp) {
+      const date = new Date(row.start_timestamp + (row.start_timestamp.includes('Z') ? '' : ' UTC'));
+      day = date.getUTCDate();
+    }
+
+    if (day >= 1 && day <= 31) {
+      const pay = typeof row.pay === 'number' ? row.pay : 0;
+      data[`day${day}`] += pay;
+    }
   });
 
   return data;
@@ -46,24 +55,28 @@ export const generatePraeDocument = async (data) => {
  * Generiert PRAE-Dokumente für alle Trainer und bündelt sie ggf. in einem ZIP.
  * @returns {Object} { buffer, filename, contentType }
  */
-export const generateExport = async (rowsByTrainer, hourlyWage, selectedMonth) => {
+export const generateExport = async (rowsByTrainer, selectedMonth) => {
   const trainers = Object.keys(rowsByTrainer);
+
+  if (trainers.length === 0) {
+    throw new Error('No trainers data to export');
+  }
 
   if (trainers.length === 1) {
     const trainerName = trainers[0];
-    const data = preparePraeData(trainerName, rowsByTrainer[trainerName], hourlyWage, selectedMonth);
+    const data = preparePraeData(trainerName, rowsByTrainer[trainerName], selectedMonth);
     const buffer = await generatePraeDocument(data);
     const filename = `PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`;
     return {
       buffer,
       filename,
-      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     };
   }
 
   const zip = new JSZip();
   for (const trainerName of trainers) {
-    const data = preparePraeData(trainerName, rowsByTrainer[trainerName], hourlyWage, selectedMonth);
+    const data = preparePraeData(trainerName, rowsByTrainer[trainerName], selectedMonth);
     const buffer = await generatePraeDocument(data);
     zip.file(`PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`, buffer);
   }
@@ -72,6 +85,6 @@ export const generateExport = async (rowsByTrainer, hourlyWage, selectedMonth) =
   return {
     buffer: zipBuffer,
     filename: `PRAE_Export_${selectedMonth}.zip`,
-    contentType: 'application/zip'
+    contentType: 'application/zip',
   };
 };

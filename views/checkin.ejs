@@ -12,167 +12,167 @@
         --color-primary: <%= branding.colors.primary %>;
         --color-primary-hover: <%= branding.colors.primaryHover %>;
       }
-      /* Spinner for auto-mode */
-      .loader {
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid var(--color-primary);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
     </style>
   </head>
   <body
-    class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans relative"
+    class="bg-[#f8fafa] min-h-screen flex flex-col items-center justify-center p-4 font-sans relative"
   >
-    <div class="absolute top-0 left-0 w-full h-64 bg-primary rounded-b-[3rem] shadow-md z-0"></div>
+    <div class="absolute top-0 left-0 w-full h-64 bg-primary rounded-b-[3rem] shadow-sm z-0"></div>
 
     <div
-      class="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl relative z-10 border border-gray-200"
+      class="w-full max-w-md bg-white rounded-3xl p-8 shadow-xl relative z-10 border border-gray-100 space-y-6"
     >
       <!-- Header -->
-      <div class="text-center mb-8">
+      <div class="text-center space-y-2">
         <h2 class="font-brand-serif text-2xl tracking-tight text-gray-800">
           <%= branding.name %> <span class="text-primary"><%= branding.accentText %></span>
         </h2>
-        <p class="text-[10px] text-gray-500 uppercase tracking-widest mb-6 mt-1">
+        <p class="text-[10px] text-gray-400 uppercase tracking-widest">
           <%= branding.description %>
         </p>
 
-        <h1 class="text-3xl font-bold mb-2 text-gray-800"><%= __('CHECKIN_HEADER') %></h1>
-        <p class="text-primary font-medium flex justify-center items-center gap-2 mb-4">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h1 class="text-2xl font-bold text-gray-800 pt-2"><%= __('CHECKIN_HEADER') %></h1>
+        <p class="text-primary font-bold flex justify-center items-center gap-1.5 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
           </svg>
           <%= hallName %>
         </p>
-        <div class="inline-block bg-primary/10 px-5 py-2 rounded-full border border-primary/30">
-          <p id="liveClock" class="text-xl font-mono text-primary tracking-widest font-bold"></p>
+        <div class="inline-block bg-primary/10 px-4 py-1 rounded-full border border-primary/20">
+          <p id="liveClock" class="text-base font-mono text-primary tracking-widest font-bold"></p>
         </div>
       </div>
 
-      <!-- Loading indicator for auto-start -->
-      <div id="autoLoading" class="hidden text-center py-10">
-        <div class="loader mb-4"></div>
-        <p class="text-gray-600 font-medium"><%= __('CHECKIN_AUTO_LOADING') %></p>
-      </div>
-
       <!-- Status message -->
-      <div id="status" class="hidden mb-6 p-4 rounded-xl text-center font-bold"></div>
+      <div id="status" class="hidden p-4 rounded-xl text-center text-xs font-bold"></div>
 
       <!-- Main Form -->
       <div id="formContainer">
-        <form id="checkinForm" class="space-y-6">
+        <form id="checkinForm" class="space-y-4">
           <input type="hidden" id="hallId" value="<%= hallId %>" />
 
+          <!-- Course Selection -->
           <div>
-            <div class="flex justify-between items-center mb-2">
-              <label class="block text-sm font-semibold text-gray-600"><%= __('CHECKIN_SELECT_TRAINER') %></label>
-              <span id="sessionBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse"><%= __('CHECKIN_SESSION_RUNNING') %></span>
-            </div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_COURSE') %></label>
+            <% if (turnplanEntries.length > 0) { %>
+              <select
+                id="turnplanId"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium text-gray-800 outline-none focus:ring-2 ring-primary transition cursor-pointer"
+              >
+                <% turnplanEntries.forEach(c => { %>
+                  <option value="<%= c.id %>" data-trainer="<%= c.trainer_id %>" <%= c.isActive ? 'selected' : '' %>>
+                    <%= c.isActive ? '⭐ ' : '' %><%= c.name %> (<%= c.time_from %> - <%= c.time_to %>)
+                  </option>
+                <% }) %>
+              </select>
+              <% if (activeCourse) { %>
+                <div class="text-[11px] text-primary font-semibold flex items-center gap-1.5 pt-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span><%= __('CHECKIN_ACTIVE_COURSE') %>: <strong><%= activeCourse.name %></strong> (<%= activeCourse.time_from %>-<%= activeCourse.time_to %>)</span>
+                </div>
+              <% } %>
+            <% } else { %>
+              <p class="text-xs text-gray-400 italic py-2"><%= __('ERROR_NO_COURSES') %></p>
+            <% } %>
+          </div>
+
+          <!-- Main Trainer Select -->
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_TRAINER') %></label>
             <select
               id="trainerId"
-              class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 focus:outline-none focus:ring-2 ring-primary text-lg font-medium shadow-sm transition cursor-pointer"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium text-gray-800 outline-none focus:ring-2 ring-primary transition cursor-pointer"
+              required
             >
               <option value="" disabled selected><%= __('CHECKIN_SELECT_NAME') %></option>
               <% trainers.forEach(t => { %>
-              <option value="<%= t.id %>"><%= t.name %></option>
+                <option value="<%= t.id %>" <%= activeCourse && activeCourse.trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
               <% }) %>
             </select>
           </div>
 
+          <!-- Helper Trainers Multi-Select -->
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_HELPERS') %></label>
+            <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto" id="helpersContainer">
+              <% trainers.forEach(t => { %>
+                <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 helper-label" data-trainer-id="<%= t.id %>">
+                  <input type="checkbox" name="helperIds" value="<%= t.id %>" class="text-primary rounded cursor-pointer helper-checkbox"> <%= t.name %>
+                </label>
+              <% }) %>
+            </div>
+          </div>
+
+          <!-- PIN Entry -->
           <div id="pinContainer">
-            <label class="block text-sm font-semibold text-gray-600 mb-2"><%= __('CHECKIN_PIN_LABEL') %></label>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_PIN_LABEL') %></label>
             <input
               type="password"
               id="pin"
               pattern="[0-9]*"
               inputmode="numeric"
               placeholder="<%= __('CHECKIN_PIN_PLACEHOLDER') %>"
-              class="w-full p-4 bg-gray-50 border border-gray-300 rounded-xl text-gray-800 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 ring-primary shadow-sm transition"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-center text-2xl tracking-widest font-bold text-gray-800 outline-none focus:ring-2 ring-primary transition"
+              required
             />
-          </div>
-
-          <!-- Auto-start option -->
-          <div class="flex items-start gap-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <div class="flex items-center h-5">
-              <input
-                id="autoStartToggle"
-                type="checkbox"
-                class="w-5 h-5 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-              />
-            </div>
-            <label for="autoStartToggle" class="text-sm cursor-pointer">
-              <span class="font-bold text-gray-700 block cursor-pointer"><%= __('CHECKIN_AUTO_START') %></span>
-              <span class="text-xs text-gray-500 cursor-pointer"><%= __('CHECKIN_AUTO_START_DESC') %></span>
-            </label>
           </div>
 
           <button
             id="submitBtn"
             type="submit"
-            class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02] cursor-pointer"
+            class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider mt-2"
           >
-            <%= __('CHECKIN_SUBMIT_START') %>
+            <%= __('CHECKIN_SUBMIT_CONFIRM') %>
           </button>
         </form>
       </div>
 
       <!-- Success message -->
-      <div id="successContainer" class="hidden flex-col items-center justify-center py-4">
-        <div class="w-20 h-20 bg-primary rounded-full flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(118,165,157,0.5)]">
-          <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div id="successContainer" class="hidden flex-col items-center justify-center py-4 text-center">
+        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-md text-white">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        <h2 id="successTitle" class="text-3xl font-bold text-gray-800 mb-2 text-center"></h2>
-        <p id="successText" class="text-gray-600 text-lg text-center font-medium leading-relaxed"></p>
+        <h2 id="successTitle" class="text-2xl font-bold text-gray-800 mb-2"><%= __('CHECKIN_SUCCESS_CONFIRMED') %></h2>
+        <p id="successText" class="text-gray-600 text-sm font-medium leading-relaxed"></p>
 
-        <div class="mt-8 bg-gray-50 p-4 rounded-xl border border-gray-100 text-center w-full">
-          <p class="text-sm text-gray-500 mb-3"><%= __('CHECKIN_SUCCESS_RECORDED') %></p>
-          <button
-            id="btnDisableAuto"
-            class="hidden text-xs text-red-500 font-semibold underline decoration-red-200 underline-offset-4 cursor-pointer"
-          >
-            <%= __('CHECKIN_DISABLE_AUTO') %>
-          </button>
-        </div>
+        <button
+          onclick="location.reload()"
+          class="mt-6 bg-gray-800 hover:bg-black text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+        >
+          Zurück zur Auswahl
+        </button>
       </div>
 
       <!-- Reports Section -->
-      <div id="reportsWrapper" class="mt-8 pt-6 border-t border-gray-100">
+      <div id="reportsWrapper" class="pt-4 border-t border-gray-100">
         <button
           id="btnToggleReports"
-          class="text-xs text-gray-400 hover:text-primary flex items-center gap-1 mx-auto transition-colors uppercase tracking-widest font-bold cursor-pointer"
+          class="text-[11px] text-gray-400 hover:text-primary flex items-center gap-1 mx-auto transition uppercase tracking-widest font-bold cursor-pointer"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
           </svg>
           <%= __('CHECKIN_REPORTS_TOGGLE') %>
         </button>
-        <div id="reportsSection" class="hidden mt-4 space-y-3">
-          <div class="grid grid-cols-2 gap-3">
+        <div id="reportsSection" class="hidden mt-3 space-y-2">
+          <div class="grid grid-cols-2 gap-2">
             <button
               id="btnExportCurrent"
-              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold py-3 rounded-xl transition uppercase cursor-pointer"
+              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold py-2.5 rounded-xl transition uppercase cursor-pointer"
             >
               <%= __('CHECKIN_THIS_MONTH') %>
             </button>
             <button
               id="btnExportLast"
-              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-600 text-[10px] font-bold py-3 rounded-xl transition uppercase cursor-pointer"
+              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold py-2.5 rounded-xl transition uppercase cursor-pointer"
             >
               <%= __('CHECKIN_LAST_MONTH') %>
             </button>
           </div>
-          <p class="text-[9px] text-gray-400 text-center leading-tight">
+          <p class="text-[10px] text-gray-400 text-center">
             <%= __('CHECKIN_EXPORT_DESC') %>
           </p>
         </div>
@@ -180,41 +180,29 @@
     </div>
 
     <script>
-      // DOM Elements
       const el = {
         formContainer: document.getElementById('formContainer'),
         successContainer: document.getElementById('successContainer'),
-        autoLoading: document.getElementById('autoLoading'),
         status: document.getElementById('status'),
-        autoStartToggle: document.getElementById('autoStartToggle'),
+        turnplanSelect: document.getElementById('turnplanId'),
         trainerSelect: document.getElementById('trainerId'),
         submitBtn: document.getElementById('submitBtn'),
-        sessionBadge: document.getElementById('sessionBadge'),
         btnToggleReports: document.getElementById('btnToggleReports'),
         btnExportCurrent: document.getElementById('btnExportCurrent'),
         btnExportLast: document.getElementById('btnExportLast'),
         reportsSection: document.getElementById('reportsSection'),
         liveClock: document.getElementById('liveClock'),
-        successTitle: document.getElementById('successTitle'),
         successText: document.getElementById('successText'),
-        btnDisableAuto: document.getElementById('btnDisableAuto'),
         pinInput: document.getElementById('pin'),
         hallIdInput: document.getElementById('hallId'),
         checkinForm: document.getElementById('checkinForm')
       };
 
-      // i18n configurations for JS
       const i18n = {
-        submitStart: "<%= __('CHECKIN_SUBMIT_START') %>",
-        submitStop: "<%= __('CHECKIN_SUBMIT_STOP') %>",
-        successStarted: "<%= __('CHECKIN_SUCCESS_STARTED') %>",
-        successStopped: "<%= __('CHECKIN_SUCCESS_STOPPED') %>",
         alertMissingInfo: "<%= __('CHECKIN_ALERT_MISSING_INFO') %>",
-        alertAutoDisabled: "<%= __('CHECKIN_ALERT_AUTO_DISABLED') %>",
         locale: "<%= locale %>"
       };
 
-      // Update live clock
       function updateClock() {
         const now = new Date();
         el.liveClock.textContent = now.toLocaleTimeString(i18n.locale === 'de' ? 'de-AT' : 'en-US', {
@@ -226,7 +214,32 @@
       setInterval(updateClock, 1000);
       updateClock();
 
-      // UI Event Listeners
+      function updateHelperCheckboxes() {
+        const mainTrainerId = el.trainerSelect.value;
+        document.querySelectorAll('.helper-label').forEach(label => {
+          const tId = label.getAttribute('data-trainer-id');
+          if (tId === mainTrainerId) {
+            label.classList.add('hidden');
+            label.querySelector('input').checked = false;
+          } else {
+            label.classList.remove('hidden');
+          }
+        });
+      }
+
+      el.trainerSelect.addEventListener('change', updateHelperCheckboxes);
+
+      if (el.turnplanSelect) {
+        el.turnplanSelect.addEventListener('change', (e) => {
+          const selectedOpt = e.target.options[e.target.selectedIndex];
+          const defaultTrainer = selectedOpt.getAttribute('data-trainer');
+          if (defaultTrainer) {
+            el.trainerSelect.value = defaultTrainer;
+            updateHelperCheckboxes();
+          }
+        });
+      }
+
       el.btnToggleReports.addEventListener('click', () => {
         el.reportsSection.classList.toggle('hidden');
       });
@@ -234,30 +247,17 @@
       el.btnExportCurrent.addEventListener('click', () => downloadReport('current'));
       el.btnExportLast.addEventListener('click', () => downloadReport('last'));
 
-      el.trainerSelect.addEventListener('change', (e) => updateSessionStatus(e.target.value));
-
-      el.checkinForm.addEventListener('submit', (e) => {
+      el.checkinForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        performCheckin(el.trainerSelect.value, el.pinInput.value, el.hallIdInput.value, false);
+        await performCheckin();
       });
 
-      el.btnDisableAuto.addEventListener('click', () => {
-        localStorage.setItem('gym_auto_start', 'false');
-        alert(i18n.alertAutoDisabled);
-        location.reload();
-      });
-
-      // Download localized report
       function downloadReport(month) {
         const trainerId = el.trainerSelect.value || localStorage.getItem('gym_trainer_id');
         const pin = el.pinInput.value || localStorage.getItem('gym_trainer_pin');
 
         if (!trainerId || !pin) {
           alert(i18n.alertMissingInfo);
-          el.reportsSection.classList.add('hidden');
-          el.formContainer.classList.remove('hidden');
-          el.successContainer.classList.add('hidden');
-          el.successContainer.classList.remove('flex');
           return;
         }
 
@@ -279,100 +279,45 @@
         document.body.removeChild(form);
       }
 
-      // Check current session status for the selected trainer
-      async function updateSessionStatus(trainerId) {
-        if (!trainerId) {
-          el.submitBtn.textContent = i18n.submitStart;
-          el.sessionBadge.classList.add('hidden');
-          return;
-        }
-        try {
-          const res = await fetch('<%= url("/api/session-status/") %>' + trainerId);
-          const data = await res.json();
-          if (data.active) {
-            el.submitBtn.textContent = i18n.submitStop;
-            el.submitBtn.className = 'w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02] cursor-pointer';
-            el.sessionBadge.classList.remove('hidden');
-            el.sessionBadge.className = 'px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider animate-pulse bg-red-100 text-red-700 border border-red-200';
-          } else {
-            el.submitBtn.textContent = i18n.submitStart;
-            el.submitBtn.className = 'w-full bg-primary hover:bg-primary-hover text-white font-bold py-4 rounded-xl transition-all shadow-lg transform hover:scale-[1.02] cursor-pointer';
-            el.sessionBadge.classList.add('hidden');
-          }
-        } catch (err) {
-          console.error('Status check error', err);
-        }
-      }
-
-      // Perform check-in or check-out
-      async function performCheckin(trainerId, pin, hallId, isAuto = false) {
-        if (isAuto) {
-          el.formContainer.classList.add('hidden');
-          el.autoLoading.classList.remove('hidden');
-        }
+      async function performCheckin() {
+        const turnplanId = el.turnplanSelect ? el.turnplanSelect.value : null;
+        const trainerId = el.trainerSelect.value;
+        const pin = el.pinInput.value;
+        const hallId = el.hallIdInput.value;
+        const helperIds = Array.from(document.querySelectorAll('.helper-checkbox:checked')).map(cb => cb.value);
 
         try {
-          // Check status before perform to set correct title
-          const statusRes = await fetch('<%= url("/api/session-status/") %>' + trainerId);
-          const statusData = await statusRes.json();
-          const wasActive = statusData.active;
-
           const res = await fetch('<%= url("/api/checkin") %>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ trainerId, pin, hallId }),
+            body: JSON.stringify({ turnplanId, trainerId, pin, helperIds, hallId }),
           });
           const data = await res.json();
 
           if (res.ok) {
-            // Save for future auto-checkins
             localStorage.setItem('gym_trainer_id', trainerId);
             localStorage.setItem('gym_trainer_pin', pin);
-            localStorage.setItem('gym_auto_start', el.autoStartToggle.checked || isAuto);
 
-            el.autoLoading.classList.add('hidden');
             el.formContainer.classList.add('hidden');
             el.status.classList.add('hidden');
-
-            el.successTitle.textContent = wasActive ? i18n.successStopped : i18n.successStarted;
             el.successText.textContent = data.message;
             el.successContainer.classList.remove('hidden');
             el.successContainer.classList.add('flex');
-
-            if (localStorage.getItem('gym_auto_start') === 'true') {
-              el.btnDisableAuto.classList.remove('hidden');
-            }
           } else {
             throw new Error(data.error);
           }
         } catch (err) {
-          el.autoLoading.classList.add('hidden');
-          el.formContainer.classList.remove('hidden');
           el.status.classList.remove('hidden');
-          el.status.className = 'mb-6 p-4 rounded-xl text-center font-bold bg-red-100 text-red-700 border border-red-200';
+          el.status.className = 'p-3 rounded-xl text-center font-bold bg-red-50 text-red-600 border border-red-100 text-xs';
           el.status.textContent = err.message;
-          localStorage.setItem('gym_auto_start', 'false');
         }
       }
 
-      // Initialize page state from localStorage
-      window.addEventListener('load', async () => {
+      window.addEventListener('load', () => {
+        updateHelperCheckboxes();
         const savedId = localStorage.getItem('gym_trainer_id');
         const savedPin = localStorage.getItem('gym_trainer_pin');
-        const isAutoStartEnabled = localStorage.getItem('gym_auto_start') === 'true';
-        const currentHall = el.hallIdInput.value;
-
-        el.autoStartToggle.checked = isAutoStartEnabled;
-
-        if (savedId) {
-          el.trainerSelect.value = savedId;
-          await updateSessionStatus(savedId);
-        }
         if (savedPin) el.pinInput.value = savedPin;
-
-        if (isAutoStartEnabled && savedId && savedPin) {
-          performCheckin(savedId, savedPin, currentHall, true);
-        }
       });
     </script>
   </body>

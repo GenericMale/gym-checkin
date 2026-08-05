@@ -15,7 +15,7 @@ export const getLogin = (req, res) => res.render('login', { error: null });
 export const postLogin = (req, res) => {
   if (req.body.password === process.env.ADMIN_PASSWORD) {
     req.session.loggedIn = true;
-    redirect(res, '/admin');
+    redirect(res, '/admin/turnplan');
   } else {
     res.render('login', { error: req.__('ERROR_INVALID_PASSWORD') });
   }
@@ -26,23 +26,48 @@ export const logout = (req, res) => {
   redirect(res, '/admin/login');
 };
 
-export const getDashboard = async (req, res) => {
-  const baseUrl = req.protocol + '://' + req.get('host') + BASE_PATH;
+export const getTurnplan = async (req, res) => {
+  try {
+    const turnplan = await db.all(`
+      SELECT tp.*, h.name as hall_name, t.name as trainer_name
+      FROM turnplan tp
+      LEFT JOIN halls h ON tp.hall_id = h.id
+      LEFT JOIN trainers t ON tp.trainer_id = t.id
+      ORDER BY h.name ASC, tp.time_from ASC
+    `);
 
+    const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
+    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
+    const settings = await db.getSettings();
+
+    res.render('turnplan', { turnplan, halls, trainers, settings, activeTab: 'turnplan' });
+  } catch (err) {
+    logger.error('Datenbankfehler in getTurnplan', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const getTrainers = async (req, res) => {
+  try {
+    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
+    res.render('trainers', { trainers, activeTab: 'trainers' });
+  } catch (err) {
+    logger.error('Datenbankfehler in getTrainers', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const getHalls = async (req, res) => {
+  const baseUrl = req.protocol + '://' + req.get('host') + BASE_PATH;
   try {
     const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
     for (let hall of halls) {
       hall.url = `${baseUrl}/checkin?hall=${hall.id}`;
       hall.qr = await generateQRCode(hall.url);
     }
-
-    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
-    const assignments = await db.all('SELECT * FROM trainer_halls');
-    const settings = await db.getSettings();
-
-    res.render('admin', { halls, trainers, assignments, settings });
+    res.render('halls', { halls, activeTab: 'halls' });
   } catch (err) {
-    logger.error('Datenbankfehler in getDashboard', err);
+    logger.error('Datenbankfehler in getHalls', err);
     res.status(500).send(req.__('ERROR_DB'));
   }
 };
@@ -54,28 +79,61 @@ export const getProtocol = async (req, res) => {
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const selectedMonth = month || defaultMonth;
 
-  let query = `
-        SELECT c.*, COALESCE(t.name, ?) as trainer, COALESCE(h.name, ?) as hall
-        FROM checkins c
-        LEFT JOIN trainers t ON c.trainer_id = t.id
-        LEFT JOIN halls h ON c.hall_id = h.id
-        WHERE strftime('%Y-%m', c.start_timestamp) = ?
-    `;
-  const params = [req.__('ERROR_DELETED'), req.__('ERROR_DELETED'), selectedMonth];
-
-  if (trainer) {
-    query += ' AND c.trainer_id = ?';
-    params.push(trainer);
-  }
-  if (hall) {
-    query += ' AND c.hall_id = ?';
-    params.push(hall);
-  }
-
-  query += ' ORDER BY c.start_timestamp DESC';
-
   try {
-    const logs = await db.all(query, params);
+    let query = `
+      SELECT c.*,
+             COALESCE(tp.name, c.remarks, 'Einheit') as course_name,
+             COALESCE(h.name, ?) as hall_name,
+             COALESCE(mt.name, ?) as main_trainer_name,
+             COALESCE(mt.main_wage, 0) as main_wage
+      FROM checkins c
+      LEFT JOIN turnplan tp ON c.turnplan_id = tp.id
+      LEFT JOIN halls h ON c.hall_id = h.id
+      LEFT JOIN trainers mt ON c.main_trainer_id = mt.id
+      WHERE (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+    `;
+    const params = [req.__('ERROR_DELETED'), req.__('ERROR_DELETED'), selectedMonth, selectedMonth];
+
+    if (trainer) {
+      query += ` AND (c.main_trainer_id = ? OR c.id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
+      params.push(trainer, trainer);
+    }
+    if (hall) {
+      query += ' AND c.hall_id = ?';
+      params.push(hall);
+    }
+
+    query += ' ORDER BY c.date DESC, c.start_time DESC, c.start_timestamp DESC';
+
+    const checkinRows = await db.all(query, params);
+    const allHelpers = await db.all(`
+      SELECT ch.checkin_id, t.id as trainer_id, t.name, COALESCE(t.helper_wage, 0) as helper_wage
+      FROM checkin_helpers ch
+      JOIN trainers t ON ch.trainer_id = t.id
+    `);
+
+    const helpersByCheckin = {};
+    allHelpers.forEach((h) => {
+      if (!helpersByCheckin[h.checkin_id]) helpersByCheckin[h.checkin_id] = [];
+      helpersByCheckin[h.checkin_id].push(h);
+    });
+
+    const logs = checkinRows.map((c) => {
+      const helpers = helpersByCheckin[c.id] || [];
+      const durationHours = (c.duration_minutes || 0) / 60;
+      const mainPay = durationHours * (c.main_wage || 0);
+      const helperPay = helpers.reduce((sum, h) => sum + durationHours * (h.helper_wage || 0), 0);
+      const totalPay = mainPay + helperPay;
+
+      return {
+        ...c,
+        helpers,
+        mainPay,
+        helperPay,
+        totalPay,
+      };
+    });
+
     const trainers = await db.all('SELECT id, name FROM trainers ORDER BY name ASC');
     const halls = await db.all('SELECT id, name FROM halls ORDER BY name ASC');
     const settings = await db.getSettings();
@@ -86,6 +144,7 @@ export const getProtocol = async (req, res) => {
       halls,
       settings,
       filters: { month: selectedMonth, trainer, hall },
+      activeTab: 'protocol',
     });
   } catch (err) {
     logger.error('Datenbankfehler in getProtocol', err);
@@ -94,16 +153,13 @@ export const getProtocol = async (req, res) => {
 };
 
 export const updateSettings = async (req, res) => {
-  const { max_session_minutes, default_session_minutes, hourly_wage } = req.body;
+  const { grace_period_minutes } = req.body;
   try {
-    await db.run("UPDATE settings SET value = ? WHERE key = 'max_session_minutes'", [
-      max_session_minutes,
-    ]);
-    await db.run("UPDATE settings SET value = ? WHERE key = 'default_session_minutes'", [
-      default_session_minutes,
-    ]);
-    await db.run("UPDATE settings SET value = ? WHERE key = 'hourly_wage'", [hourly_wage]);
-    redirect(res, '/admin');
+    await db.run(
+      'INSERT INTO settings (key, value) VALUES (\'grace_period_minutes\', ?) ON CONFLICT(key) DO UPDATE SET value = ?',
+      [grace_period_minutes, grace_period_minutes]
+    );
+    redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in updateSettings', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -113,7 +169,7 @@ export const updateSettings = async (req, res) => {
 export const addHall = async (req, res) => {
   try {
     await db.run('INSERT INTO halls (name) VALUES (?)', [req.body.name]);
-    redirect(res, '/admin');
+    redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in addHall', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -125,7 +181,7 @@ export const editHall = async (req, res) => {
   const { name } = req.body;
   try {
     await db.run('UPDATE halls SET name = ? WHERE id = ?', [name, id]);
-    redirect(res, '/admin');
+    redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in editHall', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -135,8 +191,8 @@ export const editHall = async (req, res) => {
 export const deleteHall = async (req, res) => {
   try {
     await db.run('DELETE FROM halls WHERE id = ?', [req.params.id]);
-    await db.run('DELETE FROM trainer_halls WHERE hall_id = ?', [req.params.id]);
-    redirect(res, '/admin');
+    await db.run('DELETE FROM turnplan WHERE hall_id = ?', [req.params.id]);
+    redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in deleteHall', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -144,18 +200,13 @@ export const deleteHall = async (req, res) => {
 };
 
 export const addTrainer = async (req, res) => {
-  const { name, pin, halls } = req.body;
+  const { name, pin, main_wage, helper_wage } = req.body;
   try {
-    const result = await db.run('INSERT INTO trainers (name, pin) VALUES (?, ?)', [name, pin]);
-    const trainerId = result.lastID;
-    const hallIds = Array.isArray(halls) ? halls : halls ? [halls] : [];
-    for (const hallId of hallIds) {
-      await db.run('INSERT INTO trainer_halls (trainer_id, hall_id) VALUES (?, ?)', [
-        trainerId,
-        hallId,
-      ]);
-    }
-    redirect(res, '/admin');
+    await db.run(
+      'INSERT INTO trainers (name, pin, main_wage, helper_wage) VALUES (?, ?, ?, ?)',
+      [name, pin, parseFloat(main_wage) || 0, parseFloat(helper_wage) || 0]
+    );
+    redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in addTrainer', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -164,18 +215,13 @@ export const addTrainer = async (req, res) => {
 
 export const editTrainer = async (req, res) => {
   const trainerId = req.params.id;
-  const { name, pin, halls } = req.body;
+  const { name, pin, main_wage, helper_wage } = req.body;
   try {
-    await db.run('UPDATE trainers SET name = ?, pin = ? WHERE id = ?', [name, pin, trainerId]);
-    await db.run('DELETE FROM trainer_halls WHERE trainer_id = ?', [trainerId]);
-    const hallIds = Array.isArray(halls) ? halls : halls ? [halls] : [];
-    for (const hallId of hallIds) {
-      await db.run('INSERT INTO trainer_halls (trainer_id, hall_id) VALUES (?, ?)', [
-        trainerId,
-        hallId,
-      ]);
-    }
-    redirect(res, '/admin');
+    await db.run(
+      'UPDATE trainers SET name = ?, pin = ?, main_wage = ?, helper_wage = ? WHERE id = ?',
+      [name, pin, parseFloat(main_wage) || 0, parseFloat(helper_wage) || 0, trainerId]
+    );
+    redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in editTrainer', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -185,16 +231,79 @@ export const editTrainer = async (req, res) => {
 export const deleteTrainer = async (req, res) => {
   try {
     await db.run('DELETE FROM trainers WHERE id = ?', [req.params.id]);
-    await db.run('DELETE FROM trainer_halls WHERE trainer_id = ?', [req.params.id]);
-    redirect(res, '/admin');
+    redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in deleteTrainer', err);
     res.status(500).send(req.__('ERROR_DB'));
   }
 };
 
+export const addTurnplan = async (req, res) => {
+  const { name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to } = req.body;
+  try {
+    const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
+    await db.run(
+      `INSERT INTO turnplan (name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        hall_id,
+        trainer_id,
+        is_special ? 1 : 0,
+        remarks || '',
+        JSON.stringify(days),
+        time_from,
+        time_to,
+      ]
+    );
+    redirect(res, '/admin/turnplan');
+  } catch (err) {
+    logger.error('Datenbankfehler in addTurnplan', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const editTurnplan = async (req, res) => {
+  const { id } = req.params;
+  const { name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to } = req.body;
+  try {
+    const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
+    await db.run(
+      `UPDATE turnplan
+       SET name = ?, hall_id = ?, trainer_id = ?, is_special = ?, remarks = ?, weekdays = ?, time_from = ?, time_to = ?
+       WHERE id = ?`,
+      [
+        name,
+        hall_id,
+        trainer_id,
+        is_special ? 1 : 0,
+        remarks || '',
+        JSON.stringify(days),
+        time_from,
+        time_to,
+        id,
+      ]
+    );
+    redirect(res, '/admin/turnplan');
+  } catch (err) {
+    logger.error('Datenbankfehler in editTurnplan', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
+export const deleteTurnplan = async (req, res) => {
+  try {
+    await db.run('DELETE FROM turnplan WHERE id = ?', [req.params.id]);
+    redirect(res, '/admin/turnplan');
+  } catch (err) {
+    logger.error('Datenbankfehler in deleteTurnplan', err);
+    res.status(500).send(req.__('ERROR_DB'));
+  }
+};
+
 export const deleteCheckin = async (req, res) => {
   try {
+    await db.run('DELETE FROM checkin_helpers WHERE checkin_id = ?', [req.params.id]);
     await db.run('DELETE FROM checkins WHERE id = ?', [req.params.id]);
     res.status(200).send('OK');
   } catch (err) {
@@ -204,22 +313,26 @@ export const deleteCheckin = async (req, res) => {
 };
 
 export const addCheckin = async (req, res) => {
-  const { trainer_id, hall_id, date, start_time, end_time } = req.body;
+  const { turnplan_id, hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
   try {
-    const start = new Date(`${date}T${start_time}`);
-    const end = new Date(`${date}T${end_time}`);
-    if (end < start) end.setDate(end.getDate() + 1);
-    const durationMinutes = Math.round((end - start) / (1000 * 60));
+    const [sH, sM] = start_time.split(':').map(Number);
+    const [eH, eM] = end_time.split(':').map(Number);
+    let durationMinutes = eH * 60 + eM - (sH * 60 + sM);
+    if (durationMinutes < 0) durationMinutes += 24 * 60;
 
-    const toSqlTimestamp = (date) => {
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
-    };
-
-    await db.run(
-      'INSERT INTO checkins (trainer_id, hall_id, start_timestamp, end_timestamp, duration_minutes) VALUES (?, ?, ?, ?, ?)',
-      [trainer_id, hall_id, toSqlTimestamp(start), toSqlTimestamp(end), durationMinutes]
+    const result = await db.run(
+      `INSERT INTO checkins (turnplan_id, hall_id, main_trainer_id, date, start_time, end_time, duration_minutes, remarks)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [turnplan_id || null, hall_id, main_trainer_id, date, start_time, end_time, durationMinutes, remarks || '']
     );
+
+    const checkinId = result.lastID;
+    const helpers = Array.isArray(helper_ids) ? helper_ids : helper_ids ? [helper_ids] : [];
+    for (const hId of helpers) {
+      if (hId && parseInt(hId) !== parseInt(main_trainer_id)) {
+        await db.run('INSERT INTO checkin_helpers (checkin_id, trainer_id) VALUES (?, ?)', [checkinId, hId]);
+      }
+    }
 
     redirect(res, '/admin/protocol');
   } catch (err) {
@@ -230,22 +343,27 @@ export const addCheckin = async (req, res) => {
 
 export const editCheckin = async (req, res) => {
   const { id } = req.params;
-  const { trainer_id, hall_id, date, start_time, end_time } = req.body;
+  const { hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
   try {
-    const start = new Date(`${date}T${start_time}`);
-    const end = new Date(`${date}T${end_time}`);
-    if (end < start) end.setDate(end.getDate() + 1);
-    const durationMinutes = Math.round((end - start) / (1000 * 60));
-
-    const toSqlTimestamp = (date) => {
-      const pad = (n) => String(n).padStart(2, '0');
-      return `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())} ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}:${pad(date.getUTCSeconds())}`;
-    };
+    const [sH, sM] = start_time.split(':').map(Number);
+    const [eH, eM] = end_time.split(':').map(Number);
+    let durationMinutes = eH * 60 + eM - (sH * 60 + sM);
+    if (durationMinutes < 0) durationMinutes += 24 * 60;
 
     await db.run(
-      'UPDATE checkins SET trainer_id = ?, hall_id = ?, start_timestamp = ?, end_timestamp = ?, duration_minutes = ? WHERE id = ?',
-      [trainer_id, hall_id, toSqlTimestamp(start), toSqlTimestamp(end), durationMinutes, id]
+      `UPDATE checkins
+       SET hall_id = ?, main_trainer_id = ?, date = ?, start_time = ?, end_time = ?, duration_minutes = ?, remarks = ?
+       WHERE id = ?`,
+      [hall_id, main_trainer_id, date, start_time, end_time, durationMinutes, remarks || '', id]
     );
+
+    await db.run('DELETE FROM checkin_helpers WHERE checkin_id = ?', [id]);
+    const helpers = Array.isArray(helper_ids) ? helper_ids : helper_ids ? [helper_ids] : [];
+    for (const hId of helpers) {
+      if (hId && parseInt(hId) !== parseInt(main_trainer_id)) {
+        await db.run('INSERT INTO checkin_helpers (checkin_id, trainer_id) VALUES (?, ?)', [id, hId]);
+      }
+    }
 
     redirect(res, '/admin/protocol');
   } catch (err) {
@@ -256,12 +374,12 @@ export const editCheckin = async (req, res) => {
 
 export const deleteFilteredCheckins = async (req, res) => {
   const { month, trainer, hall } = req.body;
-  let query = "DELETE FROM checkins WHERE strftime('%Y-%m', start_timestamp) = ?";
-  const params = [month];
+  let query = "DELETE FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
+  const params = [month, month];
 
   if (trainer) {
-    query += ' AND trainer_id = ?';
-    params.push(trainer);
+    query += ` AND (main_trainer_id = ? OR id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
+    params.push(trainer, trainer);
   }
   if (hall) {
     query += ' AND hall_id = ?';
@@ -269,6 +387,21 @@ export const deleteFilteredCheckins = async (req, res) => {
   }
 
   try {
+    let subQuery = "SELECT id FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
+    const subParams = [month, month];
+    if (trainer) {
+      subQuery += ` AND (main_trainer_id = ? OR id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
+      subParams.push(trainer, trainer);
+    }
+    if (hall) {
+      subQuery += ' AND hall_id = ?';
+      subParams.push(hall);
+    }
+    const toDelete = await db.all(subQuery, subParams);
+    for (const item of toDelete) {
+      await db.run('DELETE FROM checkin_helpers WHERE checkin_id = ?', [item.id]);
+    }
+
     await db.run(query, params);
     res.status(200).send('OK');
   } catch (err) {
@@ -277,48 +410,75 @@ export const deleteFilteredCheckins = async (req, res) => {
   }
 };
 
+const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filterHallId = null) => {
+  const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
+  const rowsByTrainer = {};
+
+  for (const t of trainers) {
+    if (filterTrainerId && parseInt(filterTrainerId) !== t.id) continue;
+
+    let mainQuery = `
+      SELECT c.date, c.start_timestamp, c.duration_minutes
+      FROM checkins c
+      WHERE c.main_trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+    `;
+    const mainParams = [t.id, selectedMonth, selectedMonth];
+    if (filterHallId) {
+      mainQuery += ' AND c.hall_id = ?';
+      mainParams.push(filterHallId);
+    }
+    const mainSessions = await db.all(mainQuery, mainParams);
+
+    let helperQuery = `
+      SELECT c.date, c.start_timestamp, c.duration_minutes
+      FROM checkins c
+      JOIN checkin_helpers ch ON c.id = ch.checkin_id
+      WHERE ch.trainer_id = ? AND (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
+    `;
+    const helperParams = [t.id, selectedMonth, selectedMonth];
+    if (filterHallId) {
+      helperQuery += ' AND c.hall_id = ?';
+      helperParams.push(filterHallId);
+    }
+    const helperSessions = await db.all(helperQuery, helperParams);
+
+    const trainerRows = [];
+    mainSessions.forEach((s) => {
+      const durationHours = (s.duration_minutes || 0) / 60;
+      trainerRows.push({
+        date: s.date || s.start_timestamp,
+        pay: durationHours * (t.main_wage || 0),
+      });
+    });
+
+    helperSessions.forEach((s) => {
+      const durationHours = (s.duration_minutes || 0) / 60;
+      trainerRows.push({
+        date: s.date || s.start_timestamp,
+        pay: durationHours * (t.helper_wage || 0),
+      });
+    });
+
+    if (trainerRows.length > 0) {
+      rowsByTrainer[t.name] = trainerRows;
+    }
+  }
+
+  return rowsByTrainer;
+};
+
 export const exportAll = async (req, res) => {
   const { month, trainer, hall } = req.query;
   const now = new Date();
-  const selectedMonth =
-    month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const selectedMonth = month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   try {
-    const settings = await db.getSettings();
-    const hourlyWage = parseFloat(settings.hourly_wage);
-
-    let query = `
-            SELECT c.*, COALESCE(t.name, ?) as trainer_name
-            FROM checkins c
-            LEFT JOIN trainers t ON c.trainer_id = t.id
-            WHERE strftime('%Y-%m', c.start_timestamp) = ?
-        `;
-    const params = [req.__('ERROR_UNKNOWN'), selectedMonth];
-
-    if (trainer) {
-      query += ' AND c.trainer_id = ?';
-      params.push(trainer);
-    }
-    if (hall) {
-      query += ' AND c.hall_id = ?';
-      params.push(hall);
+    const rowsByTrainer = await getTrainerExportData(selectedMonth, trainer, hall);
+    if (Object.keys(rowsByTrainer).length === 0) {
+      return res.status(404).send('Keine Daten für Export vorhanden');
     }
 
-    query += ' ORDER BY t.name ASC, c.start_timestamp ASC';
-
-    const rows = await db.all(query, params);
-
-    const rowsByTrainer = {};
-    rows.forEach((row) => {
-      if (!rowsByTrainer[row.trainer_name]) rowsByTrainer[row.trainer_name] = [];
-      rowsByTrainer[row.trainer_name].push(row);
-    });
-
-    const { buffer, filename, contentType } = await generateExport(
-      rowsByTrainer,
-      hourlyWage,
-      selectedMonth
-    );
+    const { buffer, filename, contentType } = await generateExport(rowsByTrainer, selectedMonth);
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
@@ -333,10 +493,7 @@ export const exportTrainer = async (req, res) => {
   const { trainerId, pin, month } = req.body;
 
   try {
-    const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [
-      trainerId,
-      pin,
-    ]);
+    const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [trainerId, pin]);
     if (!trainer) return res.status(401).send(req.__('ERROR_INVALID_PIN'));
 
     let selectedMonth = month;
@@ -348,25 +505,12 @@ export const exportTrainer = async (req, res) => {
       selectedMonth = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
     }
 
-    const settings = await db.getSettings();
-    const hourlyWage = parseFloat(settings.hourly_wage);
+    const rowsByTrainer = await getTrainerExportData(selectedMonth, trainerId);
+    if (!rowsByTrainer[trainer.name]) {
+      rowsByTrainer[trainer.name] = [];
+    }
 
-    const rows = await db.all(
-      `
-            SELECT c.*
-            FROM checkins c
-            WHERE c.trainer_id = ? AND strftime('%Y-%m', c.start_timestamp) = ?
-            ORDER BY c.start_timestamp ASC
-        `,
-      [trainerId, selectedMonth]
-    );
-
-    const rowsByTrainer = { [trainer.name]: rows };
-    const { buffer, filename, contentType } = await generateExport(
-      rowsByTrainer,
-      hourlyWage,
-      selectedMonth
-    );
+    const { buffer, filename, contentType } = await generateExport(rowsByTrainer, selectedMonth);
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename=${filename}`);

@@ -29,23 +29,96 @@ const run = (sql, params = []) => {
 const initDb = async () => {
   await run('CREATE TABLE IF NOT EXISTS halls (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');
   await run(
-    'CREATE TABLE IF NOT EXISTS trainers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, pin TEXT)'
+    'CREATE TABLE IF NOT EXISTS trainers (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, pin TEXT, main_wage REAL DEFAULT 0.0, helper_wage REAL DEFAULT 0.0)'
   );
-  await run('CREATE TABLE IF NOT EXISTS trainer_halls (trainer_id INTEGER, hall_id INTEGER)');
-  await run(`CREATE TABLE IF NOT EXISTS checkins (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        trainer_id INTEGER,
-        hall_id INTEGER,
-        start_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-        end_timestamp DATETIME,
-        duration_minutes INTEGER
-    )`);
-  await run('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)');
+  try {
+    await run('ALTER TABLE trainers ADD COLUMN main_wage REAL DEFAULT 0.0');
+  } catch (_e) {
+    // Ignore if column exists
+  }
+  try {
+    await run('ALTER TABLE trainers ADD COLUMN helper_wage REAL DEFAULT 0.0');
+  } catch (_e) {
+    // Ignore if column exists
+  }
 
-  // Initial Settings
-  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('max_session_minutes', '180')");
-  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('default_session_minutes', '60')");
-  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('hourly_wage', '20')");
+  await run(`CREATE TABLE IF NOT EXISTS turnplan (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
+    hall_id INTEGER,
+    trainer_id INTEGER,
+    is_special INTEGER DEFAULT 0,
+    remarks TEXT,
+    weekdays TEXT,
+    time_from TEXT,
+    time_to TEXT
+  )`);
+
+  await run(`CREATE TABLE IF NOT EXISTS checkins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    turnplan_id INTEGER,
+    hall_id INTEGER,
+    main_trainer_id INTEGER,
+    date TEXT,
+    start_time TEXT,
+    end_time TEXT,
+    duration_minutes INTEGER,
+    remarks TEXT,
+    start_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN turnplan_id INTEGER');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN main_trainer_id INTEGER');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN date TEXT');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN start_time TEXT');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN end_time TEXT');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN remarks TEXT');
+  } catch (_e) {
+    // Ignore
+  }
+
+  // Migrate old trainer_id to main_trainer_id if needed
+  try {
+    await run('UPDATE checkins SET main_trainer_id = trainer_id WHERE main_trainer_id IS NULL AND trainer_id IS NOT NULL');
+  } catch (_e) {
+    // Ignore
+  }
+  try {
+    await run("UPDATE checkins SET date = strftime('%Y-%m-%d', start_timestamp) WHERE date IS NULL AND start_timestamp IS NOT NULL");
+  } catch (_e) {
+    // Ignore
+  }
+
+  await run(`CREATE TABLE IF NOT EXISTS checkin_helpers (
+    checkin_id INTEGER,
+    trainer_id INTEGER,
+    PRIMARY KEY (checkin_id, trainer_id)
+  )`);
+
+  await run('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)');
+  await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('grace_period_minutes', '30')");
+  await run('DROP TABLE IF EXISTS trainer_halls');
 };
 
 const getSettings = async () => {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= branding.shortName %> - <%= __('ADMIN_PROTOCOL_TITLE') %></title>
+    <title><%= branding.shortName %> - <%= __('ADMIN_TAB_PROTOCOL') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>">
     <style>
         :root {
@@ -12,16 +12,11 @@
         }
         .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
             z-index: 60;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             padding: 1rem;
         }
         .modal-overlay.hidden {
@@ -31,39 +26,66 @@
 </head>
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
 
-    <nav class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50 shadow-sm">
-        <div class="container mx-auto flex justify-between items-center text-sm">
-            <div class="flex items-center gap-4">
-                <a href="<%= url('/admin') %>" class="bg-gray-100 p-2 rounded-lg hover:bg-gray-200 transition cursor-pointer">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                </a>
-                <div>
-                    <h1 class="font-brand-serif text-xl leading-tight"><%= __('ADMIN_PROTOCOL_TITLE') %></h1>
-                    <p class="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold"><%= branding.name %> <%= branding.accentText %></p>
+    <!-- Navigation -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm no-print">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary p-2 rounded-xl text-white shadow-sm">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    <div>
+                        <h1 class="font-brand-serif text-xl leading-tight"><%= branding.name %> <span class="text-primary"><%= branding.accentText %></span></h1>
+                    </div>
                 </div>
+                <a href="<%= url('/admin/logout') %>" class="text-xs font-bold text-gray-500 hover:text-red-500 transition cursor-pointer flex items-center gap-1.5 bg-gray-50 hover:bg-red-50 px-3 py-2 rounded-xl border border-gray-200 hover:border-red-100">
+                    <%= __('ADMIN_LOGOUT') %>
+                </a>
             </div>
-            <div class="flex gap-4">
-                <button onclick="openModal('addCheckinModal')" class="bg-white border border-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                    <%= __('ADMIN_ADD_CHECKIN') %>
-                </button>
-                <% if (logs.length > 0) { %>
-                    <button id="deleteAllShown" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-100 transition flex items-center gap-2 cursor-pointer">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        <%= __('ADMIN_DELETE_ALL_SHOWN') %>
-                    </button>
-                <% } %>
-                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-primary text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md hover:bg-primary-hover transition flex items-center gap-2 cursor-pointer">
-                    <%= __('ADMIN_EXCEL_EXPORT') %>
+            <div class="flex gap-2 font-medium text-sm border-t border-gray-100 pt-2 pb-0 overflow-x-auto">
+                <a href="<%= url('/admin/turnplan') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'turnplan' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
+                    <%= __('ADMIN_TAB_TURNPLAN') %>
+                </a>
+                <a href="<%= url('/admin/trainers') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'trainers' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
+                    <%= __('ADMIN_TAB_TRAINERS') %>
+                </a>
+                <a href="<%= url('/admin/halls') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'halls' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
+                    <%= __('ADMIN_TAB_HALLS') %>
+                </a>
+                <a href="<%= url('/admin/protocol') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'protocol' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
+                    <%= __('ADMIN_TAB_PROTOCOL') %>
                 </a>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto p-6">
+    <main class="container mx-auto p-6 space-y-6">
+        <!-- Page Header & Main Actions -->
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
+                    <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+                    <%= __('ADMIN_PROTOCOL_TITLE') %>
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Einsicht in alle durchgeführten Einheiten, Haupttrainer, Helfer und Entschädigungen.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+                <button onclick="openModal('addCheckinModal')" class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-sm">
+                    <span>+</span> <%= __('ADMIN_ADD_CHECKIN') %>
+                </button>
+                <% if (logs.length > 0) { %>
+                    <button id="deleteAllShown" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                        <%= __('ADMIN_DELETE_ALL_SHOWN') %>
+                    </button>
+                <% } %>
+                <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md transition flex items-center gap-2 cursor-pointer">
+                    <%= __('ADMIN_EXCEL_EXPORT') %>
+                </a>
+            </div>
+        </section>
 
         <!-- Filter Bar -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 mb-8">
+        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
             <form id="filterForm" method="GET" action="<%= url('/admin/protocol') %>" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                 <%
                     const [fYear, fMonth] = filters.month.split('-');
@@ -71,16 +93,16 @@
                     const monthKeys = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
                 %>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_YEAR') %></label>
-                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_YEAR') %></label>
+                    <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% for(let y = currentYear; y >= currentYear - 5; y--) { %>
                             <option value="<%= y %>" <%= fYear == y ? 'selected' : '' %>><%= y %></option>
                         <% } %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_MONTH') %></label>
-                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MONTH') %></label>
+                    <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% monthKeys.forEach((key) => { %>
                             <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('MONTHS.' + key) %></option>
                         <% } ) %>
@@ -89,8 +111,8 @@
                 <input type="hidden" name="month" id="hiddenMonth" value="<%= filters.month %>">
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TRAINER_FILTER') %></label>
+                    <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= filters.trainer == t.id ? 'selected' : '' %>><%= t.name %></option>
@@ -98,30 +120,29 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <option value=""><%= __('ADMIN_ALL') %></option>
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>" <%= filters.hall == h.id ? 'selected' : '' %>><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
-                <button type="submit" class="bg-gray-800 text-white font-bold py-2.5 rounded-xl text-sm shadow-md hover:bg-black transition cursor-pointer"><%= __('ADMIN_FILTER_BTN') %></button>
+                <button type="submit" class="bg-gray-800 hover:bg-black text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition cursor-pointer"><%= __('ADMIN_FILTER_BTN') %></button>
             </form>
         </section>
 
         <%
             let totalMins = 0;
             let totalPay = 0;
-            const hourlyWage = parseFloat(settings.hourly_wage);
             logs.forEach(log => {
                 totalMins += (log.duration_minutes || 0);
-                totalPay += (log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0);
+                totalPay += (log.totalPay || 0);
             });
         %>
 
         <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
                 <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_UNITS') %></p>
                 <p class="text-3xl font-brand-serif text-gray-800"><%= logs.length %></p>
@@ -133,7 +154,6 @@
             <div class="p-6 rounded-3xl border border-primary/20 shadow-sm bg-primary/5">
                 <p class="text-xs font-bold text-primary uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
                 <p class="text-3xl font-brand-serif text-primary"><%= totalPay.toFixed(2) %> €</p>
-                <p class="text-[10px] text-gray-400 mt-1"><%= __('ADMIN_BASIS') %>: <%= hourlyWage.toFixed(2) %> € / Std.</p>
             </div>
         </div>
 
@@ -144,6 +164,7 @@
                     <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-widest font-bold">
                         <tr>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINER_HALL') %></th>
+                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINERS') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
                             <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_COMPENSATION') %></th>
@@ -152,48 +173,53 @@
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         <% logs.forEach(log => {
-                            const sessionPay = log.duration_minutes ? (log.duration_minutes / 60 * hourlyWage) : 0;
-                            const startDate = new Date(log.start_timestamp + " UTC");
-                            const endDate = log.end_timestamp ? new Date(log.end_timestamp + " UTC") : null;
+                            const helperNames = log.helpers.map(h => h.name).join(', ');
+                            const helperIds = JSON.stringify(log.helpers.map(h => h.trainer_id));
+                            const dateVal = log.date || (log.start_timestamp ? log.start_timestamp.split(' ')[0] : '');
                         %>
-                            <tr class="hover:bg-gray-50 transition group cursor-pointer"
-                                onclick="openEditCheckinModal('<%= log.id %>', '<%= log.trainer_id %>', '<%= log.hall_id %>', '<%= startDate.toISOString().split('T')[0] %>', '<%= startDate.toTimeString().slice(0,5) %>', '<%= endDate ? endDate.toTimeString().slice(0,5) : '' %>')">
+                            <tr class="hover:bg-gray-50 transition group cursor-pointer edit-checkin-row"
+                                data-id="<%= log.id %>"
+                                data-main="<%= log.main_trainer_id %>"
+                                data-hall="<%= log.hall_id %>"
+                                data-helpers='<%= helperIds %>'
+                                data-date="<%= dateVal %>"
+                                data-start="<%= log.start_time %>"
+                                data-end="<%= log.end_time %>">
                                 <td class="px-6 py-4">
-                                    <div class="font-bold text-gray-700"><%= log.trainer %></div>
-                                    <div class="text-[10px] text-primary uppercase font-bold"><%= log.hall %></div>
+                                    <div class="font-bold text-gray-800"><%= log.course_name %></div>
+                                    <div class="text-[10px] text-primary uppercase font-bold"><%= log.hall_name %></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-bold text-gray-700 text-xs">Haupt: <%= log.main_trainer_name %></div>
+                                    <% if (helperNames) { %>
+                                        <div class="text-[10px] text-gray-500 italic">Helfer: <%= helperNames %></div>
+                                    <% } %>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-gray-800 text-xs font-medium">
-                                        <%= startDate.toLocaleDateString(locale || 'de', { day:'2-digit', month:'2-digit', year:'numeric' }) %>
+                                        <%= dateVal %>
                                     </div>
-                                    <div class="text-[10px] text-gray-400">
-                                        <%= startDate.toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) %> -
-                                        <%= endDate ? endDate.toLocaleTimeString(locale || 'de', { hour:'2-digit', minute:'2-digit' }) : '...' %>
+                                    <div class="text-[10px] text-gray-400 font-mono">
+                                        <%= log.start_time %> - <%= log.end_time %>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <% if (log.end_timestamp !== null) { %>
-                                        <span class="px-2 py-1 bg-primary/10 text-primary rounded-md text-[10px] font-bold">
-                                            <%= log.duration_minutes %> Min.
-                                        </span>
-                                    <% } else { %>
-                                        <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md text-[10px] font-bold animate-pulse">
-                                            <%= __('ADMIN_TABLE_RUNNING') %>
-                                        </span>
-                                    <% } %>
+                                    <span class="px-2.5 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold">
+                                        <%= log.duration_minutes %> Min.
+                                    </span>
                                 </td>
                                 <td class="px-6 py-4 text-right font-mono font-bold text-gray-700">
-                                    <%= sessionPay > 0 ? sessionPay.toFixed(2) + ' €' : '-' %>
+                                    <%= (log.totalPay || 0).toFixed(2) %> €
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <button class="text-gray-300 group-hover:text-primary transition p-2 cursor-pointer">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    <button class="text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
                                 </td>
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="5" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
+                            <tr><td colspan="6" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -201,49 +227,57 @@
         </section>
     </main>
 
-    <!-- Modals -->
-
     <!-- Add Checkin Modal -->
     <div id="addCheckinModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl"><%= __('ADMIN_ADD_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_CHECKIN') %></h2>
                 <button onclick="closeModal('addCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form action="<%= url('/admin/add-checkin') %>" method="POST" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
+                    <select name="main_trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto">
+                        <% trainers.forEach(t => { %>
+                            <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                                <input type="checkbox" name="helper_ids" value="<%= t.id %>" class="text-primary rounded cursor-pointer"> <%= t.name %>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <select name="hall_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>"><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
-                    <input type="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_DATE') %></label>
+                    <input type="date" name="date" required value="<%= new Date().toISOString().split('T')[0] %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
-                        <input type="time" name="start_time" required value="17:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_START_TIME') %></label>
+                        <input type="time" name="start_time" required value="08:30" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
-                        <input type="time" name="end_time" required value="19:00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_END_TIME') %></label>
+                        <input type="time" name="end_time" required value="09:15" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-primary text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-hover transition mt-2 cursor-pointer">
+                <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm">
                     <%= __('ADMIN_ADD_CHECKIN_SUBMIT') %>
                 </button>
             </form>
@@ -252,49 +286,59 @@
 
     <!-- Edit Checkin Modal -->
     <div id="editCheckinModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
                 <button onclick="closeModal('editCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form id="editCheckinForm" method="POST" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TRAINER_FILTER') %></label>
-                    <select name="trainer_id" id="editCheckinTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
+                    <select name="main_trainer_id" id="editCheckinMainTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_HALL_FILTER') %></label>
-                    <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary cursor-pointer">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto">
+                        <% trainers.forEach(t => { %>
+                            <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                                <input type="checkbox" name="helper_ids" value="<%= t.id %>" class="text-primary rounded edit-helper-cb cursor-pointer"> <%= t.name %>
+                            </label>
+                        <% }) %>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>"><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_DATE') %></label>
-                    <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_DATE') %></label>
+                    <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_START_TIME') %></label>
-                        <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_START_TIME') %></label>
+                        <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_END_TIME') %></label>
-                        <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm outline-none focus:ring-2 ring-primary">
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_END_TIME') %></label>
+                        <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                 </div>
                 <div class="flex gap-2 mt-2">
-                    <button type="submit" class="flex-1 bg-primary text-white font-bold py-3 rounded-xl shadow-lg hover:bg-primary-hover transition cursor-pointer">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
                         <%= __('ADMIN_SAVE') %>
                     </button>
-                    <button type="button" id="deleteCheckinBtn" class="bg-red-50 text-red-600 px-6 py-3 rounded-xl font-bold hover:bg-red-100 transition cursor-pointer">
+                    <button type="button" id="deleteCheckinBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm">
                         <%= __('ADMIN_DELETE') %>
                     </button>
                 </div>
@@ -312,30 +356,46 @@
             document.getElementById(id).classList.add('hidden');
         }
 
-        // Close modal on background click
         document.querySelectorAll('.modal-overlay').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal(modal.id);
             });
         });
 
-        function openEditCheckinModal(id, trainerId, hallId, date, start, end) {
-            document.getElementById('editCheckinTrainer').value = trainerId;
-            document.getElementById('editCheckinHall').value = hallId;
-            document.getElementById('editCheckinDate').value = date;
-            document.getElementById('editCheckinStart').value = start;
-            document.getElementById('editCheckinEnd').value = end || '';
-            document.getElementById('editCheckinForm').action = `<%= url('/admin/edit-checkin/') %>${id}`;
-            document.getElementById('deleteCheckinBtn').onclick = async () => {
-                if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
-                    const response = await fetch(`<%= url('/admin/delete-checkin/') %>${id}`, { method: 'POST' });
-                    if (response.ok) {
-                        location.reload();
+        document.querySelectorAll('.edit-checkin-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const id = row.getAttribute('data-id');
+                const mainTrainerId = row.getAttribute('data-main');
+                const hallId = row.getAttribute('data-hall');
+                const helperIdsJson = row.getAttribute('data-helpers');
+                const date = row.getAttribute('data-date');
+                const start = row.getAttribute('data-start');
+                const end = row.getAttribute('data-end');
+
+                document.getElementById('editCheckinMainTrainer').value = mainTrainerId;
+                document.getElementById('editCheckinHall').value = hallId;
+                document.getElementById('editCheckinDate').value = date;
+                document.getElementById('editCheckinStart').value = start;
+                document.getElementById('editCheckinEnd').value = end || '';
+                document.getElementById('editCheckinForm').action = `<%= url('/admin/edit-checkin/') %>${id}`;
+
+                let helperIds = [];
+                try { helperIds = JSON.parse(helperIdsJson); } catch(_e) { helperIds = []; }
+                document.querySelectorAll('.edit-helper-cb').forEach(cb => {
+                    cb.checked = helperIds.includes(parseInt(cb.value));
+                });
+
+                document.getElementById('deleteCheckinBtn').onclick = async () => {
+                    if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                        const response = await fetch(`<%= url('/admin/delete-checkin/') %>${id}`, { method: 'POST' });
+                        if (response.ok) {
+                            location.reload();
+                        }
                     }
-                }
-            };
-            openModal('editCheckinModal');
-        }
+                };
+                openModal('editCheckinModal');
+            });
+        });
 
         document.getElementById('filterForm').addEventListener('submit', function() {
             const year = document.getElementById('selectYear').value;

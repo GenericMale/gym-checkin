@@ -5,6 +5,6 @@ const router = express.Router();
 
 router.get('/checkin', getCheckinPage);
 router.post('/api/checkin', postCheckin);
-router.get('/api/session-status/:trainerId', getSessionStatus);
+router.get('/api/session-status/:hallId', getSessionStatus);
 
 export default router;
