@@ -1,178 +1,288 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
-<head>
+  <head>
     <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_HALLS')}` }) %>
-</head>
-<body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
-
+  </head>
+  <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
     <%- include('partials/nav') %>
 
     <main class="container mx-auto p-6 space-y-6 no-print">
-        <!-- Page Header -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
-                    <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-                    <%= __('ADMIN_HALLS') %>
-                </h2>
-                <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_HALLS_SUBTITLE') %></p>
-            </div>
-            <button onclick="openModal('addHallModal')" class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0">
-                <span>+</span> <%= __('ADMIN_ADD_HALL') %>
-            </button>
-        </section>
+      <!-- Page Header -->
+      <section
+        class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div>
+          <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
+            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+            <%= __('ADMIN_HALLS') %>
+          </h2>
+          <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_HALLS_SUBTITLE') %></p>
+        </div>
+        <button
+          onclick="openModal('addHallModal')"
+          class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0"
+        >
+          <span>+</span>
+          <%= __('ADMIN_ADD_HALL') %>
+        </button>
+      </section>
 
-        <!-- Halls List -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <% halls.forEach(hall => { %>
-                    <div class="bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex items-center justify-between gap-4 group shadow-2xs">
-                        <div class="overflow-hidden mr-2 space-y-1">
-                            <h3 class="font-bold text-gray-800 text-base truncate"><%= hall.name %></h3>
-                            <p class="text-[10px] text-primary font-mono truncate opacity-70 group-hover:opacity-100 transition"><%= hall.url %></p>
-                        </div>
-                        <div class="flex items-center gap-1 shrink-0">
-                            <button class="print-btn text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer" data-hall="<%= hall.name %>" data-qr="<%= hall.qr %>" title="<%= __('ADMIN_PRINT_QR') %>">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                            </button>
-                            <button onclick="openEditHallModal('<%= hall.id %>', '<%= hall.name %>')" class="text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                <% }) %>
-                <% if (halls.length === 0) { %>
-                    <div class="col-span-full text-center text-gray-400 py-12 text-sm italic"><%= __('ADMIN_NO_HALLS') %></div>
-                <% } %>
+      <!-- Halls List -->
+      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% halls.forEach(hall => { %>
+          <div
+            class="edit-hall-card bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex items-center justify-between gap-4 group shadow-2xs cursor-pointer"
+            data-id="<%= hall.id %>"
+            data-name="<%= hall.name %>"
+          >
+            <div class="overflow-hidden mr-2 space-y-1">
+              <h3 class="font-bold text-gray-800 text-base truncate"><%= hall.name %></h3>
+              <p
+                class="text-[10px] text-primary font-mono truncate opacity-70 group-hover:opacity-100 transition"
+              >
+                <%= hall.url %>
+              </p>
             </div>
-        </section>
+            <div class="flex items-center gap-1 shrink-0">
+              <button
+                class="print-btn text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+                data-hall="<%= hall.name %>"
+                data-qr="<%= hall.qr %>"
+                title="<%= __('ADMIN_PRINT_QR') %>"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                  ></path>
+                </svg>
+              </button>
+              <button
+                class="text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  ></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <% }) %>
+          <% if (halls.length === 0) { %>
+          <div class="col-span-full text-center text-gray-400 py-12 text-sm italic">
+            <%= __('ADMIN_NO_HALLS') %>
+          </div>
+          <% } %>
+        </div>
+      </section>
     </main>
 
     <!-- Add Hall Modal -->
     <div id="addHallModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_HALL') %></h2>
-                <button onclick="closeModal('addHallModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form action="<%= url('/admin/add-hall') %>" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_NAME') %></label>
-                    <input type="text" name="name" placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm">
-                    <%= __('ADMIN_ADD') %>
-                </button>
-            </form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_HALL') %></h2>
+          <button
+            onclick="closeModal('addHallModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form action="<%= url('/admin/add-hall') %>" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
+          >
+            <%= __('ADMIN_ADD') %>
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- Edit Hall Modal -->
     <div id="editHallModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_HALL') %></h2>
-                <button onclick="closeModal('editHallModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form id="editHallForm" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_NAME') %></label>
-                    <input type="text" name="name" id="editHallName" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <div class="flex gap-2 mt-2">
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
-                        <%= __('ADMIN_SAVE') %>
-                    </button>
-                    <button type="button" id="deleteHallBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm">
-                        <%= __('ADMIN_DELETE') %>
-                    </button>
-                </div>
-            </form>
-            <form id="deleteHallForm" method="POST" class="hidden"></form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_HALL') %></h2>
+          <button
+            onclick="closeModal('editHallModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form id="editHallForm" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              id="editHallName"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button
+              type="submit"
+              class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_SAVE') %>
+            </button>
+            <button
+              type="button"
+              id="deleteHallBtn"
+              class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_DELETE') %>
+            </button>
+          </div>
+        </form>
+        <form id="deleteHallForm" method="POST" class="hidden"></form>
+      </div>
     </div>
 
     <!-- Hidden Print Container -->
     <div id="printArea" class="hidden">
-        <div class="flex-1 border-4 border-gray-800 rounded-4xl p-8 flex flex-col items-center justify-between h-full box-border">
-            <h1 class="font-sans font-bold text-6xl text-gray-800 uppercase tracking-tight text-center" id="printTitle"></h1>
+      <div
+        class="flex-1 border-4 border-gray-800 rounded-4xl p-8 flex flex-col items-center justify-between h-full box-border"
+      >
+        <h1
+          class="font-sans font-bold text-6xl text-gray-800 uppercase tracking-tight text-center"
+          id="printTitle"
+        ></h1>
 
-            <div class="flex w-full items-center justify-around flex-1">
-                <div class="flex flex-col items-center gap-4">
-                    <img id="printImage" class="w-48 h-48">
-                </div>
-                <div class="flex flex-col items-center text-center">
-                    <div class="relative flex items-center justify-center">
-                        <svg class="w-32 h-32 text-gray-800" viewBox="0 0 200 300" fill="none" stroke="currentColor" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="30" y="20" width="140" height="260" rx="24" />
-                            <path d="M 85 40 h 30" stroke-width="8" />
-                            <path d="M 67 136 A 20 20 0 0 1 67 164" />
-                            <path d="M 81 122 A 40 40 0 0 1 81 178" />
-                            <path d="M 95 108 A 60 60 0 0 1 95 192" />
-                            <path d="M 109 94 A 80 80 0 0 1 109 206" />
-                        </svg>
-                    </div>
-                    <p class="font-bold text-2xl text-gray-800 uppercase tracking-widest"><%= __('ADMIN_PRINT_TAP_HERE') %></p>
-                </div>
+        <div class="flex w-full items-center justify-around flex-1">
+          <div class="flex flex-col items-center gap-4">
+            <img id="printImage" class="w-48 h-48" />
+          </div>
+          <div class="flex flex-col items-center text-center">
+            <div class="relative flex items-center justify-center">
+              <svg
+                class="w-32 h-32 text-gray-800"
+                viewBox="0 0 200 300"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="10"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="30" y="20" width="140" height="260" rx="24" />
+                <path d="M 85 40 h 30" stroke-width="8" />
+                <path d="M 67 136 A 20 20 0 0 1 67 164" />
+                <path d="M 81 122 A 40 40 0 0 1 81 178" />
+                <path d="M 95 108 A 60 60 0 0 1 95 192" />
+                <path d="M 109 94 A 80 80 0 0 1 109 206" />
+              </svg>
             </div>
-
-            <div class="w-full flex justify-between items-end border-t border-gray-100 pt-4 opacity-40">
-                <p class="font-brand-serif text-lg text-primary italic"><%= branding.description %></p>
-                <p class="text-xs text-gray-400 uppercase tracking-widest font-bold"><%= branding.name %></p>
-            </div>
+            <p class="font-bold text-2xl text-gray-800 uppercase tracking-widest">
+              <%= __('ADMIN_PRINT_TAP_HERE') %>
+            </p>
+          </div>
         </div>
+
+        <div class="w-full flex justify-between items-end border-t border-gray-100 pt-4 opacity-40">
+          <p class="font-brand-serif text-lg text-primary italic"><%= branding.description %></p>
+          <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">
+            <%= branding.name %>
+          </p>
+        </div>
+      </div>
     </div>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
+      function openModal(id) {
+          document.getElementById(id).classList.remove('hidden');
+      }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+      function closeModal(id) {
+          document.getElementById(id).classList.add('hidden');
+      }
 
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal(modal.id);
-            });
-        });
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+          modal.addEventListener('click', (e) => {
+              if (e.target === modal) closeModal(modal.id);
+          });
+      });
 
-        function openEditHallModal(id, name) {
-            document.getElementById('editHallName').value = name;
-            document.getElementById('editHallForm').action = `<%= url('/admin/edit-hall/') %>${id}`;
-            document.getElementById('deleteHallForm').action = `<%= url('/admin/delete-hall/') %>${id}`;
-            document.getElementById('deleteHallBtn').onclick = () => {
-                if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
-                    document.getElementById('deleteHallForm').submit();
-                }
-            };
-            openModal('editHallModal');
-        }
+      function openEditHallModal(id, name) {
+          document.getElementById('editHallName').value = name;
+          document.getElementById('editHallForm').action = `<%= url('/admin/edit-hall/') %>${id}`;
+          document.getElementById('deleteHallForm').action = `<%= url('/admin/delete-hall/') %>${id}`;
+          document.getElementById('deleteHallBtn').onclick = () => {
+              if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                  document.getElementById('deleteHallForm').submit();
+              }
+          };
+          openModal('editHallModal');
+      }
 
-        document.querySelectorAll('.print-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const hallName = btn.getAttribute('data-hall');
-                const qrData = btn.getAttribute('data-qr');
+      document.querySelectorAll('.edit-hall-card').forEach(card => {
+          card.addEventListener('click', () => {
+              openEditHallModal(card.getAttribute('data-id'), card.getAttribute('data-name'));
+          });
+      });
 
-                document.getElementById('printTitle').innerText = hallName;
-                document.getElementById('printImage').src = qrData;
+      document.querySelectorAll('.print-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const hallName = btn.getAttribute('data-hall');
+              const qrData = btn.getAttribute('data-qr');
 
-                const printArea = document.getElementById('printArea');
-                printArea.classList.remove('hidden');
-                printArea.classList.add('print-area');
+              document.getElementById('printTitle').innerText = hallName;
+              document.getElementById('printImage').src = qrData;
 
-                window.print();
+              const printArea = document.getElementById('printArea');
+              printArea.classList.remove('hidden');
+              printArea.classList.add('print-area');
 
-                printArea.classList.add('hidden');
-                printArea.classList.remove('print-area');
-            });
-        });
+              window.print();
+
+              printArea.classList.add('hidden');
+              printArea.classList.remove('print-area');
+          });
+      });
     </script>
-</body>
+  </body>
 </html>

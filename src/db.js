@@ -38,6 +38,8 @@ const initDb = async () => {
       birth_date TEXT DEFAULT '',
       address TEXT DEFAULT '',
       iban TEXT DEFAULT '',
+      is_trainer INTEGER DEFAULT 0,
+      is_helper INTEGER DEFAULT 0,
       main_wage_first_hour REAL DEFAULT 0.0,
       main_wage_additional REAL DEFAULT 0.0,
       helper_wage REAL DEFAULT 0.0
@@ -65,7 +67,24 @@ const initDb = async () => {
     await run("ALTER TABLE trainers ADD COLUMN iban TEXT DEFAULT ''");
   } catch (_e) {}
   try {
-    await run('UPDATE trainers SET main_wage_first_hour = main_wage, main_wage_additional = main_wage WHERE (main_wage_first_hour IS NULL OR main_wage_first_hour = 0) AND main_wage IS NOT NULL');
+    await run('ALTER TABLE trainers ADD COLUMN is_trainer INTEGER DEFAULT 0');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE trainers ADD COLUMN is_helper INTEGER DEFAULT 0');
+  } catch (_e) {}
+  // Infer roles for existing trainers from their configured data
+  try {
+    await run(
+      "UPDATE trainers SET is_trainer = 1 WHERE is_trainer = 0 AND (main_wage_first_hour > 0 OR main_wage_additional > 0 OR (pin IS NOT NULL AND pin != ''))"
+    );
+  } catch (_e) {}
+  try {
+    await run('UPDATE trainers SET is_helper = 1 WHERE is_helper = 0 AND helper_wage > 0');
+  } catch (_e) {}
+  try {
+    await run(
+      'UPDATE trainers SET main_wage_first_hour = main_wage, main_wage_additional = main_wage WHERE (main_wage_first_hour IS NULL OR main_wage_first_hour = 0) AND main_wage IS NOT NULL'
+    );
   } catch (_e) {}
 
   await run(`CREATE TABLE IF NOT EXISTS turnplan (
@@ -79,6 +98,18 @@ const initDb = async () => {
     time_from TEXT,
     time_to TEXT
   )`);
+
+  // Trainers allowed to check in for a course (many-to-many)
+  await run(`CREATE TABLE IF NOT EXISTS turnplan_trainers (
+    turnplan_id INTEGER,
+    trainer_id INTEGER,
+    PRIMARY KEY (turnplan_id, trainer_id)
+  )`);
+  try {
+    await run(
+      'INSERT OR IGNORE INTO turnplan_trainers (turnplan_id, trainer_id) SELECT id, trainer_id FROM turnplan WHERE trainer_id IS NOT NULL'
+    );
+  } catch (_e) {}
 
   await run(`CREATE TABLE IF NOT EXISTS checkins (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -98,24 +129,57 @@ const initDb = async () => {
     start_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  try { await run('ALTER TABLE checkins ADD COLUMN turnplan_id INTEGER'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN main_trainer_id INTEGER'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN hall_name TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN main_trainer_name TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN course_name TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN date TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN start_time TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN end_time TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN remarks TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN main_wage_first_hour REAL DEFAULT 0.0'); } catch (_e) {}
-  try { await run('ALTER TABLE checkins ADD COLUMN main_wage_additional REAL DEFAULT 0.0'); } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN turnplan_id INTEGER');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN main_trainer_id INTEGER');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN hall_name TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN main_trainer_name TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN course_name TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN date TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN start_time TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN end_time TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN remarks TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN main_wage_first_hour REAL DEFAULT 0.0');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkins ADD COLUMN main_wage_additional REAL DEFAULT 0.0');
+  } catch (_e) {}
+
+  // Ensure each course session (turnplan_id + date) is only checked in once
+  try {
+    await run(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_checkins_turnplan_date ON checkins(turnplan_id, date)'
+    );
+  } catch (_e) {}
 
   // Migrate old trainer_id to main_trainer_id
   try {
-    await run('UPDATE checkins SET main_trainer_id = trainer_id WHERE main_trainer_id IS NULL AND trainer_id IS NOT NULL');
+    await run(
+      'UPDATE checkins SET main_trainer_id = trainer_id WHERE main_trainer_id IS NULL AND trainer_id IS NOT NULL'
+    );
   } catch (_e) {}
   try {
-    await run("UPDATE checkins SET date = strftime('%Y-%m-%d', start_timestamp) WHERE date IS NULL AND start_timestamp IS NOT NULL");
+    await run(
+      "UPDATE checkins SET date = strftime('%Y-%m-%d', start_timestamp) WHERE date IS NULL AND start_timestamp IS NOT NULL"
+    );
   } catch (_e) {}
 
   await run(`CREATE TABLE IF NOT EXISTS checkin_helpers (
@@ -126,8 +190,12 @@ const initDb = async () => {
     PRIMARY KEY (checkin_id, trainer_id)
   )`);
 
-  try { await run('ALTER TABLE checkin_helpers ADD COLUMN trainer_name TEXT'); } catch (_e) {}
-  try { await run('ALTER TABLE checkin_helpers ADD COLUMN helper_wage REAL DEFAULT 0.0'); } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkin_helpers ADD COLUMN trainer_name TEXT');
+  } catch (_e) {}
+  try {
+    await run('ALTER TABLE checkin_helpers ADD COLUMN helper_wage REAL DEFAULT 0.0');
+  } catch (_e) {}
 
   await run('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT)');
   await run("INSERT OR IGNORE INTO settings (key, value) VALUES ('grace_period_minutes', '30')");

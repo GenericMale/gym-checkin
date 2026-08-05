@@ -116,7 +116,9 @@
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINERS') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
-                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_COMPENSATION') %></th>
+                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_MAIN_COMP') %></th>
+                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_HELPER_COMP') %></th>
+                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_TOTAL') %></th>
                             <th class="px-6 py-4"></th>
                         </tr>
                     </thead>
@@ -157,7 +159,13 @@
                                         <%= log.duration_minutes %> Min.
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right font-mono font-bold text-gray-700">
+                                <td class="px-6 py-4 text-right font-mono font-bold text-primary">
+                                    <%= (log.mainPay || 0).toFixed(2) %> €
+                                </td>
+                                <td class="px-6 py-4 text-right font-mono font-bold text-gray-500">
+                                    <%= (log.helperPay || 0).toFixed(2) %> €
+                                </td>
+                                <td class="px-6 py-4 text-right font-mono font-bold text-gray-800">
                                     <%= (log.totalPay || 0).toFixed(2) %> €
                                 </td>
                                 <td class="px-6 py-4 text-right">
@@ -168,7 +176,7 @@
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="6" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
+                            <tr><td colspan="8" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -189,7 +197,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
                     <select name="main_trainer_id" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <% trainers.forEach(t => { %>
+                        <% mainTrainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
                     </select>
@@ -197,7 +205,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
                     <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto">
-                        <% trainers.forEach(t => { %>
+                        <% helperTrainers.forEach(t => { %>
                             <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
                                 <input type="checkbox" name="helper_ids" value="<%= t.id %>" class="text-primary rounded cursor-pointer"> <%= t.name %>
                             </label>
@@ -246,7 +254,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
                     <select name="main_trainer_id" id="editCheckinMainTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <% trainers.forEach(t => { %>
+                        <% mainTrainers.forEach(t => { %>
                             <option value="<%= t.id %>"><%= t.name %></option>
                         <% }) %>
                     </select>
@@ -254,7 +262,7 @@
                 <div>
                     <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
                     <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto">
-                        <% trainers.forEach(t => { %>
+                        <% helperTrainers.forEach(t => { %>
                             <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
                                 <input type="checkbox" name="helper_ids" value="<%= t.id %>" class="text-primary rounded edit-helper-cb cursor-pointer"> <%= t.name %></label>
                         <% }) %>

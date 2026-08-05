@@ -6,6 +6,22 @@ import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
 
+const WEEKDAY_ORDER = { Mo: 0, Di: 1, Mi: 2, Do: 3, Fr: 4, Sa: 5, So: 6 };
+
+const turnplanSortKey = (item) => {
+  let day = '';
+  try {
+    const arr = JSON.parse(item.weekdays);
+    day = Array.isArray(arr) && arr.length > 0 ? arr[0] : '';
+  } catch (_e) {
+    day = item.weekdays ? item.weekdays.split(',')[0].trim() : '';
+  }
+  const time = item.time_from ? item.time_from.replace(':', '') : '0000';
+  const dayOrder = WEEKDAY_ORDER[day] ?? 7;
+  const hall = (item.hall_name || '').toLowerCase();
+  return `${String(dayOrder).padStart(2, '0')}_${hall}_${time}`;
+};
+
 const redirect = (res, url) => {
   const cleanPath = url.startsWith('/') ? url : `/${url}`;
   return res.redirect(`${BASE_PATH}${cleanPath}`);
@@ -30,18 +46,41 @@ export const logout = (req, res) => {
 export const getTurnplan = async (req, res) => {
   try {
     const turnplan = await db.all(`
-      SELECT tp.*, h.name as hall_name, t.name as trainer_name
+      SELECT tp.*, h.name as hall_name,
+        (SELECT GROUP_CONCAT(t2.name, ', ')
+         FROM turnplan_trainers tt
+         JOIN trainers t2 ON tt.trainer_id = t2.id
+         WHERE tt.turnplan_id = tp.id) as trainer_names
       FROM turnplan tp
       LEFT JOIN halls h ON tp.hall_id = h.id
-      LEFT JOIN trainers t ON tp.trainer_id = t.id
       ORDER BY h.name ASC, tp.time_from ASC
     `);
 
+    const trainerRows = await db.all('SELECT turnplan_id, trainer_id FROM turnplan_trainers');
+    const turnplanTrainerMap = {};
+    trainerRows.forEach((r) => {
+      if (!turnplanTrainerMap[r.turnplan_id]) turnplanTrainerMap[r.turnplan_id] = [];
+      turnplanTrainerMap[r.turnplan_id].push(r.trainer_id);
+    });
+
+    turnplan.sort((a, b) => {
+      const byDayTime = turnplanSortKey(a).localeCompare(turnplanSortKey(b));
+      if (byDayTime !== 0) return byDayTime;
+      return (a.hall_name || '').localeCompare(b.hall_name || '');
+    });
+
     const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
-    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
+    const trainers = await db.all('SELECT * FROM trainers WHERE is_trainer = 1 ORDER BY name ASC');
     const settings = await db.getSettings();
 
-    res.render('turnplan', { turnplan, halls, trainers, settings, activeTab: 'turnplan' });
+    res.render('turnplan', {
+      turnplan,
+      halls,
+      trainers,
+      settings,
+      turnplanTrainerMap,
+      activeTab: 'turnplan',
+    });
   } catch (err) {
     logger.error('Datenbankfehler in getTurnplan', err);
     res.status(500).send(req.__('ERROR_DB'));
@@ -50,7 +89,9 @@ export const getTurnplan = async (req, res) => {
 
 export const getTrainers = async (req, res) => {
   try {
-    const trainers = await db.all('SELECT * FROM trainers ORDER BY name ASC');
+    const trainers = await db.all(
+      'SELECT * FROM trainers ORDER BY is_trainer DESC, is_helper DESC, name ASC'
+    );
     res.render('trainers', { trainers, activeTab: 'trainers' });
   } catch (err) {
     logger.error('Datenbankfehler in getTrainers', err);
@@ -94,7 +135,13 @@ export const getProtocol = async (req, res) => {
       LEFT JOIN trainers mt ON c.main_trainer_id = mt.id
       WHERE (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
     `;
-    const params = [req.__('DEFAULT_UNIT_NAME'), req.__('ERROR_DELETED'), req.__('ERROR_DELETED'), selectedMonth, selectedMonth];
+    const params = [
+      req.__('DEFAULT_UNIT_NAME'),
+      req.__('ERROR_DELETED'),
+      req.__('ERROR_DELETED'),
+      selectedMonth,
+      selectedMonth,
+    ];
 
     if (trainer) {
       query += ` AND (c.main_trainer_id = ? OR c.id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
@@ -144,9 +191,8 @@ export const getProtocol = async (req, res) => {
 
     const logs = checkinRows.map((c) => {
       const helpers = helpersByCheckin[c.id] || [];
-      const durationHours = (c.duration_minutes || 0) / 60;
       const mainPay = typeof sessionMainPayMap[c.id] === 'number' ? sessionMainPayMap[c.id] : 0;
-      const helperPay = helpers.reduce((sum, h) => sum + durationHours * (h.helper_wage || 0), 0);
+      const helperPay = helpers.reduce((sum, h) => sum + (h.helper_wage || 0), 0);
       const totalPay = mainPay + helperPay;
 
       return {
@@ -159,12 +205,20 @@ export const getProtocol = async (req, res) => {
     });
 
     const trainers = await db.all('SELECT id, name FROM trainers ORDER BY name ASC');
+    const mainTrainers = await db.all(
+      'SELECT id, name FROM trainers WHERE is_trainer = 1 ORDER BY name ASC'
+    );
+    const helperTrainers = await db.all(
+      'SELECT id, name FROM trainers WHERE is_helper = 1 ORDER BY name ASC'
+    );
     const halls = await db.all('SELECT id, name FROM halls ORDER BY name ASC');
     const settings = await db.getSettings();
 
     res.render('protocol', {
       logs,
       trainers,
+      mainTrainers,
+      helperTrainers,
       halls,
       settings,
       filters: { month: selectedMonth, trainer, hall },
@@ -180,7 +234,7 @@ export const updateSettings = async (req, res) => {
   const { grace_period_minutes } = req.body;
   try {
     await db.run(
-      'INSERT INTO settings (key, value) VALUES (\'grace_period_minutes\', ?) ON CONFLICT(key) DO UPDATE SET value = ?',
+      "INSERT INTO settings (key, value) VALUES ('grace_period_minutes', ?) ON CONFLICT(key) DO UPDATE SET value = ?",
       [grace_period_minutes, grace_period_minutes]
     );
     redirect(res, '/admin/turnplan');
@@ -224,18 +278,34 @@ export const deleteHall = async (req, res) => {
 };
 
 export const addTrainer = async (req, res) => {
-  const { name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
+  const {
+    name,
+    pin,
+    svn,
+    birth_date,
+    address,
+    iban,
+    is_trainer,
+    is_helper,
+    main_wage_first_hour,
+    main_wage_additional,
+    helper_wage,
+  } = req.body;
+  const isTrainer = is_trainer ? 1 : 0;
+  const isHelper = is_helper ? 1 : 0;
   try {
     await db.run(
-      `INSERT INTO trainers (name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO trainers (name, pin, svn, birth_date, address, iban, is_trainer, is_helper, main_wage_first_hour, main_wage_additional, helper_wage)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
-        pin,
+        isTrainer ? pin : '',
         svn || '',
         birth_date || '',
         address || '',
         iban || '',
+        isTrainer,
+        isHelper,
         parseFloat(main_wage_first_hour) || 0,
         parseFloat(main_wage_additional) || 0,
         parseFloat(helper_wage) || 0,
@@ -250,20 +320,37 @@ export const addTrainer = async (req, res) => {
 
 export const editTrainer = async (req, res) => {
   const trainerId = req.params.id;
-  const { name, pin, svn, birth_date, address, iban, main_wage_first_hour, main_wage_additional, helper_wage } = req.body;
+  const {
+    name,
+    pin,
+    svn,
+    birth_date,
+    address,
+    iban,
+    is_trainer,
+    is_helper,
+    main_wage_first_hour,
+    main_wage_additional,
+    helper_wage,
+  } = req.body;
+  const isTrainer = is_trainer ? 1 : 0;
+  const isHelper = is_helper ? 1 : 0;
   try {
     await db.run(
       `UPDATE trainers
        SET name = ?, pin = ?, svn = ?, birth_date = ?, address = ?, iban = ?,
+           is_trainer = ?, is_helper = ?,
            main_wage_first_hour = ?, main_wage_additional = ?, helper_wage = ?
        WHERE id = ?`,
       [
         name,
-        pin,
+        isTrainer ? pin : '',
         svn || '',
         birth_date || '',
         address || '',
         iban || '',
+        isTrainer,
+        isHelper,
         parseFloat(main_wage_first_hour) || 0,
         parseFloat(main_wage_additional) || 0,
         parseFloat(helper_wage) || 0,
@@ -288,16 +375,18 @@ export const deleteTrainer = async (req, res) => {
 };
 
 export const addTurnplan = async (req, res) => {
-  const { name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, is_special, remarks, weekdays, time_from, time_to } =
+    req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
-    await db.run(
+    const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
+    const result = await db.run(
       `INSERT INTO turnplan (name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         hall_id,
-        trainer_id,
+        trainerIds[0] || null,
         is_special ? 1 : 0,
         remarks || '',
         JSON.stringify(days),
@@ -305,6 +394,12 @@ export const addTurnplan = async (req, res) => {
         time_to,
       ]
     );
+    for (const tId of trainerIds) {
+      await db.run(
+        'INSERT OR IGNORE INTO turnplan_trainers (turnplan_id, trainer_id) VALUES (?, ?)',
+        [result.lastID, tId]
+      );
+    }
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in addTurnplan', err);
@@ -314,9 +409,11 @@ export const addTurnplan = async (req, res) => {
 
 export const editTurnplan = async (req, res) => {
   const { id } = req.params;
-  const { name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, is_special, remarks, weekdays, time_from, time_to } =
+    req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
+    const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     await db.run(
       `UPDATE turnplan
        SET name = ?, hall_id = ?, trainer_id = ?, is_special = ?, remarks = ?, weekdays = ?, time_from = ?, time_to = ?
@@ -324,7 +421,7 @@ export const editTurnplan = async (req, res) => {
       [
         name,
         hall_id,
-        trainer_id,
+        trainerIds[0] || null,
         is_special ? 1 : 0,
         remarks || '',
         JSON.stringify(days),
@@ -333,6 +430,13 @@ export const editTurnplan = async (req, res) => {
         id,
       ]
     );
+    await db.run('DELETE FROM turnplan_trainers WHERE turnplan_id = ?', [id]);
+    for (const tId of trainerIds) {
+      await db.run(
+        'INSERT OR IGNORE INTO turnplan_trainers (turnplan_id, trainer_id) VALUES (?, ?)',
+        [id, tId]
+      );
+    }
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in editTurnplan', err);
@@ -342,6 +446,7 @@ export const editTurnplan = async (req, res) => {
 
 export const deleteTurnplan = async (req, res) => {
   try {
+    await db.run('DELETE FROM turnplan_trainers WHERE turnplan_id = ?', [req.params.id]);
     await db.run('DELETE FROM turnplan WHERE id = ?', [req.params.id]);
     redirect(res, '/admin/turnplan');
   } catch (err) {
@@ -362,7 +467,8 @@ export const deleteCheckin = async (req, res) => {
 };
 
 export const addCheckin = async (req, res) => {
-  const { turnplan_id, hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
+  const { turnplan_id, hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } =
+    req.body;
   try {
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hall_id]);
     const trainer = await db.get('SELECT * FROM trainers WHERE id = ?', [main_trainer_id]);
@@ -396,8 +502,8 @@ export const addCheckin = async (req, res) => {
         start_time,
         end_time,
         durationMinutes,
-        trainer ? (parseFloat(trainer.main_wage_first_hour) || 0) : 0,
-        trainer ? (parseFloat(trainer.main_wage_additional) || 0) : 0,
+        trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0,
+        trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0,
         remarks || '',
       ]
     );
@@ -452,8 +558,8 @@ export const editCheckin = async (req, res) => {
         start_time,
         end_time,
         durationMinutes,
-        trainer ? (parseFloat(trainer.main_wage_first_hour) || 0) : 0,
-        trainer ? (parseFloat(trainer.main_wage_additional) || 0) : 0,
+        trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0,
+        trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0,
         remarks || '',
         id,
       ]
@@ -483,7 +589,8 @@ export const editCheckin = async (req, res) => {
 
 export const deleteFilteredCheckins = async (req, res) => {
   const { month, trainer, hall } = req.body;
-  let query = "DELETE FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
+  let query =
+    "DELETE FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
   const params = [month, month];
 
   if (trainer) {
@@ -496,7 +603,8 @@ export const deleteFilteredCheckins = async (req, res) => {
   }
 
   try {
-    let subQuery = "SELECT id FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
+    let subQuery =
+      "SELECT id FROM checkins WHERE (strftime('%Y-%m', date) = ? OR strftime('%Y-%m', start_timestamp) = ?)";
     const subParams = [month, month];
     if (trainer) {
       subQuery += ` AND (main_trainer_id = ? OR id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
@@ -587,7 +695,8 @@ const getTrainerExportData = async (selectedMonth, filterTrainerId = null, filte
 export const exportAll = async (req, res) => {
   const { month, trainer, hall } = req.query;
   const now = new Date();
-  const selectedMonth = month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const selectedMonth =
+    month || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   try {
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainer, hall);
@@ -610,7 +719,10 @@ export const exportTrainer = async (req, res) => {
   const { trainerId, pin, month } = req.body;
 
   try {
-    const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [trainerId, pin]);
+    const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [
+      trainerId,
+      pin,
+    ]);
     if (!trainer) return res.status(401).send(req.__('ERROR_INVALID_PIN'));
 
     let selectedMonth = month;

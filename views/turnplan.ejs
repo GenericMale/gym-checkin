@@ -1,287 +1,524 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
-<head>
+  <head>
     <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_TURNPLAN')}` }) %>
-</head>
-<body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
-
+  </head>
+  <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
     <%- include('partials/nav') %>
 
     <main class="container mx-auto p-6 space-y-6">
-        <!-- Page Header -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
-                    <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-                    <%= __('ADMIN_TURNPLAN') %>
-                </h2>
-                <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_TURNPLAN_SUBTITLE') %></p>
-            </div>
-            <button onclick="openModal('addTurnplanModal')" class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0">
-                <span>+</span> <%= __('ADMIN_ADD_TURNPLAN') %>
+      <!-- Page Header -->
+      <section
+        class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div>
+          <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
+            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+            <%= __('ADMIN_TURNPLAN') %>
+          </h2>
+          <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_TURNPLAN_SUBTITLE') %></p>
+        </div>
+        <button
+          onclick="openModal('addTurnplanModal')"
+          class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0"
+        >
+          <span>+</span>
+          <%= __('ADMIN_ADD_TURNPLAN') %>
+        </button>
+      </section>
+
+      <!-- Grace Period Settings Section -->
+      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+        <form
+          method="POST"
+          action="<%= url('/admin/update-settings') %>"
+          class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div>
+            <h3 class="font-bold text-gray-800 text-sm"><%= __('ADMIN_GRACE_PERIOD') %></h3>
+            <p class="text-xs text-gray-400 mt-0.5"><%= __('ADMIN_GRACE_PERIOD_DESC') %></p>
+          </div>
+          <div class="flex items-center gap-3 shrink-0">
+            <input
+              type="number"
+              name="grace_period_minutes"
+              value="<%= settings.grace_period_minutes || 30 %>"
+              class="w-24 bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-bold text-center outline-none focus:ring-2 ring-primary transition text-gray-800"
+              required
+            />
+            <button
+              type="submit"
+              class="bg-gray-800 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
+            >
+              <%= __('ADMIN_SAVE') %>
             </button>
-        </section>
+          </div>
+        </form>
+      </section>
 
-        <!-- Grace Period Settings Section -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <form method="POST" action="<%= url('/admin/update-settings') %>" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h3 class="font-bold text-gray-800 text-sm"><%= __('ADMIN_GRACE_PERIOD') %></h3>
-                    <p class="text-xs text-gray-400 mt-0.5"><%= __('ADMIN_GRACE_PERIOD_DESC') %></p>
+      <!-- Turnplan Grid Section -->
+      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+        <% const weekdaysOrder = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; const
+        normalizedTurnplan = turnplan.map(item => { let days = []; try { days =
+        JSON.parse(item.weekdays); } catch(_e) { days = item.weekdays ? item.weekdays.split(',') :
+        []; } return { ...item, days }; }); %>
+        <% if (turnplan.length === 0) { %>
+        <div class="text-center text-gray-400 py-12 text-sm italic">
+          <%= __('ADMIN_NO_TURNPLAN') %>
+        </div>
+        <% } else { %>
+        <% weekdaysOrder.forEach(day => { const dayCourses = normalizedTurnplan.filter(item =>
+        item.days.includes(day)); if (dayCourses.length === 0) return; %>
+        <div class="pt-8 mb-8 first:pt-0 last:mb-0">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+            <h3 class="font-brand-serif text-xl text-gray-800"><%= __('WEEKDAYS.' + day) %></h3>
+            <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full"
+              ><%= dayCourses.length %>
+              <%= __('ADMIN_UNITS') %></span
+            >
+            <div class="flex-1 h-px bg-gray-200"></div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
+            <% dayCourses.forEach(item => { %>
+            <div
+              class="edit-turnplan-card bg-gray-50 hover:bg-white rounded-xl p-3 border border-gray-100 hover:border-gray-200 transition cursor-pointer group"
+            >
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0 space-y-1">
+                  <h3 class="font-bold text-gray-800 text-sm leading-snug truncate">
+                    <%= item.name %>
+                  </h3>
+                  <p class="text-[11px] text-gray-500 font-medium truncate">
+                    <span class="font-mono text-gray-700 font-semibold"
+                      ><%= item.time_from %>
+                      -
+                      <%= item.time_to %></span
+                    >
+                    <% if (item.trainer_names) { %>
+                    ·
+                    <%= item.trainer_names %><% } %>
+                  </p>
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span
+                      class="bg-primary/10 text-primary text-[9px] font-bold px-2 py-0.5 rounded-full"
+                      ><%= item.hall_name %></span
+                    >
+                    <% if (item.is_special) { %>
+                    <span
+                      class="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200"
+                      ><%= __('ADMIN_SPECIAL_COURSE') %></span
+                    >
+                    <% } %>
+                    <% if (item.remarks) { %>
+                    <span
+                      class="italic text-gray-400 text-[10px] truncate"
+                      title="<%= item.remarks %>"
+                      >—
+                      <%= item.remarks %></span
+                    >
+                    <% } %>
+                  </div>
                 </div>
-                <div class="flex items-center gap-3 shrink-0">
-                    <input type="number" name="grace_period_minutes" value="<%= settings.grace_period_minutes || 30 %>" class="w-24 bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-bold text-center outline-none focus:ring-2 ring-primary transition text-gray-800" required>
-                    <button type="submit" class="bg-gray-800 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer">
-                        <%= __('ADMIN_SAVE') %>
-                    </button>
-                </div>
-            </form>
-        </section>
-
-        <!-- Turnplan Grid Section -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <% turnplan.forEach(item => {
-                    let days = [];
-                    try { days = JSON.parse(item.weekdays); } catch(_e) { days = item.weekdays ? item.weekdays.split(',') : []; }
-                %>
-                    <div class="bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex flex-col justify-between gap-3 group">
-                        <div class="space-y-2">
-                            <div class="flex items-start justify-between gap-2">
-                                <h3 class="font-bold text-gray-800 text-base leading-snug"><%= item.name %></h3>
-                                <button class="edit-turnplan-btn text-gray-400 hover:text-primary transition p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer shrink-0"
-                                        data-id="<%= item.id %>"
-                                        data-name="<%= item.name %>"
-                                        data-hall="<%= item.hall_id %>"
-                                        data-trainer="<%= item.trainer_id %>"
-                                        data-special="<%= item.is_special %>"
-                                        data-remarks="<%= item.remarks || '' %>"
-                                        data-weekdays='<%= JSON.stringify(days) %>'
-                                        data-from="<%= item.time_from %>"
-                                        data-to="<%= item.time_to %>">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                </button>
-                            </div>
-
-                            <div class="flex items-center gap-1.5 flex-wrap">
-                                <span class="bg-primary/10 text-primary text-[10px] font-bold px-2.5 py-0.5 rounded-full"><%= item.hall_name %></span>
-                                <% if (item.is_special) { %>
-                                    <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full border border-amber-200"><%= __('ADMIN_SPECIAL_COURSE') %></span>
-                                <% } %>
-                            </div>
-
-                            <div class="text-xs text-gray-600 font-medium space-y-1 pt-1">
-                                <p><span class="font-bold text-gray-400 uppercase text-[10px]"><%= __('ADMIN_MAIN_TRAINER') %>:</span> <%= item.trainer_name || '-' %></p>
-                                <p><span class="font-bold text-gray-400 uppercase text-[10px]"><%= __('ADMIN_TIME_SHORT') %>:</span> <span class="font-mono text-gray-700 font-semibold"><%= days.join(', ') %> | <%= item.time_from %> - <%= item.time_to %></span></p>
-                                <% if (item.remarks) { %>
-                                    <p class="italic text-gray-400 text-[11px]">— <%= item.remarks %></p>
-                                <% } %>
-                            </div>
-                        </div>
-                    </div>
-                <% }) %>
-                <% if (turnplan.length === 0) { %>
-                    <div class="col-span-full text-center text-gray-400 py-12 text-sm italic"><%= __('ADMIN_NO_TURNPLAN') %></div>
-                <% } %>
+                <button
+                  class="edit-turnplan-btn text-gray-400 hover:text-primary transition p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer shrink-0"
+                  data-id="<%= item.id %>"
+                  data-name="<%= item.name %>"
+                  data-hall="<%= item.hall_id %>"
+                  data-trainers="<%= JSON.stringify(turnplanTrainerMap[item.id] || []) %>"
+                  data-special="<%= item.is_special %>"
+                  data-remarks="<%= item.remarks || '' %>"
+                  data-weekdays="<%= JSON.stringify(item.days) %>"
+                  data-from="<%= item.time_from %>"
+                  data-to="<%= item.time_to %>"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
             </div>
-        </section>
+            <% }) %>
+          </div>
+        </div>
+        <% }) %>
+        <% } %>
+      </section>
     </main>
 
     <!-- Add Turnplan Modal -->
     <div id="addTurnplanModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_TURNPLAN') %></h2>
-                <button onclick="closeModal('addTurnplanModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form action="<%= url('/admin/add-turnplan') %>" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE_NAME') %></label>
-                    <input type="text" name="name" placeholder="<%= __('ADMIN_COURSE_NAME_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL') %></label>
-                        <select name="hall_id" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer" required>
-                            <% halls.forEach(h => { %>
-                                <option value="<%= h.id %>"><%= h.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
-                        <select name="trainer_id" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer" required>
-                            <% trainers.forEach(t => { %>
-                                <option value="<%= t.id %>"><%= t.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                    <input type="checkbox" id="addIsSpecial" name="is_special" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer">
-                    <label for="addIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"><%= __('ADMIN_SPECIAL_COURSE') %></label>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_REMARKS') %></label>
-                    <input type="text" name="remarks" placeholder="<%= __('ADMIN_REMARKS_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WEEKDAYS') %></label>
-                    <div class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium">
-                        <% const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; %>
-                        <% days.forEach(day => { %>
-                            <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
-                                <input type="checkbox" name="weekdays" value="<%= day %>" class="text-primary rounded cursor-pointer"> <%= day %>
-                            </label>
-                        <% }) %>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TIME_FROM') %></label>
-                        <input type="time" name="time_from" required value="08:30" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TIME_TO') %></label>
-                        <input type="time" name="time_to" required value="09:15" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm">
-                    <%= __('ADMIN_ADD') %>
-                </button>
-            </form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_TURNPLAN') %></h2>
+          <button
+            onclick="closeModal('addTurnplanModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form action="<%= url('/admin/add-turnplan') %>" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_COURSE_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              placeholder="<%= __('ADMIN_COURSE_NAME_PLACEHOLDER') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_HALL') %></label
+            >
+            <select
+              name="hall_id"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
+              required
+            >
+              <% halls.forEach(h => { %>
+              <option value="<%= h.id %>"><%= h.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_ALLOWED_TRAINERS') %></label
+            >
+            <div
+              class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto"
+            >
+              <% trainers.forEach(t => { %>
+              <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                <input
+                  type="checkbox"
+                  name="trainer_ids"
+                  value="<%= t.id %>"
+                  class="text-primary rounded cursor-pointer"
+                />
+                <%= t.name %>
+              </label>
+              <% }) %>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
+          </div>
+          <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <input
+              type="checkbox"
+              id="addIsSpecial"
+              name="is_special"
+              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+            />
+            <label for="addIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"
+              ><%= __('ADMIN_SPECIAL_COURSE') %></label
+            >
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_REMARKS') %></label
+            >
+            <input
+              type="text"
+              name="remarks"
+              placeholder="<%= __('ADMIN_REMARKS_PLACEHOLDER') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WEEKDAY') %></label
+            >
+            <div
+              class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium"
+            >
+              <% const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; %>
+              <% days.forEach(day => { %>
+              <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                <input
+                  type="radio"
+                  name="weekdays"
+                  value="<%= day %>"
+                  required
+                  class="text-primary cursor-pointer"
+                />
+                <%= day %>
+              </label>
+              <% }) %>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_TIME_FROM') %></label
+              >
+              <input
+                type="time"
+                name="time_from"
+                required
+                value="08:30"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_TIME_TO') %></label
+              >
+              <input
+                type="time"
+                name="time_to"
+                required
+                value="09:15"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
+          >
+            <%= __('ADMIN_ADD') %>
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- Edit Turnplan Modal -->
     <div id="editTurnplanModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_TURNPLAN') %></h2>
-                <button onclick="closeModal('editTurnplanModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form id="editTurnplanForm" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE_NAME') %></label>
-                    <input type="text" name="name" id="editTurnplanName" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL') %></label>
-                        <select name="hall_id" id="editTurnplanHall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer" required>
-                            <% halls.forEach(h => { %>
-                                <option value="<%= h.id %>"><%= h.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
-                        <select name="trainer_id" id="editTurnplanTrainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer" required>
-                            <% trainers.forEach(t => { %>
-                                <option value="<%= t.id %>"><%= t.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                    <input type="checkbox" id="editIsSpecial" name="is_special" class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer">
-                    <label for="editIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"><%= __('ADMIN_SPECIAL_COURSE') %></label>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_REMARKS') %></label>
-                    <input type="text" name="remarks" id="editTurnplanRemarks" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WEEKDAYS') %></label>
-                    <div class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium">
-                        <% const daysList = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; %>
-                        <% daysList.forEach(day => { %>
-                            <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
-                                <input type="checkbox" name="weekdays" value="<%= day %>" class="text-primary rounded turnplan-day-checkbox cursor-pointer"> <%= day %>
-                            </label>
-                        <% }) %>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TIME_FROM') %></label>
-                        <input type="time" name="time_from" id="editTurnplanTimeFrom" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TIME_TO') %></label>
-                        <input type="time" name="time_to" id="editTurnplanTimeTo" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-2">
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
-                        <%= __('ADMIN_SAVE') %>
-                    </button>
-                    <button type="button" id="deleteTurnplanBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm">
-                        <%= __('ADMIN_DELETE') %>
-                    </button>
-                </div>
-            </form>
-            <form id="deleteTurnplanForm" method="POST" class="hidden"></form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_TURNPLAN') %></h2>
+          <button
+            onclick="closeModal('editTurnplanModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form id="editTurnplanForm" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_COURSE_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              id="editTurnplanName"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_HALL') %></label
+            >
+            <select
+              name="hall_id"
+              id="editTurnplanHall"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
+              required
+            >
+              <% halls.forEach(h => { %>
+              <option value="<%= h.id %>"><%= h.name %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_ALLOWED_TRAINERS') %></label
+            >
+            <div
+              class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto"
+            >
+              <% trainers.forEach(t => { %>
+              <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                <input
+                  type="checkbox"
+                  name="trainer_ids"
+                  value="<%= t.id %>"
+                  class="text-primary rounded turnplan-trainer-cb cursor-pointer"
+                />
+                <%= t.name %>
+              </label>
+              <% }) %>
+            </div>
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
+          </div>
+          <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <input
+              type="checkbox"
+              id="editIsSpecial"
+              name="is_special"
+              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+            />
+            <label for="editIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"
+              ><%= __('ADMIN_SPECIAL_COURSE') %></label
+            >
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_REMARKS') %></label
+            >
+            <input
+              type="text"
+              name="remarks"
+              id="editTurnplanRemarks"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WEEKDAY') %></label
+            >
+            <div
+              class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium"
+            >
+              <% const daysList = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; %>
+              <% daysList.forEach(day => { %>
+              <label class="flex items-center gap-1.5 cursor-pointer text-gray-700">
+                <input
+                  type="radio"
+                  name="weekdays"
+                  value="<%= day %>"
+                  required
+                  class="text-primary turnplan-day-radio cursor-pointer"
+                />
+                <%= day %>
+              </label>
+              <% }) %>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_TIME_FROM') %></label
+              >
+              <input
+                type="time"
+                name="time_from"
+                id="editTurnplanTimeFrom"
+                required
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_TIME_TO') %></label
+              >
+              <input
+                type="time"
+                name="time_to"
+                id="editTurnplanTimeTo"
+                required
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button
+              type="submit"
+              class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_SAVE') %>
+            </button>
+            <button
+              type="button"
+              id="deleteTurnplanBtn"
+              class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_DELETE') %>
+            </button>
+          </div>
+        </form>
+        <form id="deleteTurnplanForm" method="POST" class="hidden"></form>
+      </div>
     </div>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
+      function openModal(id) {
+          document.getElementById(id).classList.remove('hidden');
+      }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+      function closeModal(id) {
+          document.getElementById(id).classList.add('hidden');
+      }
 
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal(modal.id);
-            });
-        });
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+          modal.addEventListener('click', (e) => {
+              if (e.target === modal) closeModal(modal.id);
+          });
+      });
 
-        document.querySelectorAll('.edit-turnplan-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                const name = btn.getAttribute('data-name');
-                const hallId = btn.getAttribute('data-hall');
-                const trainerId = btn.getAttribute('data-trainer');
-                const isSpecial = btn.getAttribute('data-special') === '1';
-                const remarks = btn.getAttribute('data-remarks');
-                const weekdaysJson = btn.getAttribute('data-weekdays');
-                const timeFrom = btn.getAttribute('data-from');
-                const timeTo = btn.getAttribute('data-to');
+      document.querySelectorAll('.edit-turnplan-card').forEach(card => {
+          card.addEventListener('click', () => {
+              const btn = card.querySelector('.edit-turnplan-btn') || card;
+              const id = btn.getAttribute('data-id');
+              const name = btn.getAttribute('data-name');
+              const hallId = btn.getAttribute('data-hall');
+              const trainerIdsJson = btn.getAttribute('data-trainers');
+              const isSpecial = btn.getAttribute('data-special') === '1';
+              const remarks = btn.getAttribute('data-remarks');
+              const weekdaysJson = btn.getAttribute('data-weekdays');
+              const timeFrom = btn.getAttribute('data-from');
+              const timeTo = btn.getAttribute('data-to');
 
-                document.getElementById('editTurnplanName').value = name;
-                document.getElementById('editTurnplanHall').value = hallId;
-                document.getElementById('editTurnplanTrainer').value = trainerId;
-                document.getElementById('editIsSpecial').checked = isSpecial;
-                document.getElementById('editTurnplanRemarks').value = remarks || '';
-                document.getElementById('editTurnplanTimeFrom').value = timeFrom;
-                document.getElementById('editTurnplanTimeTo').value = timeTo;
+              document.getElementById('editTurnplanName').value = name;
+              document.getElementById('editTurnplanHall').value = hallId;
+              document.getElementById('editIsSpecial').checked = isSpecial;
+              document.getElementById('editTurnplanRemarks').value = remarks || '';
+              document.getElementById('editTurnplanTimeFrom').value = timeFrom;
+              document.getElementById('editTurnplanTimeTo').value = timeTo;
 
-                document.getElementById('editTurnplanForm').action = `<%= url('/admin/edit-turnplan/') %>${id}`;
-                document.getElementById('deleteTurnplanForm').action = `<%= url('/admin/delete-turnplan/') %>${id}`;
+              document.getElementById('editTurnplanForm').action = `<%= url('/admin/edit-turnplan/') %>${id}`;
+              document.getElementById('deleteTurnplanForm').action = `<%= url('/admin/delete-turnplan/') %>${id}`;
 
-                let days = [];
-                try { days = JSON.parse(weekdaysJson); } catch(_e) { days = []; }
-                document.querySelectorAll('.turnplan-day-checkbox').forEach(cb => {
-                    cb.checked = days.includes(cb.value);
-                });
+              let days = [];
+              try { days = JSON.parse(weekdaysJson); } catch(_e) { days = []; }
+              document.querySelectorAll('.turnplan-day-radio').forEach(cb => {
+                  cb.checked = days.includes(cb.value);
+              });
 
-                document.getElementById('deleteTurnplanBtn').onclick = () => {
-                    if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
-                        document.getElementById('deleteTurnplanForm').submit();
-                    }
-                };
-                openModal('editTurnplanModal');
-            });
-        });
+              let trainerIds = [];
+              try { trainerIds = JSON.parse(trainerIdsJson); } catch(_e) { trainerIds = []; }
+              document.querySelectorAll('.turnplan-trainer-cb').forEach(cb => {
+                  cb.checked = trainerIds.includes(parseInt(cb.value, 10));
+              });
+
+              document.getElementById('deleteTurnplanBtn').onclick = () => {
+                  if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                      document.getElementById('deleteTurnplanForm').submit();
+                  }
+              };
+              openModal('editTurnplanModal');
+          });
+      });
     </script>
-</body>
+  </body>
 </html>

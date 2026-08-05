@@ -9,8 +9,19 @@
     <link rel="stylesheet" href="<%= url('/static/style.css') %>" />
     <style>
       :root {
-        --color-primary: <%= branding.colors.primary %>;
-        --color-primary-hover: <%= branding.colors.primaryHover %>;
+        --color-primary: <!= branding.colors.primary !>;
+        --color-primary-hover: <!= branding.colors.primaryHover !>;
+      }
+      .course-card.selected,
+      .trainer-card.selected {
+        border-color: var(--color-primary) !important;
+        background-color: #fff !important;
+        box-shadow: 0 0 0 2px rgb(118 165 157 / 0.25);
+      }
+      .helper-chip.selected {
+        border-color: var(--color-primary) !important;
+        background-color: rgb(118 165 157 / 0.12) !important;
+        color: var(--color-primary);
       }
     </style>
   </head>
@@ -34,8 +45,18 @@
         <h1 class="text-2xl font-bold text-gray-800 pt-2"><%= __('CHECKIN_HEADER') %></h1>
         <p class="text-primary font-bold flex justify-center items-center gap-1.5 text-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            ></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            ></path>
           </svg>
           <%= hallName %>
         </p>
@@ -47,95 +68,201 @@
       <!-- Status message -->
       <div id="status" class="hidden p-4 rounded-xl text-center text-xs font-bold"></div>
 
-      <!-- Main Form -->
-      <div id="formContainer">
-        <form id="checkinForm" class="space-y-4">
-          <input type="hidden" id="hallId" value="<%= hallId %>" />
-
-          <!-- Course Selection -->
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_COURSE') %></label>
-            <% if (turnplanEntries.length > 0) { %>
-              <select
-                id="turnplanId"
-                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium text-gray-800 outline-none focus:ring-2 ring-primary transition cursor-pointer"
-              >
-                <% turnplanEntries.forEach(c => { %>
-                  <option value="<%= c.id %>" data-trainer="<%= c.trainer_id %>" <%= c.isActive ? 'selected' : '' %>>
-                    <%= c.isActive ? '⭐ ' : '' %><%= c.name %> (<%= c.time_from %> - <%= c.time_to %>)
-                  </option>
-                <% }) %>
-              </select>
-              <% if (activeCourse) { %>
-                <div class="text-[11px] text-primary font-semibold flex items-center gap-1.5 pt-1.5">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span><%= __('CHECKIN_ACTIVE_COURSE') %>: <strong><%= activeCourse.name %></strong> (<%= activeCourse.time_from %>-<%= activeCourse.time_to %>)</span>
-                </div>
-              <% } %>
-            <% } else { %>
-              <p class="text-xs text-gray-400 italic py-2"><%= __('ERROR_NO_COURSES') %></p>
-            <% } %>
-          </div>
-
-          <!-- Main Trainer Select -->
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_TRAINER') %></label>
-            <select
-              id="trainerId"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium text-gray-800 outline-none focus:ring-2 ring-primary transition cursor-pointer"
-              required
+      <!-- Flow -->
+      <div id="flow" class="space-y-5">
+        <!-- Step 1: Course selection -->
+        <div id="courseStep" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
+              ><%= __('CHECKIN_SELECT_COURSE') %></label
             >
-              <option value="" disabled selected><%= __('CHECKIN_SELECT_NAME') %></option>
-              <% trainers.forEach(t => { %>
-                <option value="<%= t.id %>" <%= activeCourse && activeCourse.trainer_id === t.id ? 'selected' : '' %>><%= t.name %></option>
-              <% }) %>
-            </select>
+            <button
+              onclick="location.reload()"
+              class="text-gray-300 hover:text-primary transition cursor-pointer"
+              title="Aktualisieren"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              </svg>
+            </button>
           </div>
 
-          <!-- Helper Trainers Multi-Select -->
+          <% if (courses.length === 0) { %>
+          <div class="text-center py-10">
+            <p class="text-sm text-gray-400 italic"><%= __('CHECKIN_NO_ACTIVE_COURSES') %></p>
+            <button
+              onclick="location.reload()"
+              class="mt-4 bg-gray-800 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer"
+            >
+              <%= __('CHECKIN_BACK_BTN') %>
+            </button>
+          </div>
+          <% } else { %>
+          <div id="courseList" class="space-y-2">
+            <% courses.forEach(c => { %>
+            <button
+              type="button"
+              class="course-card w-full text-left bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3 cursor-pointer"
+              data-id="<%= c.id %>"
+              data-name="<%= c.name %>"
+              data-from="<%= c.time_from %>"
+              data-to="<%= c.time_to %>"
+              data-allowed="<%= c.allowedTrainerIds.join(',') %>"
+              data-trainer-name="<%= c.trainerNames %>"
+            >
+              <div class="min-w-0">
+                <p class="font-bold text-gray-800 truncate"><%= c.name %></p>
+                <p class="text-xs text-gray-500 font-medium mt-0.5">
+                  <span class="font-mono text-gray-700"><%= c.time_from %> – <%= c.time_to %></span>
+                  <% if (c.trainerNames) { %>
+                  ·
+                  <%= c.trainerNames %><% } %>
+                </p>
+              </div>
+              <span
+                class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full <%= c.statusKey === 'running' ? 'bg-emerald-100 text-emerald-700' : c.statusKey === 'upcoming' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500' %>"
+              >
+                <% if (c.statusKey === 'running') { %><span
+                  class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"
+                ></span
+                ><% } %>
+                <%= c.statusLabel %>
+              </span>
+            </button>
+            <% }) %>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Step 2: Trainer identification -->
+        <div id="trainerStep" class="hidden space-y-4">
+          <button
+            id="backToCoursesFromTrainerBtn"
+            type="button"
+            class="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
+          >
+            <%= __('CHECKIN_BACK_COURSES') %>
+          </button>
           <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_SELECT_HELPERS') %></label>
-            <div class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-32 overflow-y-auto" id="helpersContainer">
-              <% trainers.forEach(t => { %>
-                <label class="flex items-center gap-1.5 cursor-pointer text-gray-700 helper-label" data-trainer-id="<%= t.id %>">
-                  <input type="checkbox" name="helperIds" value="<%= t.id %>" class="text-primary rounded cursor-pointer helper-checkbox"> <%= t.name %>
-                </label>
-              <% }) %>
-            </div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-2"
+              ><%= __('CHECKIN_WHO_ARE_YOU') %></label
+            >
+            <div id="trainerList" class="space-y-2"></div>
+            <p id="noTrainers" class="text-sm text-gray-400 italic hidden">
+              <%= __('CHECKIN_NO_TRAINERS_AVAILABLE') %>
+            </p>
           </div>
 
-          <!-- PIN Entry -->
           <div id="pinContainer">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('CHECKIN_PIN_LABEL') %></label>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('CHECKIN_PIN_LABEL') %></label
+            >
             <input
               type="password"
               id="pin"
               pattern="[0-9]*"
               inputmode="numeric"
+              maxlength="4"
+              autocomplete="off"
               placeholder="<%= __('CHECKIN_PIN_PLACEHOLDER') %>"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-center text-2xl tracking-widest font-bold text-gray-800 outline-none focus:ring-2 ring-primary transition"
-              required
             />
           </div>
 
+          <label
+            class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+          >
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked
+              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+            />
+            <span class="text-xs font-bold text-gray-700"><%= __('CHECKIN_REMEMBER_ME') %></span>
+          </label>
+
+          <button
+            id="trainerContinueBtn"
+            type="button"
+            disabled
+            class="w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider"
+          >
+            <%= __('CHECKIN_CONTINUE') %>
+          </button>
+        </div>
+
+        <!-- Step 3: Confirm -->
+        <div id="confirmStep" class="hidden space-y-4">
+          <button
+            id="backToCoursesBtn"
+            type="button"
+            class="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
+          >
+            <%= __('CHECKIN_CHANGE_COURSE') %>
+          </button>
+
+          <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4">
+            <p id="confirmCourseName" class="font-bold text-gray-800"></p>
+            <p id="confirmCourseMeta" class="text-xs text-gray-500 font-medium mt-0.5"></p>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-2"
+              ><%= __('CHECKIN_HELPERS_OPTIONAL') %></label
+            >
+            <div id="helperList" class="grid grid-cols-2 gap-2"></div>
+            <p id="noHelpers" class="text-xs text-gray-400 italic hidden">
+              <%= __('CHECKIN_NO_HELPERS') %>
+            </p>
+          </div>
+
+          <p class="text-xs text-gray-500 text-center">
+            <%= __('CHECKIN_LOGGED_IN_AS') %>
+            <strong id="confirmTrainerName" class="text-gray-800"></strong>
+            <button
+              id="changeTrainerBtn"
+              type="button"
+              class="text-primary font-bold underline cursor-pointer"
+            >
+              (<%= __('CHECKIN_CHANGE') %>)
+            </button>
+          </p>
+
           <button
             id="submitBtn"
-            type="submit"
+            type="button"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider mt-2"
           >
             <%= __('CHECKIN_SUBMIT_CONFIRM') %>
           </button>
-        </form>
+        </div>
       </div>
 
       <!-- Success message -->
-      <div id="successContainer" class="hidden flex-col items-center justify-center py-4 text-center">
-        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-md text-white">
+      <div
+        id="successContainer"
+        class="hidden flex-col items-center justify-center py-4 text-center"
+      >
+        <div
+          class="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-md text-white"
+        >
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="3"
+              d="M5 13l4 4L19 7"
+            ></path>
           </svg>
         </div>
-        <h2 id="successTitle" class="text-2xl font-bold text-gray-800 mb-2"><%= __('CHECKIN_SUCCESS_CONFIRMED') %></h2>
+        <h2 id="successTitle" class="text-2xl font-bold text-gray-800 mb-2">
+          <%= __('CHECKIN_SUCCESS_CONFIRMED') %>
+        </h2>
         <p id="successText" class="text-gray-600 text-sm font-medium leading-relaxed"></p>
 
         <button
@@ -145,57 +272,37 @@
           <%= __('CHECKIN_BACK_BTN') %>
         </button>
       </div>
-
-      <!-- Reports Section -->
-      <div id="reportsWrapper" class="pt-4 border-t border-gray-100">
-        <button
-          id="btnToggleReports"
-          class="text-[11px] text-gray-400 hover:text-primary flex items-center gap-1 mx-auto transition uppercase tracking-widest font-bold cursor-pointer"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-          </svg>
-          <%= __('CHECKIN_REPORTS_TOGGLE') %>
-        </button>
-        <div id="reportsSection" class="hidden mt-3 space-y-2">
-          <div class="grid grid-cols-2 gap-2">
-            <button
-              id="btnExportCurrent"
-              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold py-2.5 rounded-xl transition uppercase cursor-pointer"
-            >
-              <%= __('CHECKIN_THIS_MONTH') %>
-            </button>
-            <button
-              id="btnExportLast"
-              class="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold py-2.5 rounded-xl transition uppercase cursor-pointer"
-            >
-              <%= __('CHECKIN_LAST_MONTH') %>
-            </button>
-          </div>
-          <p class="text-[10px] text-gray-400 text-center">
-            <%= __('CHECKIN_EXPORT_DESC') %>
-          </p>
-        </div>
-      </div>
     </div>
 
     <script>
+      const HELPERS = <%- JSON.stringify(helpers).replace(/<\//g, '<\\/') %>;
+      const TRAINERS = <%- JSON.stringify(trainers).replace(/<\//g, '<\\/') %>;
+      const HALL_ID = '<%- hallId %>';
+
       const el = {
-        formContainer: document.getElementById('formContainer'),
-        successContainer: document.getElementById('successContainer'),
+        clock: document.getElementById('liveClock'),
         status: document.getElementById('status'),
-        turnplanSelect: document.getElementById('turnplanId'),
-        trainerSelect: document.getElementById('trainerId'),
-        submitBtn: document.getElementById('submitBtn'),
-        btnToggleReports: document.getElementById('btnToggleReports'),
-        btnExportCurrent: document.getElementById('btnExportCurrent'),
-        btnExportLast: document.getElementById('btnExportLast'),
-        reportsSection: document.getElementById('reportsSection'),
-        liveClock: document.getElementById('liveClock'),
-        successText: document.getElementById('successText'),
+        flow: document.getElementById('flow'),
+        courseStep: document.getElementById('courseStep'),
+        courseList: document.getElementById('courseList'),
+        trainerStep: document.getElementById('trainerStep'),
+        trainerList: document.getElementById('trainerList'),
+        noTrainers: document.getElementById('noTrainers'),
         pinInput: document.getElementById('pin'),
-        hallIdInput: document.getElementById('hallId'),
-        checkinForm: document.getElementById('checkinForm')
+        rememberMe: document.getElementById('rememberMe'),
+        trainerContinueBtn: document.getElementById('trainerContinueBtn'),
+        confirmStep: document.getElementById('confirmStep'),
+        confirmCourseName: document.getElementById('confirmCourseName'),
+        confirmCourseMeta: document.getElementById('confirmCourseMeta'),
+        confirmTrainerName: document.getElementById('confirmTrainerName'),
+        helperList: document.getElementById('helperList'),
+        noHelpers: document.getElementById('noHelpers'),
+        submitBtn: document.getElementById('submitBtn'),
+        backToCoursesBtn: document.getElementById('backToCoursesBtn'),
+        backToCoursesFromTrainerBtn: document.getElementById('backToCoursesFromTrainerBtn'),
+        changeTrainerBtn: document.getElementById('changeTrainerBtn'),
+        successContainer: document.getElementById('successContainer'),
+        successText: document.getElementById('successText')
       };
 
       const i18n = {
@@ -203,9 +310,24 @@
         locale: "<%= locale %>"
       };
 
+      const STORAGE = { id: 'gym_trainer_id', pin: 'gym_trainer_pin', name: 'gym_trainer_name' };
+
+      let selectedCourse = null;
+      let session = { trainerId: null, trainerName: null, pin: null };
+      const selectedHelpers = new Set();
+
+      const savedId = localStorage.getItem(STORAGE.id);
+      const savedPin = localStorage.getItem(STORAGE.pin);
+      const savedName = localStorage.getItem(STORAGE.name);
+      if (savedId && savedPin) {
+        session.trainerId = savedId;
+        session.trainerName = savedName || 'Trainer';
+        session.pin = savedPin;
+      }
+
       function updateClock() {
         const now = new Date();
-        el.liveClock.textContent = now.toLocaleTimeString(i18n.locale === 'de' ? 'de-AT' : 'en-US', {
+        el.clock.textContent = now.toLocaleTimeString(i18n.locale === 'de' ? 'de-AT' : 'en-US', {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',
@@ -214,110 +336,260 @@
       setInterval(updateClock, 1000);
       updateClock();
 
-      function updateHelperCheckboxes() {
-        const mainTrainerId = el.trainerSelect.value;
-        document.querySelectorAll('.helper-label').forEach(label => {
-          const tId = label.getAttribute('data-trainer-id');
-          if (tId === mainTrainerId) {
-            label.classList.add('hidden');
-            label.querySelector('input').checked = false;
-          } else {
-            label.classList.remove('hidden');
-          }
-        });
+      function showError(message) {
+        el.status.classList.remove('hidden');
+        el.status.className = 'p-3 rounded-xl text-center font-bold bg-red-50 text-red-600 border border-red-100 text-xs';
+        el.status.textContent = message;
       }
 
-      el.trainerSelect.addEventListener('change', updateHelperCheckboxes);
-
-      if (el.turnplanSelect) {
-        el.turnplanSelect.addEventListener('change', (e) => {
-          const selectedOpt = e.target.options[e.target.selectedIndex];
-          const defaultTrainer = selectedOpt.getAttribute('data-trainer');
-          if (defaultTrainer) {
-            el.trainerSelect.value = defaultTrainer;
-            updateHelperCheckboxes();
-          }
-        });
+      function hideStatus() {
+        el.status.classList.add('hidden');
       }
 
-      el.btnToggleReports.addEventListener('click', () => {
-        el.reportsSection.classList.toggle('hidden');
-      });
+      function showStep(step) {
+        el.courseStep.classList.add('hidden');
+        el.trainerStep.classList.add('hidden');
+        el.confirmStep.classList.add('hidden');
+        step.classList.remove('hidden');
+      }
 
-      el.btnExportCurrent.addEventListener('click', () => downloadReport('current'));
-      el.btnExportLast.addEventListener('click', () => downloadReport('last'));
+      function showCourseStep() {
+        hideStatus();
+        showStep(el.courseStep);
+      }
 
-      el.checkinForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        await performCheckin();
-      });
+      function setTrainerSelected(card, on) {
+        card.classList.toggle('selected', on);
+        const check = card.querySelector('.trainer-check');
+        if (check) {
+          check.classList.toggle('border-primary', on);
+          check.classList.toggle('bg-primary', on);
+          check.innerHTML = on ? '<svg class="w-3 h-3 text-white mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>' : '';
+        }
+      }
 
-      function downloadReport(month) {
-        const trainerId = el.trainerSelect.value || localStorage.getItem('gym_trainer_id');
-        const pin = el.pinInput.value || localStorage.getItem('gym_trainer_pin');
+      function renderTrainers(course, selectedTrainerId) {
+        el.trainerList.innerHTML = '';
+        const allowed = (course.allowedTrainerIds || []).map(String);
+        const eligible = TRAINERS.filter(t => allowed.includes(String(t.id)));
 
-        if (!trainerId || !pin) {
-          alert(i18n.alertMissingInfo);
+        if (eligible.length === 0) {
+          el.noTrainers.classList.remove('hidden');
+          session.trainerId = null;
+          return false;
+        }
+        el.noTrainers.classList.add('hidden');
+
+        eligible.forEach(t => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className =
+            'trainer-card w-full text-left bg-gray-50 hover:bg-white rounded-2xl px-4 py-3 border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3 cursor-pointer';
+          btn.setAttribute('data-id', String(t.id));
+          btn.setAttribute('data-name', t.name);
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'font-bold text-gray-800 text-sm';
+          nameSpan.textContent = t.name;
+          btn.appendChild(nameSpan);
+
+          const check = document.createElement('span');
+          check.className = 'trainer-check w-5 h-5 rounded-full border-2 border-gray-300 shrink-0 transition';
+          btn.appendChild(check);
+
+          btn.addEventListener('click', () => {
+            session.trainerId = String(t.id);
+            session.trainerName = t.name;
+            el.trainerList.querySelectorAll('.trainer-card').forEach(c => setTrainerSelected(c, c === btn));
+            el.pinInput.focus();
+            updateTrainerContinue();
+          });
+          el.trainerList.appendChild(btn);
+        });
+
+        const preselectId =
+          selectedTrainerId && eligible.some(t => String(t.id) === String(selectedTrainerId))
+            ? String(selectedTrainerId)
+            : String(eligible[0].id);
+        const preselectBtn = el.trainerList.querySelector(`.trainer-card[data-id="${preselectId}"]`);
+        if (preselectBtn) {
+          setTrainerSelected(preselectBtn, true);
+          session.trainerId = preselectId;
+          session.trainerName = preselectBtn.getAttribute('data-name');
+        }
+        return true;
+      }
+
+      function showTrainerStep(course, selectedTrainerId) {
+        hideStatus();
+        const rendered = renderTrainers(course, selectedTrainerId);
+        el.pinInput.value = '';
+        updateTrainerContinue();
+        showStep(el.trainerStep);
+        if (rendered && session.trainerId) el.pinInput.focus();
+      }
+
+      function showConfirmStep() {
+        hideStatus();
+        el.confirmCourseName.textContent = selectedCourse.name;
+        el.confirmCourseMeta.textContent = `${selectedCourse.timeFrom} – ${selectedCourse.timeTo}${selectedCourse.trainerName ? ' · ' + selectedCourse.trainerName : ''}`;
+        el.confirmTrainerName.textContent = session.trainerName;
+        renderHelpers();
+        showStep(el.confirmStep);
+      }
+
+      function updateTrainerContinue() {
+        const ready = session.trainerId && el.pinInput.value.length === 4;
+        el.trainerContinueBtn.disabled = !ready;
+        el.trainerContinueBtn.className = ready
+          ? 'w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider'
+          : 'w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider';
+      }
+
+      function setHelperChipSelected(chip, on) {
+        chip.classList.toggle('selected', on);
+        const check = chip.querySelector('.helper-check');
+        if (check) {
+          check.classList.toggle('border-primary', on);
+          check.classList.toggle('bg-primary', on);
+          check.innerHTML = on
+            ? '<svg class="w-3 h-3 text-white mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>'
+            : '';
+        }
+      }
+
+      function renderHelpers() {
+        selectedHelpers.clear();
+        el.helperList.innerHTML = '';
+        const available = HELPERS.filter(h => String(h.id) !== String(session.trainerId));
+        if (available.length === 0) {
+          el.noHelpers.classList.remove('hidden');
           return;
         }
+        el.noHelpers.classList.add('hidden');
+        available.forEach(h => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className =
+            'helper-chip flex items-center justify-between gap-2 w-full bg-gray-50 hover:bg-white rounded-xl px-3 py-2.5 border border-gray-200 text-xs font-bold text-gray-700 transition cursor-pointer';
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '<%= url("/api/export-trainer") %>';
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'truncate';
+          nameSpan.textContent = h.name;
+          chip.appendChild(nameSpan);
 
-        const fields = { trainerId, pin, month };
-        for (const [name, value] of Object.entries(fields)) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        }
+          const check = document.createElement('span');
+          check.className = 'helper-check w-5 h-5 rounded-full border-2 border-gray-300 shrink-0 transition';
+          chip.appendChild(check);
 
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
+          chip.addEventListener('click', () => {
+            const on = chip.classList.toggle('selected');
+            setHelperChipSelected(chip, on);
+            if (on) selectedHelpers.add(h.id);
+            else selectedHelpers.delete(h.id);
+          });
+          el.helperList.appendChild(chip);
+        });
       }
 
-      async function performCheckin() {
-        const turnplanId = el.turnplanSelect ? el.turnplanSelect.value : null;
-        const trainerId = el.trainerSelect.value;
-        const pin = el.pinInput.value;
-        const hallId = el.hallIdInput.value;
-        const helperIds = Array.from(document.querySelectorAll('.helper-checkbox:checked')).map(cb => cb.value);
+      function selectCourse(card) {
+        document.querySelectorAll('.course-card').forEach(c => c.classList.toggle('selected', c === card));
+        selectedCourse = {
+          id: card.getAttribute('data-id'),
+          name: card.getAttribute('data-name'),
+          timeFrom: card.getAttribute('data-from'),
+          timeTo: card.getAttribute('data-to'),
+          trainerName: card.getAttribute('data-trainer-name') || '',
+          allowedTrainerIds: card.getAttribute('data-allowed')
+            ? card.getAttribute('data-allowed').split(',').map(Number)
+            : [],
+        };
+        const savedOk =
+          session.trainerId &&
+          TRAINERS.some(t => String(t.id) === String(session.trainerId)) &&
+          selectedCourse.allowedTrainerIds.map(String).includes(String(session.trainerId));
+        if (savedOk) {
+          showConfirmStep();
+        } else {
+          showTrainerStep(selectedCourse);
+        }
+      }
 
+      document.querySelectorAll('.course-card').forEach(card => {
+        card.addEventListener('click', () => selectCourse(card));
+      });
+
+      el.pinInput.addEventListener('input', updateTrainerContinue);
+      el.pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (!el.trainerContinueBtn.disabled) el.trainerContinueBtn.click();
+        }
+      });
+
+      el.trainerContinueBtn.addEventListener('click', () => {
+        session.pin = el.pinInput.value;
+        if (el.rememberMe.checked) {
+          localStorage.setItem(STORAGE.id, session.trainerId);
+          localStorage.setItem(STORAGE.name, session.trainerName);
+          localStorage.setItem(STORAGE.pin, session.pin);
+        } else {
+          localStorage.removeItem(STORAGE.id);
+          localStorage.removeItem(STORAGE.name);
+          localStorage.removeItem(STORAGE.pin);
+        }
+        showConfirmStep();
+      });
+
+      el.changeTrainerBtn.addEventListener('click', () => {
+        session.trainerId = null;
+        session.pin = null;
+        showTrainerStep(selectedCourse);
+      });
+
+      el.backToCoursesBtn.addEventListener('click', showCourseStep);
+      el.backToCoursesFromTrainerBtn.addEventListener('click', showCourseStep);
+
+      el.submitBtn.addEventListener('click', async () => {
+        if (!selectedCourse || !session.trainerId || !session.pin) {
+          showError(i18n.alertMissingInfo);
+          return;
+        }
+        const body = {
+          turnplanId: selectedCourse.id,
+          trainerId: session.trainerId,
+          pin: session.pin,
+          helperIds: Array.from(selectedHelpers),
+          hallId: HALL_ID,
+        };
         try {
           const res = await fetch('<%= url("/api/checkin") %>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ turnplanId, trainerId, pin, helperIds, hallId }),
+            body: JSON.stringify(body),
           });
           const data = await res.json();
-
           if (res.ok) {
-            localStorage.setItem('gym_trainer_id', trainerId);
-            localStorage.setItem('gym_trainer_pin', pin);
-
-            el.formContainer.classList.add('hidden');
+            el.flow.classList.add('hidden');
             el.status.classList.add('hidden');
             el.successText.textContent = data.message;
             el.successContainer.classList.remove('hidden');
             el.successContainer.classList.add('flex');
           } else {
-            throw new Error(data.error);
+            if (res.status === 401 || res.status === 403) {
+              showTrainerStep(selectedCourse, session.trainerId);
+              showError(data.error);
+              el.pinInput.focus();
+            } else if (res.status === 409) {
+              showCourseStep();
+              showError(data.error);
+            } else {
+              showError(data.error || data.message);
+            }
           }
         } catch (err) {
-          el.status.classList.remove('hidden');
-          el.status.className = 'p-3 rounded-xl text-center font-bold bg-red-50 text-red-600 border border-red-100 text-xs';
-          el.status.textContent = err.message;
+          showError(err.message);
         }
-      }
-
-      window.addEventListener('load', () => {
-        updateHelperCheckboxes();
-        const savedId = localStorage.getItem('gym_trainer_id');
-        const savedPin = localStorage.getItem('gym_trainer_pin');
-        if (savedPin) el.pinInput.value = savedPin;
       });
     </script>
   </body>

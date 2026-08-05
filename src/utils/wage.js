@@ -2,7 +2,7 @@
  * Calculates tiered main wage and helper wage for a trainer on a specific date (YYYY-MM-DD).
  * The first 60 minutes of main training each day use main_wage_first_hour.
  * All minutes after the first 60 minutes on that day use main_wage_additional.
- * Helper wage uses a fixed helper_wage rate.
+ * Helper wage is paid per session (one helper_wage rate per session, independent of duration).
  */
 export const calculateTrainerDailyWage = (mainSessions = [], helperSessions = []) => {
   const sortedMain = [...mainSessions].sort((a, b) => {
@@ -17,8 +17,10 @@ export const calculateTrainerDailyWage = (mainSessions = [], helperSessions = []
 
   sortedMain.forEach((session) => {
     const duration = session.duration_minutes || 0;
-    const firstRate = typeof session.main_wage_first_hour === 'number' ? session.main_wage_first_hour : 0;
-    const addRate = typeof session.main_wage_additional === 'number' ? session.main_wage_additional : firstRate;
+    const firstRate =
+      typeof session.main_wage_first_hour === 'number' ? session.main_wage_first_hour : 0;
+    const addRate =
+      typeof session.main_wage_additional === 'number' ? session.main_wage_additional : firstRate;
 
     const prevMins = accumulatedMainMins;
     accumulatedMainMins += duration;
@@ -42,9 +44,8 @@ export const calculateTrainerDailyWage = (mainSessions = [], helperSessions = []
   const helperBreakdown = {};
 
   helperSessions.forEach((session) => {
-    const duration = session.duration_minutes || 0;
     const wage = typeof session.helper_wage === 'number' ? session.helper_wage : 0;
-    const sessionPay = (duration / 60) * wage;
+    const sessionPay = wage;
     totalHelperPay += sessionPay;
 
     helperBreakdown[session.id] = {

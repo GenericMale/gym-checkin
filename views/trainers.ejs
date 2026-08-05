@@ -1,242 +1,605 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
-<head>
+  <head>
     <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_TRAINERS')}` }) %>
-</head>
-<body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
-
+  </head>
+  <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
     <%- include('partials/nav') %>
 
     <main class="container mx-auto p-6 space-y-6">
-        <!-- Page Header -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-                <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
-                    <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-                    <%= __('ADMIN_TRAINERS') %>
-                </h2>
-                <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_TRAINERS_SUBTITLE') %></p>
-            </div>
-            <button onclick="openModal('addTrainerModal')" class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0">
-                <span>+</span> <%= __('ADMIN_ADD_TRAINER') %>
-            </button>
-        </section>
+      <!-- Page Header -->
+      <section
+        class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      >
+        <div>
+          <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
+            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
+            <%= __('ADMIN_TRAINERS') %>
+          </h2>
+          <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_TRAINERS_SUBTITLE') %></p>
+        </div>
+        <button
+          onclick="openModal('addTrainerModal')"
+          class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0"
+        >
+          <span>+</span>
+          <%= __('ADMIN_ADD_TRAINER') %>
+        </button>
+      </section>
 
-        <!-- Trainers List -->
-        <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <% trainers.forEach(trainer => { %>
-                    <div class="bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex items-center justify-between gap-4 group shadow-2xs">
-                        <div class="space-y-1">
-                            <h3 class="font-bold text-gray-800 text-base"><%= trainer.name %></h3>
-                            <div class="text-xs text-gray-500 font-medium space-y-1">
-                                <p class="font-mono text-gray-400">PIN: <%= trainer.pin %></p>
-                                <p class="text-gray-700 font-semibold pt-0.5">
-                                    <span><%= __('ADMIN_MAIN_SHORT') %>: <strong class="text-primary font-mono"><%= (trainer.main_wage_first_hour || 0).toFixed(2) %> €</strong> / <strong class="text-primary font-mono"><%= (trainer.main_wage_additional || 0).toFixed(2) %> €</strong></span>
-                                    <span class="text-gray-300 mx-1.5">•</span>
-                                    <span><%= __('ADMIN_HELPER_SHORT') %>: <strong class="text-gray-800 font-mono"><%= (trainer.helper_wage || 0).toFixed(2) %> €</strong></span>
-                                </p>
-                            </div>
-                        </div>
-                        <button class="edit-trainer-btn text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer shrink-0"
-                                data-id="<%= trainer.id %>"
-                                data-name="<%= trainer.name %>"
-                                data-pin="<%= trainer.pin %>"
-                                data-svn="<%= trainer.svn || '' %>"
-                                data-birth="<%= trainer.birth_date || '' %>"
-                                data-address="<%= trainer.address || '' %>"
-                                data-iban="<%= trainer.iban || '' %>"
-                                data-w1="<%= trainer.main_wage_first_hour || 0 %>"
-                                data-w2="<%= trainer.main_wage_additional || 0 %>"
-                                data-wh="<%= trainer.helper_wage || 0 %>">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                        </button>
-                    </div>
-                <% }) %>
-                <% if (trainers.length === 0) { %>
-                    <div class="col-span-full text-center text-gray-400 py-12 text-sm italic"><%= __('ADMIN_NO_TRAINERS') %></div>
+      <!-- Trainers List -->
+      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <% trainers.forEach(trainer => { %>
+          <div
+            class="edit-trainer-card bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex items-center justify-between gap-4 group shadow-2xs cursor-pointer"
+          >
+            <div class="space-y-1">
+              <h3 class="font-bold text-gray-800 text-base">
+                <%= trainer.name %> <% if (trainer.is_trainer) { %>
+                <span
+                  class="bg-primary/10 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full align-middle"
+                  ><%= __('ADMIN_ROLE_TRAINER') %></span
+                >
                 <% } %>
+                <% if (trainer.is_helper) { %>
+                <span
+                  class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full align-middle"
+                  ><%= __('ADMIN_ROLE_HELPER') %></span
+                >
+                <% } %>
+                <% if (!trainer.is_trainer && !trainer.is_helper) { %>
+                <span
+                  class="bg-gray-100 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded-full align-middle"
+                  ><%= __('ADMIN_TRAINER_DISABLED') %></span
+                >
+                <% } %>
+              </h3>
+              <div class="text-xs text-gray-500 font-medium space-y-1">
+                <p class="font-mono text-gray-400">PIN: <%= trainer.pin || '–' %></p>
+                <% const hasMainWage = (trainer.main_wage_first_hour > 0 ||
+                trainer.main_wage_additional > 0); const hasHelperWage = (trainer.helper_wage > 0);
+                %>
+                <% if (hasMainWage || hasHelperWage) { %>
+                <p class="text-gray-700 font-semibold pt-0.5">
+                  <% if (hasMainWage) { %>
+                  <span
+                    ><%= __('ADMIN_MAIN_SHORT') %>:
+                    <strong class="text-primary font-mono"
+                      ><%= (trainer.main_wage_first_hour || 0).toFixed(2) %>
+                      €</strong
+                    >
+                    /
+                    <strong class="text-primary font-mono"
+                      ><%= (trainer.main_wage_additional || 0).toFixed(2) %>
+                      €</strong
+                    ></span
+                  >
+                  <% } %>
+                  <% if (hasMainWage && hasHelperWage) { %>
+                  <span class="text-gray-300 mx-1.5">•</span>
+                  <% } %>
+                  <% if (hasHelperWage) { %>
+                  <span
+                    ><%= __('ADMIN_HELPER_SHORT') %>:
+                    <strong class="text-gray-800 font-mono"
+                      ><%= (trainer.helper_wage || 0).toFixed(2) %>
+                      €</strong
+                    ></span
+                  >
+                  <% } %>
+                </p>
+                <% } else { %>
+                <p class="text-gray-400 italic pt-0.5"><%= __('ADMIN_NO_WAGE') %></p>
+                <% } %>
+              </div>
             </div>
-        </section>
+            <button
+              class="edit-trainer-btn text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer shrink-0"
+              data-id="<%= trainer.id %>"
+              data-name="<%= trainer.name %>"
+              data-pin="<%= trainer.pin %>"
+              data-is-trainer="<%= trainer.is_trainer %>"
+              data-is-helper="<%= trainer.is_helper %>"
+              data-svn="<%= trainer.svn || '' %>"
+              data-birth="<%= trainer.birth_date || '' %>"
+              data-address="<%= trainer.address || '' %>"
+              data-iban="<%= trainer.iban || '' %>"
+              data-w1="<%= trainer.main_wage_first_hour || '' %>"
+              data-w2="<%= trainer.main_wage_additional || '' %>"
+              data-wh="<%= trainer.helper_wage || '' %>"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                ></path>
+              </svg>
+            </button>
+          </div>
+          <% }) %>
+          <% if (trainers.length === 0) { %>
+          <div class="col-span-full text-center text-gray-400 py-12 text-sm italic">
+            <%= __('ADMIN_NO_TRAINERS') %>
+          </div>
+          <% } %>
+        </div>
+      </section>
     </main>
 
     <!-- Add Trainer Modal -->
     <div id="addTrainerModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_TRAINER') %></h2>
-                <button onclick="closeModal('addTrainerModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form action="<%= url('/admin/add-trainer') %>" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_NAME') %></label>
-                    <input type="text" name="name" placeholder="<%= __('ADMIN_NAME') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_PIN') %></label>
-                    <input type="text" name="pin" placeholder="<%= __('ADMIN_PIN') %>" pattern="[0-9]{4}" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-
-                <div class="pt-3 mt-1 border-t border-gray-100">
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest"><%= __('ADMIN_SECTION_PERSONAL') %></h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_SVN') %></label>
-                        <input type="text" name="svn" placeholder="<%= __('ADMIN_SVN') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_BIRTH_DATE') %></label>
-                        <input type="date" name="birth_date" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_ADDRESS') %></label>
-                    <input type="text" name="address" placeholder="<%= __('ADMIN_ADDRESS') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_IBAN') %></label>
-                    <input type="text" name="iban" placeholder="<%= __('ADMIN_IBAN') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-
-                <div class="pt-3 mt-1 border-t border-gray-100">
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest"><%= __('ADMIN_SECTION_WAGES') %></h3>
-                </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label>
-                        <input type="number" step="0.01" name="main_wage_first_hour" placeholder="25.00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label>
-                        <input type="number" step="0.01" name="main_wage_additional" placeholder="20.00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_HELPER_SHORT') %></label>
-                        <input type="number" step="0.01" name="helper_wage" placeholder="10.00" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm">
-                    <%= __('ADMIN_ADD') %>
-                </button>
-            </form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_TRAINER') %></h2>
+          <button
+            onclick="closeModal('addTrainerModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form action="<%= url('/admin/add-trainer') %>" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              placeholder="<%= __('ADMIN_NAME') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_ROLES') %>
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label
+              class="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                id="addIsTrainer"
+                name="is_trainer"
+                class="w-4 h-4 mt-0.5 text-primary rounded focus:ring-primary cursor-pointer"
+              />
+              <span>
+                <span class="block text-xs font-bold text-gray-700"
+                  ><%= __('ADMIN_ROLE_TRAINER') %></span
+                >
+                <span class="block text-[10px] text-gray-400 mt-0.5"
+                  ><%= __('ADMIN_ROLE_TRAINER_DESC') %></span
+                >
+              </span>
+            </label>
+            <label
+              class="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                id="addIsHelper"
+                name="is_helper"
+                class="w-4 h-4 mt-0.5 text-primary rounded focus:ring-primary cursor-pointer"
+              />
+              <span>
+                <span class="block text-xs font-bold text-gray-700"
+                  ><%= __('ADMIN_ROLE_HELPER') %></span
+                >
+                <span class="block text-[10px] text-gray-400 mt-0.5"
+                  ><%= __('ADMIN_ROLE_HELPER_DESC') %></span
+                >
+              </span>
+            </label>
+          </div>
+
+          <div id="addPinContainer" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_PIN') %></label
+            >
+            <input
+              type="text"
+              name="pin"
+              id="addPin"
+              placeholder="<%= __('ADMIN_PIN') %>"
+              pattern="[0-9]{4}"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_PIN_HINT') %></p>
+          </div>
+
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_PERSONAL') %>
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_SVN') %></label
+              >
+              <input
+                type="text"
+                name="svn"
+                placeholder="<%= __('ADMIN_SVN') %>"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_BIRTH_DATE') %></label
+              >
+              <input
+                type="date"
+                name="birth_date"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_ADDRESS') %></label
+            >
+            <input
+              type="text"
+              name="address"
+              placeholder="<%= __('ADMIN_ADDRESS') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_IBAN') %></label
+            >
+            <input
+              type="text"
+              name="iban"
+              placeholder="<%= __('ADMIN_IBAN') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_WAGES') %>
+            </h3>
+          </div>
+          <div id="addMainWages" class="hidden">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_first_hour"
+                  placeholder="25.00"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_additional"
+                  placeholder="20.00"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+            </div>
+          </div>
+          <div id="addHelperWage" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
+            >
+            <input
+              type="number"
+              step="0.01"
+              name="helper_wage"
+              placeholder="10.00"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
+          >
+            <%= __('ADMIN_ADD') %>
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- Edit Trainer Modal -->
     <div id="editTrainerModal" class="modal-overlay hidden">
-        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
-            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_TRAINER') %></h2>
-                <button onclick="closeModal('editTrainerModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form id="editTrainerForm" method="POST" class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_NAME') %></label>
-                    <input type="text" name="name" id="editTrainerName" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_PIN') %></label>
-                    <input type="text" name="pin" id="editTrainerPin" pattern="[0-9]{4}" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                </div>
-
-                <div class="pt-3 mt-1 border-t border-gray-100">
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest"><%= __('ADMIN_SECTION_PERSONAL') %></h3>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_SVN') %></label>
-                        <input type="text" name="svn" id="editTrainerSvn" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_BIRTH_DATE') %></label>
-                        <input type="date" name="birth_date" id="editTrainerBirth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_ADDRESS') %></label>
-                    <input type="text" name="address" id="editTrainerAddress" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_IBAN') %></label>
-                    <input type="text" name="iban" id="editTrainerIban" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
-                </div>
-
-                <div class="pt-3 mt-1 border-t border-gray-100">
-                    <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest"><%= __('ADMIN_SECTION_WAGES') %></h3>
-                </div>
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label>
-                        <input type="number" step="0.01" name="main_wage_first_hour" id="editTrainerMainWageFirst" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label>
-                        <input type="number" step="0.01" name="main_wage_additional" id="editTrainerMainWageAdditional" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_WAGE_HELPER_SHORT') %></label>
-                        <input type="number" step="0.01" name="helper_wage" id="editTrainerHelperWage" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition" required>
-                    </div>
-                </div>
-                <div class="flex gap-2 mt-2">
-                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
-                        <%= __('ADMIN_SAVE') %>
-                    </button>
-                    <button type="button" id="deleteTrainerBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm">
-                        <%= __('ADMIN_DELETE') %>
-                    </button>
-                </div>
-            </form>
-            <form id="deleteTrainerForm" method="POST" class="hidden"></form>
+      <div
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
+      >
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_TRAINER') %></h2>
+          <button
+            onclick="closeModal('editTrainerModal')"
+            class="text-gray-400 hover:text-gray-600 cursor-pointer"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
         </div>
+        <form id="editTrainerForm" method="POST" class="p-6 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_NAME') %></label
+            >
+            <input
+              type="text"
+              name="name"
+              id="editTrainerName"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              required
+            />
+          </div>
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_ROLES') %>
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <label
+              class="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                id="editIsTrainer"
+                name="is_trainer"
+                class="w-4 h-4 mt-0.5 text-primary rounded focus:ring-primary cursor-pointer"
+              />
+              <span>
+                <span class="block text-xs font-bold text-gray-700"
+                  ><%= __('ADMIN_ROLE_TRAINER') %></span
+                >
+                <span class="block text-[10px] text-gray-400 mt-0.5"
+                  ><%= __('ADMIN_ROLE_TRAINER_DESC') %></span
+                >
+              </span>
+            </label>
+            <label
+              class="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                id="editIsHelper"
+                name="is_helper"
+                class="w-4 h-4 mt-0.5 text-primary rounded focus:ring-primary cursor-pointer"
+              />
+              <span>
+                <span class="block text-xs font-bold text-gray-700"
+                  ><%= __('ADMIN_ROLE_HELPER') %></span
+                >
+                <span class="block text-[10px] text-gray-400 mt-0.5"
+                  ><%= __('ADMIN_ROLE_HELPER_DESC') %></span
+                >
+              </span>
+            </label>
+          </div>
+
+          <div id="editPinContainer" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_PIN') %></label
+            >
+            <input
+              type="text"
+              name="pin"
+              id="editTrainerPin"
+              pattern="[0-9]{4}"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_PIN_HINT') %></p>
+          </div>
+
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_PERSONAL') %>
+            </h3>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_SVN') %></label
+              >
+              <input
+                type="text"
+                name="svn"
+                id="editTrainerSvn"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('ADMIN_BIRTH_DATE') %></label
+              >
+              <input
+                type="date"
+                name="birth_date"
+                id="editTrainerBirth"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_ADDRESS') %></label
+            >
+            <input
+              type="text"
+              name="address"
+              id="editTrainerAddress"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_IBAN') %></label
+            >
+            <input
+              type="text"
+              name="iban"
+              id="editTrainerIban"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+
+          <div class="pt-3 mt-1 border-t border-gray-100">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_WAGES') %>
+            </h3>
+          </div>
+          <div id="editMainWages" class="hidden">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_first_hour"
+                  id="editTrainerMainWageFirst"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_additional"
+                  id="editTrainerMainWageAdditional"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+            </div>
+          </div>
+          <div id="editHelperWage" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
+            >
+            <input
+              type="number"
+              step="0.01"
+              name="helper_wage"
+              id="editTrainerHelperWage"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button
+              type="submit"
+              class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_SAVE') %>
+            </button>
+            <button
+              type="button"
+              id="deleteTrainerBtn"
+              class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm"
+            >
+              <%= __('ADMIN_DELETE') %>
+            </button>
+          </div>
+        </form>
+        <form id="deleteTrainerForm" method="POST" class="hidden"></form>
+      </div>
     </div>
 
     <script>
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
+      function openModal(id) {
+          document.getElementById(id).classList.remove('hidden');
+      }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+      function closeModal(id) {
+          document.getElementById(id).classList.add('hidden');
+      }
 
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModal(modal.id);
-            });
-        });
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+          modal.addEventListener('click', (e) => {
+              if (e.target === modal) closeModal(modal.id);
+          });
+      });
 
-        document.querySelectorAll('.edit-trainer-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
+      function updateRoleFields(prefix) {
+          const isTrainer = document.getElementById(prefix + 'IsTrainer').checked;
+          const isHelper = document.getElementById(prefix + 'IsHelper').checked;
 
-                document.getElementById('editTrainerName').value = btn.getAttribute('data-name');
-                document.getElementById('editTrainerPin').value = btn.getAttribute('data-pin');
-                document.getElementById('editTrainerSvn').value = btn.getAttribute('data-svn') || '';
-                document.getElementById('editTrainerBirth').value = btn.getAttribute('data-birth') || '';
-                document.getElementById('editTrainerAddress').value = btn.getAttribute('data-address') || '';
-                document.getElementById('editTrainerIban').value = btn.getAttribute('data-iban') || '';
-                document.getElementById('editTrainerMainWageFirst').value = btn.getAttribute('data-w1');
-                document.getElementById('editTrainerMainWageAdditional').value = btn.getAttribute('data-w2');
-                document.getElementById('editTrainerHelperWage').value = btn.getAttribute('data-wh');
+          document.getElementById(prefix + 'PinContainer').classList.toggle('hidden', !isTrainer);
+          document.getElementById(prefix + 'MainWages').classList.toggle('hidden', !isTrainer);
+          document.getElementById(prefix + 'HelperWage').classList.toggle('hidden', !isHelper);
 
-                document.getElementById('editTrainerForm').action = `<%= url('/admin/edit-trainer/') %>${id}`;
-                document.getElementById('deleteTrainerForm').action = `<%= url('/admin/delete-trainer/') %>${id}`;
+          const pinInput = document.getElementById(prefix + 'Pin');
+          if (pinInput) pinInput.required = isTrainer;
+      }
 
-                document.getElementById('deleteTrainerBtn').onclick = () => {
-                    if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
-                        document.getElementById('deleteTrainerForm').submit();
-                    }
-                };
-                openModal('editTrainerModal');
-            });
-        });
+      document.getElementById('addIsTrainer').addEventListener('change', () => updateRoleFields('add'));
+      document.getElementById('addIsHelper').addEventListener('change', () => updateRoleFields('add'));
+      document.getElementById('editIsTrainer').addEventListener('change', () => updateRoleFields('edit'));
+      document.getElementById('editIsHelper').addEventListener('change', () => updateRoleFields('edit'));
+
+      document.querySelectorAll('.edit-trainer-card').forEach(card => {
+          card.addEventListener('click', () => {
+              const btn = card.querySelector('.edit-trainer-btn') || card;
+              const id = btn.getAttribute('data-id');
+
+              document.getElementById('editTrainerName').value = btn.getAttribute('data-name');
+              document.getElementById('editTrainerPin').value = btn.getAttribute('data-pin') || '';
+              document.getElementById('editTrainerSvn').value = btn.getAttribute('data-svn') || '';
+              document.getElementById('editTrainerBirth').value = btn.getAttribute('data-birth') || '';
+              document.getElementById('editTrainerAddress').value = btn.getAttribute('data-address') || '';
+              document.getElementById('editTrainerIban').value = btn.getAttribute('data-iban') || '';
+              document.getElementById('editTrainerMainWageFirst').value = btn.getAttribute('data-w1');
+              document.getElementById('editTrainerMainWageAdditional').value = btn.getAttribute('data-w2');
+              document.getElementById('editTrainerHelperWage').value = btn.getAttribute('data-wh');
+              document.getElementById('editIsTrainer').checked = btn.getAttribute('data-is-trainer') === '1';
+              document.getElementById('editIsHelper').checked = btn.getAttribute('data-is-helper') === '1';
+
+              updateRoleFields('edit');
+
+              document.getElementById('editTrainerForm').action = `<%= url('/admin/edit-trainer/') %>${id}`;
+              document.getElementById('deleteTrainerForm').action = `<%= url('/admin/delete-trainer/') %>${id}`;
+
+              document.getElementById('deleteTrainerBtn').onclick = () => {
+                  if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                      document.getElementById('deleteTrainerForm').submit();
+                  }
+              };
+              openModal('editTrainerModal');
+          });
+      });
     </script>
-</body>
+  </body>
 </html>
