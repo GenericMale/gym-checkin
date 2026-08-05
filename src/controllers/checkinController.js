@@ -124,7 +124,7 @@ export const postCheckin = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.__('MESSAGE_SESSION_CONFIRMED', trainer.name, course ? course.name : 'Einheit'),
+      message: req.__('MESSAGE_SESSION_CONFIRMED', trainer.name, course ? course.name : req.__('DEFAULT_UNIT_NAME')),
     });
   } catch (err) {
     logger.error('Datenbankfehler in postCheckin', err);

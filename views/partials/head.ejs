@@ -1,0 +1,40 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %></title>
+<link rel="stylesheet" href="<%= url('/static/style.css') %>">
+<style>
+    :root {
+        --color-primary: <%= branding.colors.primary %>;
+        --color-primary-hover: <%= branding.colors.primaryHover %>;
+    }
+    @media print {
+        @page {
+            size: A5 landscape;
+            margin: 0;
+        }
+        body * { visibility: hidden; }
+        .print-area, .print-area * { visibility: visible; }
+        .print-area {
+            position: absolute;
+            left: 0; top: 0;
+            width: 210mm; height: 148mm;
+            padding: 10mm;
+            display: flex; flex-direction: column;
+            background: white;
+            box-sizing: border-box;
+        }
+        .no-print { display: none !important; }
+    }
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 60;
+        display: flex; align-items: center; justify-content: center;
+        padding: 1rem;
+    }
+    .modal-overlay.hidden {
+        display: none;
+    }
+</style>

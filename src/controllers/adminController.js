@@ -82,7 +82,7 @@ export const getProtocol = async (req, res) => {
   try {
     let query = `
       SELECT c.*,
-             COALESCE(tp.name, c.remarks, 'Einheit') as course_name,
+             COALESCE(tp.name, c.remarks, ?) as course_name,
              COALESCE(h.name, ?) as hall_name,
              COALESCE(mt.name, ?) as main_trainer_name,
              COALESCE(mt.main_wage, 0) as main_wage
@@ -92,7 +92,7 @@ export const getProtocol = async (req, res) => {
       LEFT JOIN trainers mt ON c.main_trainer_id = mt.id
       WHERE (strftime('%Y-%m', c.date) = ? OR strftime('%Y-%m', c.start_timestamp) = ?)
     `;
-    const params = [req.__('ERROR_DELETED'), req.__('ERROR_DELETED'), selectedMonth, selectedMonth];
+    const params = [req.__('DEFAULT_UNIT_NAME'), req.__('ERROR_DELETED'), req.__('ERROR_DELETED'), selectedMonth, selectedMonth];
 
     if (trainer) {
       query += ` AND (c.main_trainer_id = ? OR c.id IN (SELECT checkin_id FROM checkin_helpers WHERE trainer_id = ?))`;
@@ -475,7 +475,7 @@ export const exportAll = async (req, res) => {
   try {
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainer, hall);
     if (Object.keys(rowsByTrainer).length === 0) {
-      return res.status(404).send('Keine Daten für Export vorhanden');
+      return res.status(404).send(req.__('ERROR_NO_EXPORT_DATA'));
     }
 
     const { buffer, filename, contentType } = await generateExport(rowsByTrainer, selectedMonth);
