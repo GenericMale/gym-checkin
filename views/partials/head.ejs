@@ -31,8 +31,23 @@
         background-color: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         z-index: 60;
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
         padding: 1rem;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .modal-overlay > * {
+        margin: auto;
+    }
+    .modal-overlay > div {
+        max-height: calc(100vh - 2rem);
+        display: flex;
+        flex-direction: column;
+    }
+    .modal-overlay > div > form {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
     }
     .modal-overlay.hidden {
         display: none;
