@@ -88,6 +88,7 @@
   "ADMIN_TABLE_DURATION": "Dauer",
   "ADMIN_TABLE_MAIN_COMP": "Trainer-Entschädigung",
   "ADMIN_TABLE_HELPER_COMP": "Helfer-Entschädigung",
+  "ADMIN_COMPENSATION": "Entschädigung",
   "ADMIN_TABLE_NO_ENTRIES": "Keine Einträge für diesen Zeitraum gefunden.",
   "CHECKIN_TITLE": "Trainingsbestätigung",
   "CHECKIN_HEADER": "Trainingsbestätigung",

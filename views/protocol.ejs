@@ -86,7 +86,7 @@
             let totalPay = 0;
             logs.forEach(log => {
                 totalMins += (log.duration_minutes || 0);
-                totalPay += (log.totalPay || 0);
+                totalPay += (filters.trainer ? (log.filteredTrainerPay || 0) : (log.totalPay || 0));
             });
         %>
 
@@ -116,8 +116,12 @@
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINERS') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
-                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_MAIN_COMP') %></th>
-                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_HELPER_COMP') %></th>
+                            <% if (filters.trainer) { %>
+                                <th class="px-6 py-4 text-right"><%= __('ADMIN_COMPENSATION') %></th>
+                            <% } else { %>
+                                <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_MAIN_COMP') %></th>
+                                <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_HELPER_COMP') %></th>
+                            <% } %>
                             <th class="px-6 py-4"></th>
                         </tr>
                     </thead>
@@ -162,12 +166,18 @@
                                         <%= log.duration_minutes %> Min.
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right font-mono font-bold text-primary">
-                                    <%= (log.mainPay || 0).toFixed(2) %> €
-                                </td>
-                                <td class="px-6 py-4 text-right font-mono font-bold text-gray-500">
-                                    <%= (log.helperPay || 0).toFixed(2) %> €
-                                </td>
+                                <% if (filters.trainer) { %>
+                                    <td class="px-6 py-4 text-right font-mono font-bold text-primary">
+                                        <%= (log.filteredTrainerPay || 0).toFixed(2) %> €
+                                    </td>
+                                <% } else { %>
+                                    <td class="px-6 py-4 text-right font-mono font-bold text-primary">
+                                        <%= (log.mainPay || 0).toFixed(2) %> €
+                                    </td>
+                                    <td class="px-6 py-4 text-right font-mono font-bold text-gray-500">
+                                        <%= (log.helperPay || 0).toFixed(2) %> €
+                                    </td>
+                                <% } %>
                                 <td class="px-6 py-4 text-right">
                                     <button class="text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
@@ -176,7 +186,7 @@
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="8" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
+                            <tr><td colspan="<%= filters.trainer ? 6 : 8 %>" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>

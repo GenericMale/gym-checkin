@@ -193,11 +193,31 @@ export const getProtocol = async (req, res) => {
       });
     });
 
+    const selectedTrainerId = trainer ? parseInt(trainer, 10) : null;
+
     const logs = checkinRows.map((c) => {
       const helpers = helpersByCheckin[c.id] || [];
       const mainPay = typeof sessionMainPayMap[c.id] === 'number' ? sessionMainPayMap[c.id] : 0;
       const helperPay = helpers.reduce((sum, h) => sum + (h.helper_wage || 0), 0);
       const totalPay = mainPay + helperPay;
+
+      let filteredRole = null;
+      let filteredTrainerPay = 0;
+      let filteredTrainerName = '';
+      if (selectedTrainerId) {
+        if (c.main_trainer_id === selectedTrainerId) {
+          filteredRole = 'main';
+          filteredTrainerPay = mainPay;
+          filteredTrainerName = c.main_trainer_name;
+        } else {
+          const helper = helpers.find((h) => parseInt(h.trainer_id, 10) === selectedTrainerId);
+          if (helper) {
+            filteredRole = 'helper';
+            filteredTrainerPay = helper.helper_wage || 0;
+            filteredTrainerName = helper.name;
+          }
+        }
+      }
 
       return {
         ...c,
@@ -205,6 +225,9 @@ export const getProtocol = async (req, res) => {
         mainPay,
         helperPay,
         totalPay,
+        filteredRole,
+        filteredTrainerPay,
+        filteredTrainerName,
       };
     });
 
