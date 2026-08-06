@@ -70,6 +70,16 @@ function euroToWords(amount) {
 }
 
 /**
+ * Converts an ISO birth date (YYYY-MM-DD) into DDMMYY (e.g. 1990-05-03 -> 030590).
+ */
+function formatBirthDate(value) {
+  if (!value) return '';
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(value);
+  return `${m[3]}${m[2]}${m[1].slice(2)}`;
+}
+
+/**
  * Generiert die PRAE-Daten für einen Trainer für einen bestimmten Monat.
  */
 export const preparePraeData = (trainer, rows, selectedMonth) => {
@@ -81,7 +91,7 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
   const data = {
     trainerName: trainer.name,
     svn: trainer.svn || '',
-    birthDate: trainer.birth_date,
+    birthDate: formatBirthDate(trainer.birth_date),
     address: trainer.address || '',
     iban: trainer.iban || '',
     generationDate: generationDate,
