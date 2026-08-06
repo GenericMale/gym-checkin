@@ -41,7 +41,7 @@ export const postLogin = (req, res) => {
     req.session.loggedIn = true;
     redirect(res, '/admin/turnplan');
   } else {
-    res.render('login', { error: req.__('ERROR_INVALID_PASSWORD') });
+    res.render('login', { error: req.__('errors.invalidPassword') });
   }
 };
 
@@ -90,7 +90,7 @@ export const getTurnplan = async (req, res) => {
     });
   } catch (err) {
     logger.error('Datenbankfehler in getTurnplan', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -102,7 +102,7 @@ export const getTrainers = async (req, res) => {
     res.render('trainers', { trainers, activeTab: 'trainers' });
   } catch (err) {
     logger.error('Datenbankfehler in getTrainers', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -117,7 +117,7 @@ export const getHalls = async (req, res) => {
     res.render('halls', { halls, activeTab: 'halls' });
   } catch (err) {
     logger.error('Datenbankfehler in getHalls', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -142,9 +142,9 @@ export const getProtocol = async (req, res) => {
       WHERE strftime('%Y-%m', c.date) = ?
     `;
     const params = [
-      req.__('DEFAULT_UNIT_NAME'),
-      req.__('ERROR_DELETED'),
-      req.__('ERROR_DELETED'),
+      req.__('common.unit'),
+      req.__('errors.deleted'),
+      req.__('errors.deleted'),
       selectedMonth,
     ];
 
@@ -262,7 +262,7 @@ export const getProtocol = async (req, res) => {
     });
   } catch (err) {
     logger.error('Datenbankfehler in getProtocol', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -276,7 +276,7 @@ export const updateSettings = async (req, res) => {
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in updateSettings', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -286,7 +286,7 @@ export const addHall = async (req, res) => {
     redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in addHall', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -298,7 +298,7 @@ export const editHall = async (req, res) => {
     redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in editHall', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -309,7 +309,7 @@ export const deleteHall = async (req, res) => {
     redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in deleteHall', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -350,7 +350,7 @@ export const addTrainer = async (req, res) => {
     redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in addTrainer', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -396,7 +396,7 @@ export const editTrainer = async (req, res) => {
     redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in editTrainer', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -406,7 +406,7 @@ export const deleteTrainer = async (req, res) => {
     redirect(res, '/admin/trainers');
   } catch (err) {
     logger.error('Datenbankfehler in deleteTrainer', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -437,7 +437,7 @@ export const addTurnplan = async (req, res) => {
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in addTurnplan', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -472,7 +472,7 @@ export const editTurnplan = async (req, res) => {
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in editTurnplan', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -483,7 +483,7 @@ export const deleteTurnplan = async (req, res) => {
     redirect(res, '/admin/turnplan');
   } catch (err) {
     logger.error('Datenbankfehler in deleteTurnplan', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -494,7 +494,7 @@ export const deleteCheckin = async (req, res) => {
     res.status(200).send('OK');
   } catch (err) {
     logger.error('Datenbankfehler in deleteCheckin', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -521,7 +521,7 @@ export const addCheckin = async (req, res) => {
       const course = await db.get('SELECT * FROM turnplan WHERE id = ?', [turnplan_id]);
       if (course && !courseName) courseName = course.name;
     }
-    if (!courseName) courseName = remarks || req.__('DEFAULT_UNIT_NAME');
+    if (!courseName) courseName = remarks || req.__('common.unit');
 
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
@@ -578,7 +578,7 @@ export const addCheckin = async (req, res) => {
     redirect(res, '/admin/protocol');
   } catch (err) {
     logger.error('Datenbankfehler in addCheckin', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -603,7 +603,7 @@ export const editCheckin = async (req, res) => {
 
     let courseName = course_name ? String(course_name).trim() : '';
     if (!courseName && existing) courseName = existing.course_name;
-    if (!courseName) courseName = req.__('DEFAULT_UNIT_NAME');
+    if (!courseName) courseName = req.__('common.unit');
 
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
@@ -657,7 +657,7 @@ export const editCheckin = async (req, res) => {
     redirect(res, '/admin/protocol');
   } catch (err) {
     logger.error('Datenbankfehler in editCheckin', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -695,7 +695,7 @@ export const deleteFilteredCheckins = async (req, res) => {
     res.status(200).send('OK');
   } catch (err) {
     logger.error('Datenbankfehler in deleteFilteredCheckins', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -771,7 +771,7 @@ export const exportAll = async (req, res) => {
   try {
     const rowsByTrainer = await getTrainerExportData(selectedMonth, trainer, hall);
     if (Object.keys(rowsByTrainer).length === 0) {
-      return res.status(404).send(req.__('ERROR_NO_EXPORT_DATA'));
+      return res.status(404).send(req.__('errors.noExportData'));
     }
 
     const { buffer, filename, contentType } = await generateExport(rowsByTrainer, selectedMonth);
@@ -781,7 +781,7 @@ export const exportAll = async (req, res) => {
     res.send(buffer);
   } catch (err) {
     logger.error('Exportfehler in exportAll', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -793,7 +793,7 @@ export const exportTrainer = async (req, res) => {
       trainerId,
       pin,
     ]);
-    if (!trainer) return res.status(401).send(req.__('ERROR_INVALID_PIN'));
+    if (!trainer) return res.status(401).send(req.__('errors.invalidPin'));
 
     let selectedMonth = month;
     if (month === 'current') {
@@ -815,6 +815,6 @@ export const exportTrainer = async (req, res) => {
     res.send(buffer);
   } catch (err) {
     logger.error('Exportfehler in exportTrainer', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };

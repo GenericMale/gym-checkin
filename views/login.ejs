@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= branding.shortName %> - <%= __('ADMIN_LOGIN_TITLE') %></title>
+    <title><%= branding.shortName %> - <%= __('login.title') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>" />
     <style>
       :root {
@@ -32,7 +32,7 @@
 
       <form method="POST" action="<%= url('/admin/login') %>" class="space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('LOGIN_PASSWORD_PLACEHOLDER') %></label>
+          <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('login.passwordPlaceholder') %></label>
           <input
             type="password"
             name="password"
@@ -44,7 +44,7 @@
         <button
           class="w-full bg-primary hover:bg-primary-hover text-white font-bold p-3.5 rounded-xl transition shadow-md cursor-pointer text-xs uppercase tracking-wider"
         >
-          <%= __('LOGIN_BTN') %>
+          <%= __('login.btn') %>
         </button>
       </form>
     </div>

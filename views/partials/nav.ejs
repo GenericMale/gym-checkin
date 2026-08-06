@@ -10,21 +10,21 @@
                 </div>
             </div>
             <a href="<%= url('/admin/logout') %>" class="text-xs font-bold text-gray-500 hover:text-red-500 transition cursor-pointer flex items-center gap-1.5 bg-gray-50 hover:bg-red-50 px-3 py-2 rounded-xl border border-gray-200 hover:border-red-100">
-                <%= __('ADMIN_LOGOUT') %>
+                <%= __('common.logout') %>
             </a>
         </div>
         <div class="flex gap-2 font-medium text-sm border-t border-gray-100 pt-2 pb-0 overflow-x-auto">
             <a href="<%= url('/admin/turnplan') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'turnplan' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
-                <%= __('ADMIN_TAB_TURNPLAN') %>
+                📅 <%= __('course.title') %>
             </a>
             <a href="<%= url('/admin/trainers') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'trainers' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
-                <%= __('ADMIN_TAB_TRAINERS') %>
+                👟 <%= __('common.trainer') %>
             </a>
             <a href="<%= url('/admin/halls') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'halls' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
-                <%= __('ADMIN_TAB_HALLS') %>
+                🏢 <%= __('common.halls') %>
             </a>
             <a href="<%= url('/admin/protocol') %>" class="px-4 py-2.5 rounded-t-xl transition cursor-pointer whitespace-nowrap <%= activeTab === 'protocol' ? 'bg-primary/10 text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-gray-800' %>">
-                <%= __('ADMIN_TAB_PROTOCOL') %>
+                📋 <%= __('protocol.title') %>
             </a>
         </div>
     </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
   <head>
-    <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_TURNPLAN')}` }) %>
+    <%- include('partials/head', { title: `${branding.shortName} - ${__('course.title')}` }) %>
   </head>
   <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
@@ -15,16 +15,16 @@
         <div>
           <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
             <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-            <%= __('ADMIN_TURNPLAN') %>
+            <%= __('course.title') %>
           </h2>
-          <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_TURNPLAN_SUBTITLE') %></p>
+          <p class="text-xs text-gray-400 mt-1"><%= __('course.subtitle') %></p>
         </div>
         <button
           onclick="openModal('addTurnplanModal')"
           class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0"
         >
           <span>+</span>
-          <%= __('ADMIN_ADD_TURNPLAN') %>
+          <%= __('course.add') %>
         </button>
       </section>
 
@@ -36,8 +36,8 @@
           class="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
         >
           <div>
-            <h3 class="font-bold text-gray-800 text-sm"><%= __('ADMIN_GRACE_PERIOD') %></h3>
-            <p class="text-xs text-gray-400 mt-0.5"><%= __('ADMIN_GRACE_PERIOD_DESC') %></p>
+            <h3 class="font-bold text-gray-800 text-sm"><%= __('course.gracePeriod') %></h3>
+            <p class="text-xs text-gray-400 mt-0.5"><%= __('course.gracePeriodDesc') %></p>
           </div>
           <div class="flex items-center gap-3 shrink-0">
             <input
@@ -51,7 +51,7 @@
               type="submit"
               class="bg-gray-800 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
             >
-              <%= __('ADMIN_SAVE') %>
+              <%= __('common.save') %>
             </button>
           </div>
         </form>
@@ -65,7 +65,7 @@
         []; } return { ...item, days }; }); %>
         <% if (turnplan.length === 0) { %>
         <div class="text-center text-gray-400 py-12 text-sm italic">
-          <%= __('ADMIN_NO_TURNPLAN') %>
+          <%= __('course.noCourses') %>
         </div>
         <% } else { %>
         <% weekdaysOrder.forEach(day => { const dayCourses = normalizedTurnplan.filter(item =>
@@ -73,10 +73,10 @@
         <div class="pt-8 mb-8 first:pt-0 last:mb-0">
           <div class="flex items-center gap-3 mb-4">
             <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-            <h3 class="font-brand-serif text-xl text-gray-800"><%= __('WEEKDAYS.' + day) %></h3>
+            <h3 class="font-brand-serif text-xl text-gray-800"><%= __('weekdays.' + day) %></h3>
             <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full"
               ><%= dayCourses.length %>
-              <%= __('ADMIN_UNITS') %></span
+              <%= __('common.units') %></span
             >
             <div class="flex-1 h-px bg-gray-200"></div>
           </div>
@@ -151,7 +151,7 @@
         class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
       >
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_TURNPLAN') %></h2>
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('course.add') %></h2>
           <button
             onclick="closeModal('addTurnplanModal')"
             class="text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -169,19 +169,19 @@
         <form action="<%= url('/admin/add-turnplan') %>" method="POST" class="p-6 space-y-4">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_COURSE_NAME') %></label
+              ><%= __('course.name') %></label
             >
             <input
               type="text"
               name="name"
-              placeholder="<%= __('ADMIN_COURSE_NAME_PLACEHOLDER') %>"
+              placeholder="<%= __('course.namePlaceholder') %>"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
               required
             />
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_HALL') %></label
+              ><%= __('common.hall') %></label
             >
             <select
               name="hall_id"
@@ -195,7 +195,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_ALLOWED_TRAINERS') %></label
+              ><%= __('course.allowedTrainers') %></label
             >
             <div
               class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto"
@@ -212,22 +212,22 @@
               </label>
               <% }) %>
             </div>
-            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('course.allowedTrainersHint') %></p>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_REMARKS') %></label
+              ><%= __('course.remarks') %></label
             >
             <input
               type="text"
               name="remarks"
-              placeholder="<%= __('ADMIN_REMARKS_PLACEHOLDER') %>"
+              placeholder="<%= __('course.remarksPlaceholder') %>"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
             />
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_WEEKDAY') %></label
+              ><%= __('common.weekday') %></label
             >
             <div
               class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium"
@@ -250,7 +250,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                ><%= __('ADMIN_TIME_FROM') %></label
+                ><%= __('common.timeFrom') %></label
               >
               <input
                 type="time"
@@ -262,7 +262,7 @@
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                ><%= __('ADMIN_TIME_TO') %></label
+                ><%= __('common.timeTo') %></label
               >
               <input
                 type="time"
@@ -277,7 +277,7 @@
             type="submit"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
           >
-            <%= __('ADMIN_ADD') %>
+            <%= __('common.add') %>
           </button>
         </form>
       </div>
@@ -289,7 +289,7 @@
         class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100"
       >
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_TURNPLAN') %></h2>
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('course.edit') %></h2>
           <button
             onclick="closeModal('editTurnplanModal')"
             class="text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -307,7 +307,7 @@
         <form id="editTurnplanForm" method="POST" class="p-6 space-y-4">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_COURSE_NAME') %></label
+              ><%= __('course.name') %></label
             >
             <input
               type="text"
@@ -319,7 +319,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_HALL') %></label
+              ><%= __('common.hall') %></label
             >
             <select
               name="hall_id"
@@ -334,7 +334,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_ALLOWED_TRAINERS') %></label
+              ><%= __('course.allowedTrainers') %></label
             >
             <div
               class="grid grid-cols-2 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto"
@@ -351,11 +351,11 @@
               </label>
               <% }) %>
             </div>
-            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
+            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('course.allowedTrainersHint') %></p>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_REMARKS') %></label
+              ><%= __('course.remarks') %></label
             >
             <input
               type="text"
@@ -366,7 +366,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_WEEKDAY') %></label
+              ><%= __('common.weekday') %></label
             >
             <div
               class="grid grid-cols-4 gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium"
@@ -389,7 +389,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                ><%= __('ADMIN_TIME_FROM') %></label
+                ><%= __('common.timeFrom') %></label
               >
               <input
                 type="time"
@@ -401,7 +401,7 @@
             </div>
             <div>
               <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                ><%= __('ADMIN_TIME_TO') %></label
+                ><%= __('common.timeTo') %></label
               >
               <input
                 type="time"
@@ -417,14 +417,14 @@
               type="submit"
               class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm"
             >
-              <%= __('ADMIN_SAVE') %>
+              <%= __('common.save') %>
             </button>
             <button
               type="button"
               id="deleteTurnplanBtn"
               class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm"
             >
-              <%= __('ADMIN_DELETE') %>
+              <%= __('common.delete') %>
             </button>
           </div>
         </form>
@@ -481,7 +481,7 @@
               });
 
               document.getElementById('deleteTurnplanBtn').onclick = () => {
-                  if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                  if (confirm('<%= __('common.deleteConfirm') %>')) {
                       document.getElementById('deleteTurnplanForm').submit();
                   }
               };

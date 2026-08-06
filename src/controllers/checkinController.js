@@ -10,11 +10,11 @@ const timeToMinutes = (timeStr) => {
 
 export const getCheckinPage = async (req, res) => {
   const hallId = req.query.hall;
-  if (!hallId) return res.send(req.__('ERROR_INVALID_QR'));
+  if (!hallId) return res.send(req.__('errors.invalidQr'));
 
   try {
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hallId]);
-    if (!hall) return res.send(req.__('ERROR_HALL_NOT_FOUND'));
+    if (!hall) return res.send(req.__('errors.hallNotFound'));
 
     const turnplanEntries = await db.all(
       `SELECT tp.*,
@@ -70,10 +70,10 @@ export const getCheckinPage = async (req, res) => {
       if (currentMinutes < startMins) statusKey = 'upcoming';
       else if (currentMinutes > endMins) statusKey = 'ended';
 
-      let statusLabel = req.__('CHECKIN_STATUS_RUNNING');
+      let statusLabel = req.__('checkin.statusRunning');
       if (statusKey === 'upcoming')
-        statusLabel = req.__('CHECKIN_STATUS_UPCOMING', entry.time_from);
-      else if (statusKey === 'ended') statusLabel = req.__('CHECKIN_STATUS_ENDED', entry.time_to);
+        statusLabel = req.__('checkin.statusUpcoming', entry.time_from);
+      else if (statusKey === 'ended') statusLabel = req.__('checkin.statusEnded', entry.time_to);
 
       courses.push({
         ...entry,
@@ -103,7 +103,7 @@ export const getCheckinPage = async (req, res) => {
     });
   } catch (err) {
     logger.error('Datenbankfehler in getCheckinPage', err);
-    res.status(500).send(req.__('ERROR_DB'));
+    res.status(500).send(req.__('errors.db'));
   }
 };
 
@@ -115,9 +115,9 @@ export const postCheckin = async (req, res) => {
       trainerId,
       pin,
     ]);
-    if (!trainer) return res.status(401).json({ error: req.__('ERROR_INVALID_PIN_RETRY') });
+    if (!trainer) return res.status(401).json({ error: req.__('errors.invalidPinRetry') });
     if (!trainer.is_trainer || !trainer.pin || !trainer.pin.trim()) {
-      return res.status(403).json({ error: req.__('ERROR_TRAINER_DISABLED') });
+      return res.status(403).json({ error: req.__('errors.trainerDisabled') });
     }
 
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hallId]);
@@ -131,7 +131,7 @@ export const postCheckin = async (req, res) => {
         [turnplanId, trainerId]
       );
       if (!allowed) {
-        return res.status(403).json({ error: req.__('CHECKIN_TRAINER_NOT_ALLOWED') });
+        return res.status(403).json({ error: req.__('checkin.trainerNotAllowed') });
       }
     }
 
@@ -145,7 +145,7 @@ export const postCheckin = async (req, res) => {
         dateStr,
       ]);
       if (existing) {
-        return res.status(409).json({ error: req.__('CHECKIN_ALREADY_CONFIRMED') });
+        return res.status(409).json({ error: req.__('checkin.alreadyConfirmed') });
       }
     }
 
@@ -156,7 +156,7 @@ export const postCheckin = async (req, res) => {
     let eMins = timeToMinutes(endTime);
     if (eMins < sMins) eMins += 24 * 60;
     const durationMinutes = course ? eMins - sMins : 60;
-    const courseName = course ? course.name : req.__('DEFAULT_UNIT_NAME');
+    const courseName = course ? course.name : req.__('common.unit');
 
     let result;
     try {
@@ -185,7 +185,7 @@ export const postCheckin = async (req, res) => {
       );
     } catch (insertErr) {
       if (String(insertErr.message).includes('UNIQUE')) {
-        return res.status(409).json({ error: req.__('CHECKIN_ALREADY_CONFIRMED') });
+        return res.status(409).json({ error: req.__('checkin.alreadyConfirmed') });
       }
       throw insertErr;
     }
@@ -207,11 +207,11 @@ export const postCheckin = async (req, res) => {
 
     res.json({
       success: true,
-      message: req.__('MESSAGE_SESSION_CONFIRMED', trainer.name, courseName),
+      message: req.__('checkin.sessionConfirmed', trainer.name, courseName),
     });
   } catch (err) {
     logger.error('Datenbankfehler in postCheckin', err);
-    res.status(500).json({ error: req.__('ERROR_DB') });
+    res.status(500).json({ error: req.__('errors.db') });
   }
 };
 
@@ -247,6 +247,6 @@ export const getSessionStatus = async (req, res) => {
     res.json({ active: !!active, course: active || null });
   } catch (err) {
     logger.error('Datenbankfehler in getSessionStatus', err);
-    res.status(500).json({ error: req.__('ERROR_DB') });
+    res.status(500).json({ error: req.__('errors.db') });
   }
 };

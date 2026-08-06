@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
   <head>
-    <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_HALLS')}` }) %>
+    <%- include('partials/head', { title: `${branding.shortName} - ${__('common.halls')}` }) %>
   </head>
   <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
@@ -15,16 +15,16 @@
         <div>
           <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
             <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-            <%= __('ADMIN_HALLS') %>
+            <%= __('common.halls') %>
           </h2>
-          <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_HALLS_SUBTITLE') %></p>
+          <p class="text-xs text-gray-400 mt-1"><%= __('hall.subtitle') %></p>
         </div>
         <button
           onclick="openModal('addHallModal')"
           class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl transition shadow-md font-bold text-xs uppercase tracking-wider flex items-center gap-2 cursor-pointer shrink-0"
         >
           <span>+</span>
-          <%= __('ADMIN_ADD_HALL') %>
+          <%= __('hall.add') %>
         </button>
       </section>
 
@@ -50,7 +50,7 @@
                 class="print-btn text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer"
                 data-hall="<%= hall.name %>"
                 data-qr="<%= hall.qr %>"
-                title="<%= __('ADMIN_PRINT_QR') %>"
+                title="<%= __('hall.printQr') %>"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -78,7 +78,7 @@
           <% }) %>
           <% if (halls.length === 0) { %>
           <div class="col-span-full text-center text-gray-400 py-12 text-sm italic">
-            <%= __('ADMIN_NO_HALLS') %>
+            <%= __('hall.noHalls') %>
           </div>
           <% } %>
         </div>
@@ -91,7 +91,7 @@
         class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
       >
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_HALL') %></h2>
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('hall.add') %></h2>
           <button
             onclick="closeModal('addHallModal')"
             class="text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -109,12 +109,12 @@
         <form action="<%= url('/admin/add-hall') %>" method="POST" class="p-6 space-y-4">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_NAME') %></label
+              ><%= __('common.name') %></label
             >
             <input
               type="text"
               name="name"
-              placeholder="<%= __('ADMIN_ADD_HALL_PLACEHOLDER') %>"
+              placeholder="<%= __('hall.namePlaceholder') %>"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
               required
             />
@@ -123,7 +123,7 @@
             type="submit"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
           >
-            <%= __('ADMIN_ADD') %>
+            <%= __('common.add') %>
           </button>
         </form>
       </div>
@@ -135,7 +135,7 @@
         class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100"
       >
         <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_HALL') %></h2>
+          <h2 class="font-brand-serif text-xl text-gray-800"><%= __('hall.edit') %></h2>
           <button
             onclick="closeModal('editHallModal')"
             class="text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -153,7 +153,7 @@
         <form id="editHallForm" method="POST" class="p-6 space-y-4">
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_NAME') %></label
+              ><%= __('common.name') %></label
             >
             <input
               type="text"
@@ -168,14 +168,14 @@
               type="submit"
               class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm"
             >
-              <%= __('ADMIN_SAVE') %>
+              <%= __('common.save') %>
             </button>
             <button
               type="button"
               id="deleteHallBtn"
               class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm"
             >
-              <%= __('ADMIN_DELETE') %>
+              <%= __('common.delete') %>
             </button>
           </div>
         </form>
@@ -217,7 +217,7 @@
               </svg>
             </div>
             <p class="font-bold text-2xl text-gray-800 uppercase tracking-widest">
-              <%= __('ADMIN_PRINT_TAP_HERE') %>
+              <%= __('hall.printTapHere') %>
             </p>
           </div>
         </div>
@@ -251,7 +251,7 @@
           document.getElementById('editHallForm').action = `<%= url('/admin/edit-hall/') %>${id}`;
           document.getElementById('deleteHallForm').action = `<%= url('/admin/delete-hall/') %>${id}`;
           document.getElementById('deleteHallBtn').onclick = () => {
-              if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+              if (confirm('<%= __('common.deleteConfirm') %>')) {
                   document.getElementById('deleteHallForm').submit();
               }
           };

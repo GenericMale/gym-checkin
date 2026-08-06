@@ -82,7 +82,7 @@ app.use(BASE_PATH, checkinRoutes);
 // Error Handling Middleware
 app.use((err, req, res, _next) => {
   logger.error(err.stack);
-  res.status(500).send(req.__('ERROR_GENERIC'));
+  res.status(500).send(req.__('errors.generic'));
 });
 
 export default app;

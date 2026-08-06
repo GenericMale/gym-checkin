@@ -5,7 +5,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title><%= branding.shortName %> - <%= __('CHECKIN_TITLE') %></title>
+    <title><%= branding.shortName %> - <%= __('checkin.title') %></title>
     <link rel="stylesheet" href="<%= url('/static/style.css') %>" />
     <style>
       :root {
@@ -42,7 +42,7 @@
           <%= branding.description %>
         </p>
 
-        <h1 class="text-2xl font-bold text-gray-800 pt-2"><%= __('CHECKIN_HEADER') %></h1>
+        <h1 class="text-2xl font-bold text-gray-800 pt-2"><%= __('checkin.title') %></h1>
         <p class="text-primary font-bold flex justify-center items-center gap-1.5 text-sm">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -74,7 +74,7 @@
         <div id="courseStep" class="space-y-3">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
-              ><%= __('CHECKIN_SELECT_COURSE') %></label
+              ><%= __('checkin.selectCourse') %></label
             >
             <button
               onclick="location.reload()"
@@ -94,12 +94,12 @@
 
           <% if (courses.length === 0) { %>
           <div class="text-center py-10">
-            <p class="text-sm text-gray-400 italic"><%= __('CHECKIN_NO_ACTIVE_COURSES') %></p>
+            <p class="text-sm text-gray-400 italic"><%= __('checkin.noActiveCourses') %></p>
             <button
               onclick="location.reload()"
               class="mt-4 bg-gray-800 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer"
             >
-              <%= __('CHECKIN_BACK_BTN') %>
+              <%= __('checkin.backBtn') %>
             </button>
           </div>
           <% } else { %>
@@ -146,21 +146,21 @@
             type="button"
             class="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
           >
-            <%= __('CHECKIN_BACK_COURSES') %>
+            <%= __('checkin.backCourses') %>
           </button>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-2"
-              ><%= __('CHECKIN_WHO_ARE_YOU') %></label
+              ><%= __('checkin.whoAreYou') %></label
             >
             <div id="trainerList" class="space-y-2"></div>
             <p id="noTrainers" class="text-sm text-gray-400 italic hidden">
-              <%= __('CHECKIN_NO_TRAINERS_AVAILABLE') %>
+              <%= __('checkin.noTrainersAvailable') %>
             </p>
           </div>
 
           <div id="pinContainer">
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('CHECKIN_PIN_LABEL') %></label
+              ><%= __('checkin.pinLabel') %></label
             >
             <input
               type="password"
@@ -169,7 +169,7 @@
               inputmode="numeric"
               maxlength="4"
               autocomplete="off"
-              placeholder="<%= __('CHECKIN_PIN_PLACEHOLDER') %>"
+              placeholder="<%= __('checkin.pinPlaceholder') %>"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-center text-2xl tracking-widest font-bold text-gray-800 outline-none focus:ring-2 ring-primary transition"
             />
           </div>
@@ -183,7 +183,7 @@
               checked
               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
             />
-            <span class="text-xs font-bold text-gray-700"><%= __('CHECKIN_REMEMBER_ME') %></span>
+            <span class="text-xs font-bold text-gray-700"><%= __('checkin.rememberMe') %></span>
           </label>
 
           <button
@@ -192,7 +192,7 @@
             disabled
             class="w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider"
           >
-            <%= __('CHECKIN_CONTINUE') %>
+            <%= __('checkin.continue') %>
           </button>
         </div>
 
@@ -203,7 +203,7 @@
             type="button"
             class="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
           >
-            <%= __('CHECKIN_CHANGE_COURSE') %>
+            <%= __('checkin.changeCourse') %>
           </button>
 
           <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4">
@@ -213,23 +213,23 @@
 
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-2"
-              ><%= __('CHECKIN_HELPERS_OPTIONAL') %></label
+              ><%= __('checkin.helpersOptional') %></label
             >
             <div id="helperList" class="grid grid-cols-2 gap-2"></div>
             <p id="noHelpers" class="text-xs text-gray-400 italic hidden">
-              <%= __('CHECKIN_NO_HELPERS') %>
+              <%= __('checkin.noHelpers') %>
             </p>
           </div>
 
           <p class="text-xs text-gray-500 text-center">
-            <%= __('CHECKIN_LOGGED_IN_AS') %>
+            <%= __('checkin.loggedInAs') %>
             <strong id="confirmTrainerName" class="text-gray-800"></strong>
             <button
               id="changeTrainerBtn"
               type="button"
               class="text-primary font-bold underline cursor-pointer"
             >
-              (<%= __('CHECKIN_CHANGE') %>)
+              (<%= __('checkin.change') %>)
             </button>
           </p>
 
@@ -238,7 +238,7 @@
             type="button"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider mt-2"
           >
-            <%= __('CHECKIN_SUBMIT_CONFIRM') %>
+            <%= __('checkin.submitConfirm') %>
           </button>
         </div>
       </div>
@@ -261,7 +261,7 @@
           </svg>
         </div>
         <h2 id="successTitle" class="text-2xl font-bold text-gray-800 mb-2">
-          <%= __('CHECKIN_SUCCESS_CONFIRMED') %>
+          <%= __('checkin.successConfirmed') %>
         </h2>
         <p id="successText" class="text-gray-600 text-sm font-medium leading-relaxed"></p>
 
@@ -269,7 +269,7 @@
           onclick="location.reload()"
           class="mt-6 bg-gray-800 hover:bg-black text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
         >
-          <%= __('CHECKIN_BACK_BTN') %>
+          <%= __('checkin.backBtn') %>
         </button>
       </div>
     </div>
@@ -307,7 +307,7 @@
       };
 
       const i18n = {
-        alertMissingInfo: "<%= __('CHECKIN_ALERT_MISSING_INFO') %>",
+        alertMissingInfo: "<%= __('checkin.alertMissingInfo') %>",
         locale: "<%= locale %>"
       };
 

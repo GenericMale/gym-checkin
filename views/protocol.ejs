@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="<%= locale %>">
 <head>
-    <%- include('partials/head', { title: `${branding.shortName} - ${__('ADMIN_TAB_PROTOCOL')}` }) %>
+    <%- include('partials/head', { title: `${branding.shortName} - ${__('protocol.title')}` }) %>
 </head>
 <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
 
@@ -14,21 +14,21 @@
             <div>
                 <h2 class="font-brand-serif text-2xl flex items-center gap-3 text-gray-800">
                     <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-                    <%= __('ADMIN_PROTOCOL_TITLE') %>
+                    <%= __('protocol.title') %>
                 </h2>
-                <p class="text-xs text-gray-400 mt-1"><%= __('ADMIN_PROTOCOL_SUBTITLE') %></p>
+                <p class="text-xs text-gray-400 mt-1"><%= __('protocol.subtitle') %></p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
                 <button onclick="openModal('addCheckinModal')" class="bg-white hover:bg-gray-50 border border-gray-200 text-gray-700 px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-sm">
-                    <span>+</span> <%= __('ADMIN_ADD_CHECKIN') %>
+                    <span>+</span> <%= __('protocol.addCheckin') %>
                 </button>
                 <% if (logs.length > 0) { %>
                     <button id="deleteAllShown" class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2.5 rounded-2xl text-xs font-bold transition flex items-center gap-2 cursor-pointer">
-                        <%= __('ADMIN_DELETE_ALL_SHOWN') %>
+                        <%= __('protocol.deleteAllShown') %>
                     </button>
                 <% } %>
                 <a href="<%= url('/admin/export?month=' + filters.month + (filters.trainer ? '&trainer=' + filters.trainer : '') + (filters.hall ? '&hall=' + filters.hall : '')) %>" class="bg-primary hover:bg-primary-hover text-white px-4 py-2.5 rounded-2xl text-xs font-bold uppercase tracking-wider shadow-md transition flex items-center gap-2 cursor-pointer">
-                    <%= __('ADMIN_EXCEL_EXPORT') %>
+                    📊 <%= __('protocol.export') %>
                 </a>
             </div>
         </section>
@@ -42,7 +42,7 @@
                     const monthKeys = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
                 %>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_YEAR') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('protocol.year') %></label>
                     <select id="selectYear" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% for(let y = currentYear; y >= currentYear - 5; y--) { %>
                             <option value="<%= y %>" <%= fYear == y ? 'selected' : '' %>><%= y %></option>
@@ -50,34 +50,34 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MONTH') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('protocol.month') %></label>
                     <select id="selectMonth" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                         <% monthKeys.forEach((key) => { %>
-                            <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('MONTHS.' + key) %></option>
+                            <option value="<%= key %>" <%= fMonth == key ? 'selected' : '' %>><%= __('months.' + key) %></option>
                         <% } ) %>
                     </select>
                 </div>
                 <input type="hidden" name="month" id="hiddenMonth" value="<%= filters.month %>">
 
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_TRAINER_FILTER') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('protocol.trainerFilter') %></label>
                     <select name="trainer" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <option value=""><%= __('ADMIN_ALL') %></option>
+                        <option value=""><%= __('common.all') %></option>
                         <% trainers.forEach(t => { %>
                             <option value="<%= t.id %>" <%= filters.trainer == t.id ? 'selected' : '' %>><%= t.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.hall') %></label>
                     <select name="hall" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <option value=""><%= __('ADMIN_ALL') %></option>
+                        <option value=""><%= __('common.all') %></option>
                         <% halls.forEach(h => { %>
                             <option value="<%= h.id %>" <%= filters.hall == h.id ? 'selected' : '' %>><%= h.name %></option>
                         <% }) %>
                     </select>
                 </div>
-                <button type="submit" class="bg-gray-800 hover:bg-black text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition cursor-pointer"><%= __('ADMIN_FILTER_BTN') %></button>
+                <button type="submit" class="bg-gray-800 hover:bg-black text-white font-bold py-2.5 rounded-xl text-sm shadow-md transition cursor-pointer"><%= __('common.filter') %></button>
             </form>
         </section>
 
@@ -93,15 +93,15 @@
         <!-- Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_UNITS') %></p>
+                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('common.units') %></p>
                 <p class="text-3xl font-brand-serif text-gray-800"><%= logs.length %></p>
             </div>
             <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('ADMIN_TOTAL_TIME') %></p>
+                <p class="text-xs font-bold text-gray-400 uppercase mb-1"><%= __('protocol.totalTime') %></p>
                 <p class="text-3xl font-brand-serif text-gray-800"><%= Math.floor(totalMins / 60) %>h <%= totalMins % 60 %>m</p>
             </div>
             <div class="p-6 rounded-3xl border border-primary/20 shadow-sm bg-primary/5">
-                <p class="text-xs font-bold text-primary uppercase mb-1"><%= __('ADMIN_TOTAL_COMPENSATION') %></p>
+                <p class="text-xs font-bold text-primary uppercase mb-1"><%= __('protocol.totalCompensation') %></p>
                 <p class="text-3xl font-brand-serif text-primary"><%= totalPay.toFixed(2) %> €</p>
             </div>
         </div>
@@ -112,15 +112,15 @@
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 text-gray-400 uppercase text-[9px] tracking-widest font-bold">
                         <tr>
-                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINER_HALL') %></th>
-                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_TRAINERS') %></th>
-                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_DATE_TIME') %></th>
-                            <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
+                            <th class="px-6 py-4"><%= __('protocol.tableTrainerHall') %></th>
+                            <th class="px-6 py-4"><%= __('protocol.tableTrainers') %></th>
+                            <th class="px-6 py-4"><%= __('protocol.tableDateTime') %></th>
+                            <th class="px-6 py-4"><%= __('protocol.tableDuration') %></th>
                             <% if (filters.trainer) { %>
-                                <th class="px-6 py-4 text-right"><%= __('ADMIN_COMPENSATION') %></th>
+                                <th class="px-6 py-4 text-right"><%= __('common.compensation') %></th>
                             <% } else { %>
-                                <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_MAIN_COMP') %></th>
-                                <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_HELPER_COMP') %></th>
+                                <th class="px-6 py-4 text-right"><%= __('protocol.tableMainComp') %></th>
+                                <th class="px-6 py-4 text-right"><%= __('protocol.tableHelperComp') %></th>
                             <% } %>
                             <th class="px-6 py-4"></th>
                         </tr>
@@ -148,9 +148,9 @@
                                     <div class="text-[10px] text-primary uppercase font-bold"><%= log.hall_name %></div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="font-bold text-gray-700 text-xs"><%= __('ADMIN_MAIN_SHORT') %>: <%= log.main_trainer_name %></div>
+                                    <div class="font-bold text-gray-700 text-xs"><%= __('common.trainer') %>: <%= log.main_trainer_name %></div>
                                     <% if (helperNames) { %>
-                                        <div class="text-[10px] text-gray-500 italic"><%= __('ADMIN_HELPER_SHORT') %>: <%= helperNames %></div>
+                                        <div class="text-[10px] text-gray-500 italic"><%= __('common.helper') %>: <%= helperNames %></div>
                                     <% } %>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
@@ -186,7 +186,7 @@
                             </tr>
                         <% }) %>
                         <% if (logs.length === 0) { %>
-                            <tr><td colspan="<%= filters.trainer ? 6 : 8 %>" class="px-6 py-20 text-center text-gray-300 italic"><%= __('ADMIN_TABLE_NO_ENTRIES') %></td></tr>
+                            <tr><td colspan="<%= filters.trainer ? 6 : 8 %>" class="px-6 py-20 text-center text-gray-300 italic"><%= __('protocol.noEntries') %></td></tr>
                         <% } %>
                     </tbody>
                 </table>
@@ -198,28 +198,28 @@
     <div id="addCheckinModal" class="modal-overlay hidden">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_ADD_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('protocol.addCheckin') %></h2>
                 <button onclick="closeModal('addCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form action="<%= url('/admin/add-checkin') %>" method="POST" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.course') %></label>
                     <select id="addCheckinCourse" name="turnplan_id" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <option value=""><%= __('ADMIN_NO_COURSE') %></option>
+                        <option value=""><%= __('course.noCourse') %></option>
                         <% courses.forEach(c => { %>
                             <option value="<%= c.id %>" data-hall="<%= c.hall_id %>" data-trainer="<%= c.first_trainer_id || '' %>" data-from="<%= c.time_from %>" data-to="<%= c.time_to %>"><%= c.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE_NAME') %></label>
-                    <input type="text" id="addCheckinCourseName" name="course_name" placeholder="<%= __('ADMIN_COURSE_NAME_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('course.name') %></label>
+                    <input type="text" id="addCheckinCourseName" name="course_name" placeholder="<%= __('course.namePlaceholder') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('course.mainTrainer') %></label>
                         <select name="main_trainer_id" id="addCheckinMainTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                             <% mainTrainers.forEach(t => { %>
                                 <option value="<%= t.id %>"><%= t.name %></option>
@@ -227,7 +227,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.hall') %></label>
                         <select name="hall_id" id="addCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                             <% halls.forEach(h => { %>
                                 <option value="<%= h.id %>"><%= h.name %></option>
@@ -236,20 +236,20 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase"><%= __('ADMIN_SECTION_WAGES') %></p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase"><%= __('common.compensation') %></p>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('trainer.wageFirstHour') %></label>
                             <input type="number" step="0.01" min="0" name="main_wage_first_hour" id="addWage1" class="w-full bg-white border border-gray-200 p-2 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('trainer.wageAdditional') %></label>
                             <input type="number" step="0.01" min="0" name="main_wage_additional" id="addWage2" class="w-full bg-white border border-gray-200 p-2 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                         </div>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('protocol.helperTrainers') %></label>
                     <div class="space-y-1.5 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto">
                         <% helperTrainers.forEach(t => { %>
                             <div class="flex items-center gap-2">
@@ -261,21 +261,21 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_DATE') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.date') %></label>
                     <input type="date" name="date" id="addCheckinDate" required value="<%= today %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_START_TIME') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.startTime') %></label>
                         <input type="time" name="start_time" id="addCheckinStart" required value="08:30" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_END_TIME') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.endTime') %></label>
                         <input type="time" name="end_time" id="addCheckinEnd" required value="09:15" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                 </div>
                 <button type="submit" class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm">
-                    <%= __('ADMIN_ADD_CHECKIN_SUBMIT') %>
+                    <%= __('protocol.addCheckinSubmit') %>
                 </button>
             </form>
         </div>
@@ -285,28 +285,28 @@
     <div id="editCheckinModal" class="modal-overlay hidden">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('ADMIN_EDIT_CHECKIN') %></h2>
+                <h2 class="font-brand-serif text-xl text-gray-800"><%= __('protocol.editCheckin') %></h2>
                 <button onclick="closeModal('editCheckinModal')" class="text-gray-400 hover:text-gray-600 cursor-pointer">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form id="editCheckinForm" method="POST" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.course') %></label>
                     <select id="editCheckinCourse" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
-                        <option value=""><%= __('ADMIN_NO_COURSE') %></option>
+                        <option value=""><%= __('course.noCourse') %></option>
                         <% courses.forEach(c => { %>
                             <option value="<%= c.id %>" data-hall="<%= c.hall_id %>" data-trainer="<%= c.first_trainer_id || '' %>" data-from="<%= c.time_from %>" data-to="<%= c.time_to %>"><%= c.name %></option>
                         <% }) %>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_COURSE_NAME') %></label>
-                    <input type="text" name="course_name" id="editCheckinCourseName" placeholder="<%= __('ADMIN_COURSE_NAME_PLACEHOLDER') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('course.name') %></label>
+                    <input type="text" name="course_name" id="editCheckinCourseName" placeholder="<%= __('course.namePlaceholder') %>" class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_MAIN_TRAINER') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('course.mainTrainer') %></label>
                         <select name="main_trainer_id" id="editCheckinMainTrainer" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                             <% mainTrainers.forEach(t => { %>
                                 <option value="<%= t.id %>"><%= t.name %></option>
@@ -314,7 +314,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HALL_FILTER') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.hall') %></label>
                         <select name="hall_id" id="editCheckinHall" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer">
                             <% halls.forEach(h => { %>
                                 <option value="<%= h.id %>"><%= h.name %></option>
@@ -323,20 +323,20 @@
                     </div>
                 </div>
                 <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 space-y-2">
-                    <p class="text-[10px] font-bold text-gray-400 uppercase"><%= __('ADMIN_SECTION_WAGES') %></p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase"><%= __('common.compensation') %></p>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('trainer.wageFirstHour') %></label>
                             <input type="number" step="0.01" min="0" name="main_wage_first_hour" id="editWage1" class="w-full bg-white border border-gray-200 p-2 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label>
+                            <label class="block text-[10px] font-bold text-gray-500 mb-1"><%= __('trainer.wageAdditional') %></label>
                             <input type="number" step="0.01" min="0" name="main_wage_additional" id="editWage2" class="w-full bg-white border border-gray-200 p-2 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                         </div>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_HELPER_TRAINERS') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('protocol.helperTrainers') %></label>
                     <div class="space-y-1.5 bg-gray-50 p-3 rounded-xl border border-gray-200 text-xs font-medium max-h-40 overflow-y-auto">
                         <% helperTrainers.forEach(t => { %>
                             <div class="flex items-center gap-2">
@@ -348,25 +348,25 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_DATE') %></label>
+                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.date') %></label>
                     <input type="date" name="date" id="editCheckinDate" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_START_TIME') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.startTime') %></label>
                         <input type="time" name="start_time" id="editCheckinStart" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('ADMIN_END_TIME') %></label>
+                        <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"><%= __('common.endTime') %></label>
                         <input type="time" name="end_time" id="editCheckinEnd" required class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition">
                     </div>
                 </div>
                 <div class="flex gap-2 mt-2">
                     <button type="submit" class="flex-1 bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition cursor-pointer text-sm">
-                        <%= __('ADMIN_SAVE') %>
+                        <%= __('common.save') %>
                     </button>
                     <button type="button" id="deleteCheckinBtn" class="bg-red-50 hover:bg-red-100 text-red-600 px-6 py-3 rounded-xl font-bold transition cursor-pointer text-sm">
-                        <%= __('ADMIN_DELETE') %>
+                        <%= __('common.delete') %>
                     </button>
                 </div>
             </form>
@@ -464,7 +464,7 @@
                 });
 
                 document.getElementById('deleteCheckinBtn').onclick = async () => {
-                    if (confirm('<%= __('ADMIN_DELETE_CONFIRM') %>')) {
+                    if (confirm('<%= __('common.deleteConfirm') %>')) {
                         const response = await fetch(`<%= url('/admin/delete-checkin/') %>${id}`, { method: 'POST' });
                         if (response.ok) {
                             location.reload();
@@ -484,7 +484,7 @@
         const deleteAllBtn = document.getElementById('deleteAllShown');
         if (deleteAllBtn) {
             deleteAllBtn.addEventListener('click', async function() {
-                if (confirm('<%= __('ADMIN_DELETE_ALL_CONFIRM') %>')) {
+                if (confirm('<%= __('protocol.deleteAllConfirm') %>')) {
                     const params = new URLSearchParams(window.location.search);
                     const month = params.get('month') || '<%= filters.month %>';
                     const trainer = params.get('trainer') || '';
