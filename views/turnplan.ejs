@@ -105,12 +105,6 @@
                       class="bg-primary/10 text-primary text-[9px] font-bold px-2 py-0.5 rounded-full"
                       ><%= item.hall_name %></span
                     >
-                    <% if (item.is_special) { %>
-                    <span
-                      class="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200"
-                      ><%= __('ADMIN_SPECIAL_COURSE') %></span
-                    >
-                    <% } %>
                     <% if (item.remarks) { %>
                     <span
                       class="italic text-gray-400 text-[10px] truncate"
@@ -127,7 +121,6 @@
                   data-name="<%= item.name %>"
                   data-hall="<%= item.hall_id %>"
                   data-trainers="<%= JSON.stringify(turnplanTrainerMap[item.id] || []) %>"
-                  data-special="<%= item.is_special %>"
                   data-remarks="<%= item.remarks || '' %>"
                   data-weekdays="<%= JSON.stringify(item.days) %>"
                   data-from="<%= item.time_from %>"
@@ -220,17 +213,6 @@
               <% }) %>
             </div>
             <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
-          </div>
-          <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-            <input
-              type="checkbox"
-              id="addIsSpecial"
-              name="is_special"
-              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-            />
-            <label for="addIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"
-              ><%= __('ADMIN_SPECIAL_COURSE') %></label
-            >
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
@@ -371,17 +353,6 @@
             </div>
             <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_ALLOWED_TRAINERS_HINT') %></p>
           </div>
-          <div class="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
-            <input
-              type="checkbox"
-              id="editIsSpecial"
-              name="is_special"
-              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-            />
-            <label for="editIsSpecial" class="text-xs font-bold text-gray-700 cursor-pointer"
-              ><%= __('ADMIN_SPECIAL_COURSE') %></label
-            >
-          </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
               ><%= __('ADMIN_REMARKS') %></label
@@ -483,7 +454,6 @@
               const name = btn.getAttribute('data-name');
               const hallId = btn.getAttribute('data-hall');
               const trainerIdsJson = btn.getAttribute('data-trainers');
-              const isSpecial = btn.getAttribute('data-special') === '1';
               const remarks = btn.getAttribute('data-remarks');
               const weekdaysJson = btn.getAttribute('data-weekdays');
               const timeFrom = btn.getAttribute('data-from');
@@ -491,7 +461,6 @@
 
               document.getElementById('editTurnplanName').value = name;
               document.getElementById('editTurnplanHall').value = hallId;
-              document.getElementById('editIsSpecial').checked = isSpecial;
               document.getElementById('editTurnplanRemarks').value = remarks || '';
               document.getElementById('editTurnplanTimeFrom').value = timeFrom;
               document.getElementById('editTurnplanTimeTo').value = timeTo;

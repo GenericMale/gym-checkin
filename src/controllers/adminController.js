@@ -373,19 +373,17 @@ export const deleteTrainer = async (req, res) => {
 };
 
 export const addTurnplan = async (req, res) => {
-  const { name, hall_id, trainer_ids, is_special, remarks, weekdays, time_from, time_to } =
-    req.body;
+  const { name, hall_id, trainer_ids, remarks, weekdays, time_from, time_to } = req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     const result = await db.run(
-      `INSERT INTO turnplan (name, hall_id, trainer_id, is_special, remarks, weekdays, time_from, time_to)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO turnplan (name, hall_id, trainer_id, remarks, weekdays, time_from, time_to)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         hall_id,
         trainerIds[0] || null,
-        is_special ? 1 : 0,
         remarks || '',
         JSON.stringify(days),
         time_from,
@@ -407,20 +405,18 @@ export const addTurnplan = async (req, res) => {
 
 export const editTurnplan = async (req, res) => {
   const { id } = req.params;
-  const { name, hall_id, trainer_ids, is_special, remarks, weekdays, time_from, time_to } =
-    req.body;
+  const { name, hall_id, trainer_ids, remarks, weekdays, time_from, time_to } = req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     await db.run(
       `UPDATE turnplan
-       SET name = ?, hall_id = ?, trainer_id = ?, is_special = ?, remarks = ?, weekdays = ?, time_from = ?, time_to = ?
+       SET name = ?, hall_id = ?, trainer_id = ?, remarks = ?, weekdays = ?, time_from = ?, time_to = ?
        WHERE id = ?`,
       [
         name,
         hall_id,
         trainerIds[0] || null,
-        is_special ? 1 : 0,
         remarks || '',
         JSON.stringify(days),
         time_from,

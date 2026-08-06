@@ -118,7 +118,6 @@
                             <th class="px-6 py-4"><%= __('ADMIN_TABLE_DURATION') %></th>
                             <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_MAIN_COMP') %></th>
                             <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_HELPER_COMP') %></th>
-                            <th class="px-6 py-4 text-right"><%= __('ADMIN_TABLE_TOTAL') %></th>
                             <th class="px-6 py-4"></th>
                         </tr>
                     </thead>
@@ -164,9 +163,6 @@
                                 </td>
                                 <td class="px-6 py-4 text-right font-mono font-bold text-gray-500">
                                     <%= (log.helperPay || 0).toFixed(2) %> €
-                                </td>
-                                <td class="px-6 py-4 text-right font-mono font-bold text-gray-800">
-                                    <%= (log.totalPay || 0).toFixed(2) %> €
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <button class="text-gray-400 hover:text-primary transition p-2 rounded-lg hover:bg-gray-100 cursor-pointer">

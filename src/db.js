@@ -51,12 +51,17 @@ const initDb = async () => {
     name TEXT,
     hall_id INTEGER,
     trainer_id INTEGER,
-    is_special INTEGER DEFAULT 0,
     remarks TEXT,
     weekdays TEXT,
     time_from TEXT,
     time_to TEXT
   )`);
+
+  // Drop the obsolete is_special column from databases created before its removal
+  const turnplanCols = await dbAll('PRAGMA table_info(turnplan)');
+  if (turnplanCols.some((c) => c.name === 'is_special')) {
+    await run('ALTER TABLE turnplan DROP COLUMN is_special');
+  }
 
   // Trainers allowed to check in for a course (many-to-many)
   await run(`CREATE TABLE IF NOT EXISTS turnplan_trainers (

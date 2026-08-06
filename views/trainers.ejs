@@ -164,11 +164,6 @@
               required
             />
           </div>
-          <div class="pt-3 mt-1 border-t border-gray-100">
-            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              <%= __('ADMIN_SECTION_ROLES') %>
-            </h3>
-          </div>
           <div class="grid grid-cols-2 gap-3">
             <label
               class="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
@@ -220,7 +215,52 @@
               pattern="[0-9]{4}"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
             />
-            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_PIN_HINT') %></p>
+          </div>
+
+          <div id="addWagesHeader" class="pt-3 mt-1 border-t border-gray-100 hidden">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_WAGES') %>
+            </h3>
+          </div>
+          <div id="addMainWages" class="hidden">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_first_hour"
+                  placeholder="25.00"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_additional"
+                  placeholder="20.00"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+            </div>
+          </div>
+          <div id="addHelperWage" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
+            >
+            <input
+              type="number"
+              step="0.01"
+              name="helper_wage"
+              placeholder="10.00"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
           </div>
 
           <div class="pt-3 mt-1 border-t border-gray-100">
@@ -274,51 +314,6 @@
             />
           </div>
 
-          <div class="pt-3 mt-1 border-t border-gray-100">
-            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              <%= __('ADMIN_SECTION_WAGES') %>
-            </h3>
-          </div>
-          <div id="addMainWages" class="hidden">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
-                >
-                <input
-                  type="number"
-                  step="0.01"
-                  name="main_wage_first_hour"
-                  placeholder="25.00"
-                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
-                >
-                <input
-                  type="number"
-                  step="0.01"
-                  name="main_wage_additional"
-                  placeholder="20.00"
-                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-                />
-              </div>
-            </div>
-          </div>
-          <div id="addHelperWage" class="hidden">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
-            >
-            <input
-              type="number"
-              step="0.01"
-              name="helper_wage"
-              placeholder="10.00"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-            />
-          </div>
           <button
             type="submit"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
@@ -362,11 +357,6 @@
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
               required
             />
-          </div>
-          <div class="pt-3 mt-1 border-t border-gray-100">
-            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              <%= __('ADMIN_SECTION_ROLES') %>
-            </h3>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <label
@@ -418,7 +408,52 @@
               pattern="[0-9]{4}"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
             />
-            <p class="text-[10px] text-gray-400 mt-1.5"><%= __('ADMIN_PIN_HINT') %></p>
+          </div>
+
+          <div id="editWagesHeader" class="pt-3 mt-1 border-t border-gray-100 hidden">
+            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+              <%= __('ADMIN_SECTION_WAGES') %>
+            </h3>
+          </div>
+          <div id="editMainWages" class="hidden">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_first_hour"
+                  id="editTrainerMainWageFirst"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  name="main_wage_additional"
+                  id="editTrainerMainWageAdditional"
+                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+                />
+              </div>
+            </div>
+          </div>
+          <div id="editHelperWage" class="hidden">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
+            >
+            <input
+              type="number"
+              step="0.01"
+              name="helper_wage"
+              id="editTrainerHelperWage"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
           </div>
 
           <div class="pt-3 mt-1 border-t border-gray-100">
@@ -473,51 +508,6 @@
             />
           </div>
 
-          <div class="pt-3 mt-1 border-t border-gray-100">
-            <h3 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-              <%= __('ADMIN_SECTION_WAGES') %>
-            </h3>
-          </div>
-          <div id="editMainWages" class="hidden">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                  ><%= __('ADMIN_WAGE_FIRST_HOUR_SHORT') %></label
-                >
-                <input
-                  type="number"
-                  step="0.01"
-                  name="main_wage_first_hour"
-                  id="editTrainerMainWageFirst"
-                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-                />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-                  ><%= __('ADMIN_WAGE_ADDITIONAL_SHORT') %></label
-                >
-                <input
-                  type="number"
-                  step="0.01"
-                  name="main_wage_additional"
-                  id="editTrainerMainWageAdditional"
-                  class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-                />
-              </div>
-            </div>
-          </div>
-          <div id="editHelperWage" class="hidden">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('ADMIN_WAGE_HELPER_SHORT') %></label
-            >
-            <input
-              type="number"
-              step="0.01"
-              name="helper_wage"
-              id="editTrainerHelperWage"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-            />
-          </div>
           <div class="flex gap-2 mt-2">
             <button
               type="submit"
@@ -560,6 +550,7 @@
           document.getElementById(prefix + 'PinContainer').classList.toggle('hidden', !isTrainer);
           document.getElementById(prefix + 'MainWages').classList.toggle('hidden', !isTrainer);
           document.getElementById(prefix + 'HelperWage').classList.toggle('hidden', !isHelper);
+          document.getElementById(prefix + 'WagesHeader').classList.toggle('hidden', !isTrainer && !isHelper);
 
           const pinInput = document.getElementById(prefix + 'Pin');
           if (pinInput) pinInput.required = isTrainer;
