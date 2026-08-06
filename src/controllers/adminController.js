@@ -2,7 +2,7 @@ import db from '../db.js';
 import { generateQRCode } from '../utils/qrcode.js';
 import { generateExport } from '../utils/prae.js';
 import { calculateTrainerDailyWage } from '../utils/wage.js';
-import { getZonedNow, getZonedMonthStr } from '../utils/time.js';
+import { getZonedNow, getZonedMonthStr, getZonedDateStr } from '../utils/time.js';
 import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -26,6 +26,12 @@ const turnplanSortKey = (item) => {
 const redirect = (res, url) => {
   const cleanPath = url.startsWith('/') ? url : `/${url}`;
   return res.redirect(`${BASE_PATH}${cleanPath}`);
+};
+
+const parseWage = (value, fallback = 0) => {
+  if (value === undefined || value === null || value === '') return fallback;
+  const n = parseFloat(value);
+  return Number.isNaN(n) ? fallback : n;
 };
 
 export const getLogin = (req, res) => res.render('login', { error: null });
@@ -210,6 +216,13 @@ export const getProtocol = async (req, res) => {
       'SELECT id, name FROM trainers WHERE is_helper = 1 ORDER BY name ASC'
     );
     const halls = await db.all('SELECT id, name FROM halls ORDER BY name ASC');
+    const courses = await db.all(`
+      SELECT tp.id, tp.name, tp.hall_id, tp.time_from, tp.time_to,
+        (SELECT tt.trainer_id FROM turnplan_trainers tt
+         WHERE tt.turnplan_id = tp.id ORDER BY tt.trainer_id ASC LIMIT 1) as first_trainer_id
+      FROM turnplan tp
+      ORDER BY tp.name ASC
+    `);
     const settings = await db.getSettings();
 
     res.render('protocol', {
@@ -218,7 +231,9 @@ export const getProtocol = async (req, res) => {
       mainTrainers,
       helperTrainers,
       halls,
+      courses,
       settings,
+      today: getZonedDateStr(),
       filters: { month: selectedMonth, trainer, hall },
       activeTab: 'protocol',
     });
@@ -461,22 +476,34 @@ export const deleteCheckin = async (req, res) => {
 };
 
 export const addCheckin = async (req, res) => {
-  const { turnplan_id, hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } =
-    req.body;
+  const {
+    turnplan_id,
+    hall_id,
+    main_trainer_id,
+    helper_ids,
+    date,
+    start_time,
+    end_time,
+    course_name,
+    main_wage_first_hour,
+    main_wage_additional,
+    remarks,
+  } = req.body;
   try {
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hall_id]);
     const trainer = await db.get('SELECT * FROM trainers WHERE id = ?', [main_trainer_id]);
+
+    let courseName = course_name ? String(course_name).trim() : '';
+    if (turnplan_id) {
+      const course = await db.get('SELECT * FROM turnplan WHERE id = ?', [turnplan_id]);
+      if (course && !courseName) courseName = course.name;
+    }
+    if (!courseName) courseName = remarks || req.__('DEFAULT_UNIT_NAME');
 
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
     let durationMinutes = eH * 60 + eM - (sH * 60 + sM);
     if (durationMinutes < 0) durationMinutes += 24 * 60;
-
-    let courseName = remarks || req.__('DEFAULT_UNIT_NAME');
-    if (turnplan_id) {
-      const course = await db.get('SELECT * FROM turnplan WHERE id = ?', [turnplan_id]);
-      if (course) courseName = course.name;
-    }
 
     const result = await db.run(
       `INSERT INTO checkins (
@@ -496,8 +523,8 @@ export const addCheckin = async (req, res) => {
         start_time,
         end_time,
         durationMinutes,
-        trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0,
-        trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0,
+        parseWage(main_wage_first_hour, trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0),
+        parseWage(main_wage_additional, trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0),
         remarks || '',
       ]
     );
@@ -511,7 +538,15 @@ export const addCheckin = async (req, res) => {
           await db.run(
             `INSERT INTO checkin_helpers (checkin_id, trainer_id, trainer_name, helper_wage)
              VALUES (?, ?, ?, ?)`,
-            [checkinId, hTrainer.id, hTrainer.name, parseFloat(hTrainer.helper_wage) || 0]
+            [
+              checkinId,
+              hTrainer.id,
+              hTrainer.name,
+              parseWage(
+                req.body[`helper_wage_${hId}`],
+                parseFloat(hTrainer.helper_wage) || 0
+              ),
+            ]
           );
         }
       }
@@ -526,10 +561,26 @@ export const addCheckin = async (req, res) => {
 
 export const editCheckin = async (req, res) => {
   const { id } = req.params;
-  const { hall_id, main_trainer_id, helper_ids, date, start_time, end_time, remarks } = req.body;
+  const {
+    hall_id,
+    main_trainer_id,
+    helper_ids,
+    date,
+    start_time,
+    end_time,
+    course_name,
+    main_wage_first_hour,
+    main_wage_additional,
+    remarks,
+  } = req.body;
   try {
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hall_id]);
     const trainer = await db.get('SELECT * FROM trainers WHERE id = ?', [main_trainer_id]);
+    const existing = await db.get('SELECT * FROM checkins WHERE id = ?', [id]);
+
+    let courseName = course_name ? String(course_name).trim() : '';
+    if (!courseName && existing) courseName = existing.course_name;
+    if (!courseName) courseName = req.__('DEFAULT_UNIT_NAME');
 
     const [sH, sM] = start_time.split(':').map(Number);
     const [eH, eM] = end_time.split(':').map(Number);
@@ -538,12 +589,13 @@ export const editCheckin = async (req, res) => {
 
     await db.run(
       `UPDATE checkins
-       SET hall_id = ?, hall_name = ?,
+       SET course_name = ?, hall_id = ?, hall_name = ?,
            main_trainer_id = ?, main_trainer_name = ?,
            date = ?, start_time = ?, end_time = ?, duration_minutes = ?,
            main_wage_first_hour = ?, main_wage_additional = ?, remarks = ?
        WHERE id = ?`,
       [
+        courseName,
         hall_id,
         hall ? hall.name : '',
         main_trainer_id,
@@ -552,8 +604,8 @@ export const editCheckin = async (req, res) => {
         start_time,
         end_time,
         durationMinutes,
-        trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0,
-        trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0,
+        parseWage(main_wage_first_hour, trainer ? parseFloat(trainer.main_wage_first_hour) || 0 : 0),
+        parseWage(main_wage_additional, trainer ? parseFloat(trainer.main_wage_additional) || 0 : 0),
         remarks || '',
         id,
       ]
@@ -568,7 +620,12 @@ export const editCheckin = async (req, res) => {
           await db.run(
             `INSERT INTO checkin_helpers (checkin_id, trainer_id, trainer_name, helper_wage)
              VALUES (?, ?, ?, ?)`,
-            [id, hTrainer.id, hTrainer.name, parseFloat(hTrainer.helper_wage) || 0]
+            [
+              id,
+              hTrainer.id,
+              hTrainer.name,
+              parseWage(req.body[`helper_wage_${hId}`], parseFloat(hTrainer.helper_wage) || 0),
+            ]
           );
         }
       }

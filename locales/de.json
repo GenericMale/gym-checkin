@@ -51,6 +51,8 @@
   "ADMIN_ADD_TURNPLAN": "Kurs hinzufügen",
   "ADMIN_EDIT_TURNPLAN": "Kurs bearbeiten",
   "ADMIN_COURSE_NAME": "Kursbezeichnung",
+  "ADMIN_COURSE": "Kurs",
+  "ADMIN_NO_COURSE": "-- ohne Kurs --",
   "ADMIN_MAIN_TRAINER": "Leiter (Haupttrainer)",
   "ADMIN_ALLOWED_TRAINERS": "Erlaubte Trainer",
   "ADMIN_ALLOWED_TRAINERS_HINT": "Nur diese Trainer können sich für diese Einheit einchecken.",
