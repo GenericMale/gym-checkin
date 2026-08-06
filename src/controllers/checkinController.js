@@ -50,10 +50,10 @@ export const getCheckinPage = async (req, res) => {
 
     const courses = [];
     turnplanEntries.forEach((entry) => {
-      let weekdays = [];
+      let weekdays;
       try {
         weekdays = JSON.parse(entry.weekdays);
-      } catch (_e) {
+      } catch {
         weekdays = entry.weekdays ? entry.weekdays.split(',').map((s) => s.trim()) : [];
       }
 
@@ -231,10 +231,10 @@ export const getSessionStatus = async (req, res) => {
     const currentMinutes = now.hour * 60 + now.minute;
 
     const active = turnplanEntries.find((entry) => {
-      let weekdays = [];
+      let weekdays;
       try {
         weekdays = JSON.parse(entry.weekdays);
-      } catch (_e) {
+      } catch {
         weekdays = entry.weekdays ? entry.weekdays.split(',').map((s) => s.trim()) : [];
       }
       const startMins = timeToMinutes(entry.time_from) - gracePeriod;

@@ -10,11 +10,11 @@ const BASE_PATH = process.env.BASE_PATH || '';
 const WEEKDAY_ORDER = { Mo: 0, Di: 1, Mi: 2, Do: 3, Fr: 4, Sa: 5, So: 6 };
 
 const turnplanSortKey = (item) => {
-  let day = '';
+  let day;
   try {
     const arr = JSON.parse(item.weekdays);
     day = Array.isArray(arr) && arr.length > 0 ? arr[0] : '';
-  } catch (_e) {
+  } catch {
     day = item.weekdays ? item.weekdays.split(',')[0].trim() : '';
   }
   const time = item.time_from ? item.time_from.replace(':', '') : '0000';
@@ -168,7 +168,6 @@ export const getProtocol = async (req, res) => {
 
     // Group main checkins by (main_trainer_id, date) for daily tiered wage calculation
     const mainSessionsByTrainerDate = {};
-    const helperSessionsByCheckin = {};
 
     checkinRows.forEach((c) => {
       const tId = c.main_trainer_id;
