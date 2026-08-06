@@ -12,12 +12,62 @@ const TEMPLATE_PATH = path.join(
   'Pauschale_Reiseaufwandsentschaedigung.xlsx'
 );
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length === 3) return `${parts[2]}.${parts[1]}.${parts[0]}`;
-  return dateStr;
-};
+/**
+ * Converts a currency string/number into spelled-out German words.
+ */
+function euroToWords(amount) {
+  const ones = ['', 'ein', 'zwei', 'drei', 'vier', 'fünf', 'sechs', 'sieben', 'acht', 'neun'];
+  const teens = [
+    'zehn',
+    'elf',
+    'zwölf',
+    'dreizehn',
+    'vierzehn',
+    'fünfzehn',
+    'sechzehn',
+    'siebzehn',
+    'achtzehn',
+    'neunzehn',
+  ];
+  const tens = [
+    '',
+    '',
+    'zwanzig',
+    'dreißig',
+    'vierzig',
+    'fünfzig',
+    'sechzig',
+    'siebzig',
+    'achtzig',
+    'neunzig',
+  ];
+
+  function under100(num) {
+    if (num < 10) return ones[num];
+    if (num < 20) return teens[num - 10];
+    return num % 10 === 0
+      ? tens[Math.floor(num / 10)]
+      : `${ones[num % 10]}und${tens[Math.floor(num / 10)]}`;
+  }
+
+  function numToWord(n) {
+    if (n === 0) return 'null';
+    if (n < 100) return under100(n);
+
+    const hundred = Math.floor(n / 100);
+    const rem = n % 100;
+    const prefix = hundred === 1 ? 'einhundert' : `${ones[hundred]}hundert`;
+
+    return rem === 0 ? prefix : `${prefix}${under100(rem)}`;
+  }
+
+  const totalCents = Math.round(amount * 100);
+  const euros = Math.floor(totalCents / 100);
+  const cents = totalCents % 100;
+
+  const euroPart = `${numToWord(euros)} Euro`;
+  return cents > 0 ? `${euroPart} ${numToWord(cents)} Cent` : euroPart;
+}
 
 /**
  * Generiert die PRAE-Daten für einen Trainer für einen bestimmten Monat.
@@ -31,18 +81,14 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
   const data = {
     trainerName: trainer.name,
     svn: trainer.svn || '',
-    birthDate: formatDate(trainer.birth_date),
+    birthDate: trainer.birth_date,
     address: trainer.address || '',
     iban: trainer.iban || '',
     generationDate: generationDate,
     month: month,
     year: year,
+    total: 0,
   };
-
-  // Initialisiere Tage 1-31 mit 0
-  for (let i = 1; i <= 31; i++) {
-    data[`day${i}`] = 0;
-  }
 
   // Gruppiere nach Tag und summiere die Vergütung
   rows.forEach((row) => {
@@ -57,9 +103,16 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
 
     if (day >= 1 && day <= 31) {
       const pay = typeof row.pay === 'number' ? row.pay : 0;
-      data[`day${day}`] += pay;
+      data[`day${day}`] = (data[`day${day}`] || 0) + pay;
+      data.total += pay;
     }
   });
+
+  for (let day = 1; day <= 31; day++) {
+    data[`day${day}`] = data[`day${day}`] || '';
+  }
+
+  data.totalWords = euroToWords(data.total);
 
   return data;
 };
@@ -99,8 +152,11 @@ export const generateExport = async (rowsByTrainer, selectedMonth) => {
   for (const trainerName of trainerNames) {
     const { trainer, rows } = rowsByTrainer[trainerName];
     const data = preparePraeData(trainer, rows, selectedMonth);
-    const buffer = await generatePraeDocument(data);
-    zip.file(`PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`, buffer);
+
+    if (data.total > 0) {
+      const buffer = await generatePraeDocument(data);
+      zip.file(`PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`, buffer);
+    }
   }
 
   const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
