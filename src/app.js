@@ -52,6 +52,14 @@ app.locals.url = (pathStr) => {
   return `${BASE_PATH}${cleanPath}`;
 };
 
+// Formatiert ein ISO-Datum (YYYY-MM-DD) als deutsches Datum (TT.MM.JJJJ)
+app.locals.formatDate = (value) => {
+  if (!value) return '';
+  const m = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return String(value);
+  return `${m[3]}.${m[2]}.${m[1]}`;
+};
+
 // EJS Setup & Statische Dateien
 app.set('view engine', 'ejs');
 app.set('trust proxy', true);
