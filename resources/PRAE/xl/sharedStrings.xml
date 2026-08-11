@@ -1,0 +1,877 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="90" uniqueCount="89">
+  <si>
+    <t>Aufzeichnung über Einsätze und Bestätigung über den Erhalt von
+pauschalen Reiseaufwandsentschädigungen</t>
+  </si>
+  <si>
+    <t>gemäß § 3 (1) Z 16c EStG und § 49 (3) Z 28 ASVG</t>
+  </si>
+  <si>
+    <t>Familien- und Vorname:</t>
+  </si>
+  <si>
+    <t>Sozialversicherungsnummer:</t>
+  </si>
+  <si>
+    <t>Wohnanschrift:</t>
+  </si>
+  <si>
+    <t>Geburtsdatum:</t>
+  </si>
+  <si>
+    <t>im Monat:</t>
+  </si>
+  <si>
+    <t>Jahr:</t>
+  </si>
+  <si>
+    <t>Verwendungszweck:</t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Einsatztage und Entschädigungshöhe
+</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="8"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(bei zutreffenden Kalendertagen den Betrag angeben):</t>
+    </r>
+  </si>
+  <si>
+    <t>11.</t>
+  </si>
+  <si>
+    <t>1.</t>
+  </si>
+  <si>
+    <t>21.</t>
+  </si>
+  <si>
+    <t>31.</t>
+  </si>
+  <si>
+    <t>2.</t>
+  </si>
+  <si>
+    <t>12.</t>
+  </si>
+  <si>
+    <t>22.</t>
+  </si>
+  <si>
+    <t>3.</t>
+  </si>
+  <si>
+    <t>13.</t>
+  </si>
+  <si>
+    <t>23.</t>
+  </si>
+  <si>
+    <t>4.</t>
+  </si>
+  <si>
+    <t>14.</t>
+  </si>
+  <si>
+    <t>24.</t>
+  </si>
+  <si>
+    <t>5.</t>
+  </si>
+  <si>
+    <t>15.</t>
+  </si>
+  <si>
+    <t>25.</t>
+  </si>
+  <si>
+    <t>6.</t>
+  </si>
+  <si>
+    <t>16.</t>
+  </si>
+  <si>
+    <t>26.</t>
+  </si>
+  <si>
+    <t>7.</t>
+  </si>
+  <si>
+    <t>17.</t>
+  </si>
+  <si>
+    <t>27.</t>
+  </si>
+  <si>
+    <t>8.</t>
+  </si>
+  <si>
+    <t>18.</t>
+  </si>
+  <si>
+    <t>28.</t>
+  </si>
+  <si>
+    <t>9.</t>
+  </si>
+  <si>
+    <t>19.</t>
+  </si>
+  <si>
+    <t>29.</t>
+  </si>
+  <si>
+    <t>10.</t>
+  </si>
+  <si>
+    <t>20.</t>
+  </si>
+  <si>
+    <t>30.</t>
+  </si>
+  <si>
+    <t>eine pauschale Reiseaufwandsentschädigung in Höhe von:</t>
+  </si>
+  <si>
+    <t>Euro</t>
+  </si>
+  <si>
+    <t>in Worten:</t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Bestätigungen des </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Empfängers</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> / der </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Empfängerin:</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> </t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">1) Nachweis der Nebenberuflichkeit  </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Zutreffendes ankreuzen)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">2) Einfachbezug der pauschalen Reiseaufwandsentschädigung  </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Zutreffendes ankreuzen)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Im oben angeführten Monat habe ich </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>nur</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> bei einem einzigen – dem unten namentlich genannten – Verein / Verband pauschale Reiseaufwandsentschädigungen erhalten</t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> und nicht auch bei anderen</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Vereinen / Verbänden. </t>
+    </r>
+  </si>
+  <si>
+    <t>BIC:</t>
+  </si>
+  <si>
+    <t>IBAN:</t>
+  </si>
+  <si>
+    <t>Mit meiner Unterschrift bestätige ich die Richtigkeit meiner Angaben.</t>
+  </si>
+  <si>
+    <t>Datum</t>
+  </si>
+  <si>
+    <t xml:space="preserve"> Unterschrift des Empfängers / der Empfängerin</t>
+  </si>
+  <si>
+    <t>Der / Die angeführte(n) Einsatztag(e) stimmen mit den von uns geführten Aufzeichnungen überein und es wurden vom Verein / Verband keine zusätzlichen Aufwandsentschädigungen im oben angeführten Monat ausbezahlt.</t>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Sportarzt / Sportärztin</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="11"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Ja </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Nebenberuf)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="11"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Nein </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Hauptberuf)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="11"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Ja </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Einfachbezug)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="11"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Nein </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Mehrfachbezug)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Betrag bar erhalten am:</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Überweisung mittels:</t>
+    </r>
+  </si>
+  <si>
+    <t>(BIC - bei Zahlungen innerhalb des Europäischen Wirtschaftsraumes nicht notwendig)</t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Bestätigung des </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>auszahlenden Vereins / Verbands:</t>
+    </r>
+  </si>
+  <si>
+    <t>Name des Vereins / Verbands:</t>
+  </si>
+  <si>
+    <t></t>
+  </si>
+  <si>
+    <t>Datenschutz-Informationspflicht</t>
+  </si>
+  <si>
+    <t>Bitte beachten Sie die Datenschutz-Informationspflicht auf der zweiten Seite!</t>
+  </si>
+  <si>
+    <t>Ausländische Sozialversicherungsnummer*:</t>
+  </si>
+  <si>
+    <t>Richtigkeitsvermerk: Dieser Beleg wird bei keinem anderen Fördergeber zur Abrechnung vorgelegt und die Kosten werden nicht durch Dritte übernommen</t>
+  </si>
+  <si>
+    <t>nur für Sportler:innen, Schieds- / Kampfrichter:innen und Sportbetreuer:innen</t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Der / Die Entschädigungsempfänger:in war tätig und erhält für folgende </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Tätigkeit(en) (Mehrfachnennungen möglich):</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Sportler:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Trainer:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Lehrwart:in / Instruktor:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Übungsleiter:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Masseur:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Zeugwart:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Schieds- / Kampfrichter:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <sz val="14"/>
+        <color indexed="8"/>
+        <rFont val="Wingdings"/>
+        <charset val="2"/>
+      </rPr>
+      <t>r</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="9"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Rennleiter:in</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">(Gesetzliche Höchstgrenzen: Es gilt ein Tageshöchstsatz von </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve">€ 120,- </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve">bei einer monatlichen Höchstgrenze von </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>€ 720,-</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>)</t>
+    </r>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Im Sinne des § 49 (3) Z 28 ASVG ist / sind die oben angegebene(n) Tätigkeit(en) </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>nicht mein</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> 
+</t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Hauptberuf</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> und bilden nicht die Hauptquelle meiner Einnahmen. (Gilt auch für </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Pensionist:innen!</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>)</t>
+    </r>
+  </si>
+  <si>
+    <t>Verbandsstempel u. Unterschrift Vereins-/Verbands- Verantwortliche/r</t>
+  </si>
+  <si>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="7"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>Disclaimer:</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="7"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t xml:space="preserve"> Dieses Dokument enthält lediglich allgemeine Informationen, die eine Beratung im Einzelfall nicht ersetzen können. Die Informationen in diesem Dokument sind weder ein Ersatz für eine professionelle Beratung noch sollten sie als Basis für eine Entscheidung oder Aktion dienen, die eine Auswirkung auf Ihre Finanzen oder Ihre Geschäftstätigkeit hat. Bevor Sie eine diesbezügliche Entscheidung treffen, sollten Sie eine/n qualifizierte/n, professionelle/n Berater:in konsultieren. </t>
+    </r>
+  </si>
+  <si>
+    <t>ACHTUNG! Lesen Sie untenstehende Datenschutz-Informationspflicht aufmerksam durch und passen Sie diese ggf. an Ihre persönliche Situation und Struktur an (sollten Sie z.B. das Formular erweitern oder an weitere Empfänger:innenkreise weitergeben). Ergänzen Sie außerdem die rot markierten Passagen sofern zutreffend.</t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">Die Daten von Ihnen werden vom </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color rgb="FFFF0000"/>
+        <rFont val="Calibri"/>
+        <family val="2"/>
+        <scheme val="minor"/>
+      </rPr>
+      <t>Verein/Verband ___________________________________ (Name, Telefon, E-Mail)</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color theme="1"/>
+        <rFont val="Calibri"/>
+        <family val="2"/>
+        <scheme val="minor"/>
+      </rPr>
+      <t xml:space="preserve"> als Verantwortliche/r zum Zweck der Abrechnung von Reisekosten für Sportler:innen, Schieds- und Kampfrichter:innen und Sportbetreuer:innen nach Art. 4 Z 7 DSGVO aufgrund Vertragserfüllung verarbeitet. </t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color rgb="FFFF0000"/>
+        <rFont val="Calibri"/>
+        <family val="2"/>
+        <scheme val="minor"/>
+      </rPr>
+      <t>Die Kontaktdaten des/der Datenschutzbeauftragten sind __________________ (falls vorhanden).</t>
+    </r>
+    <r>
+      <rPr>
+        <sz val="10"/>
+        <color theme="1"/>
+        <rFont val="Calibri"/>
+        <family val="2"/>
+        <scheme val="minor"/>
+      </rPr>
+      <t xml:space="preserve">
+Es handelt sich dabei um die Datenkategorien Vorname, Familienname, Sozialversicherungsnummer, Geburtsdatum, Wohnanschrift sowie Informationen zur ausgeübten Tätigkeit, zum Bezug der pauschalen Reiseaufwandsentschädigung, zum Nachweis der Nebenberuflichkeit und im Falle einer Überweisung auch den IBAN/BIC.
+Die Weitergabe der personenbezogenen Daten von Ihnen an Dritte ist nur in Erfüllung der vertraglichen Verpflichtungen bzw. der uns treffenden rechtlichen Verpflichtungen vorgesehen. Dies ist vor allem für die Verwaltung und Erfüllung der Verträge mit Ihnen bzw. anderer uns obliegender Verpflichtungen gegenüber Auftragsverarbeitern (bspw. Buchhaltung und Rechnungswesen, Inkassoinstitute, Rechts-/Steuervertretung), Kreditinstitute und Banken, übergeordnete oder verbundene Organisationen und Unternehmen (bspw. Konzerngesellschaften), Behörden und öffentliche Stellen (bspw. Finanzbehörden, Sozialversicherungsträger, Landes- und Bundesförderstellen) an diese erforderlich. An andere Dritte ist die Weitergabe der personenbezogenen Daten nicht vorgesehen. Werden derartige Daten an Dritte weitergegeben, werden mit diese entsprechende (Auftragsverarbeiter-) Vereinbarungen getroffen oder es bestehen diesbezügliche gesetzliche Verpflichtungen zur Datenweitergabe.
+Die Daten von Ihnen werden beim Verein ab Erhebung der Daten für die Dauer der Vertragserfüllung und – sofern keine anderen daran anschließenden Aufbewahrungspflichten gesetzlich vorgeschrieben sind (Übersicht über die in Österreich geltenden gesetzlichen Aufbewahrungspflichten unter www.wko.at/service/wirtschaftsrecht-gewerberecht/eu-dsgvo-speicher-und-aufbewahrungsfristen.html) für eine Dauer von 10 Jahren gespeichert.
+Es besteht keine Absicht, die Daten von Ihnen an ein Drittland oder eine internationale Organisation zu übermitteln (Art 13 Abs 1 lit f DSGVO). Werden derartige Daten an Dritte in einem Drittland weitergegeben, werden mit diesen entsprechende (Auftragsverarbeiter-) Vereinbarungen getroffen, sofern es keinen entsprechenden Angemessenheitsbeschluss für das Drittland oder sonstige geeignete Garantien oder eine ausdrückliche Einwilligung von Ihnen in Kenntnis des Fehlens eines derartigen Angemessenheitsbeschlusses oder sonstige geeignete Garantien gibt (Art. 49 DSGVO). Sie haben nach Art 13. Abs. 2 lit. b DSGVO jederzeit das Recht auf Auskunft über die Daten nach Art. 15 DSGVO, Recht auf Berichtigung nach Art. 16 DSGVO, Löschung nach Art. 17 DSGVO, Recht auf Einschränkung der Verarbeitung der Daten nach Art. 20 DSGVO, Recht auf Datenübertragbarkeit nach Art. 21 DSGVO, Recht auf Entscheidungen, die nicht ausschließlich auf einer automatisierten Verarbeitung beruhen – einschließlich Profiling – nach Art 22 DSGVO.
+Sie haben das Recht auf Beschwerde bei der Aufsichtsbehörde. (Art. 13 Abs. 2 lit. d DSGVO). Die zuständige Aufsichtsbehörde ist die Datenschutzbehörde, 1082 Wien, Wickenburggasse 8.
+Die Bereitstellung der personenbezogenen Daten von Ihnen ist zur Vertragserfüllung notwendig. Ohne diese Daten ist eine Vertragserfüllung unmöglich und wäre sodann der Vertrag von uns nicht abzuschließen bzw. aufzulösen (Art. 13 Abs. 2 lit. e DSGVO).
+Es besteht keine Absicht, die Daten von Ihnen für automatisierte Entscheidungsfindung einschließlich Profiling (Datenanalyse zu Verhalten, Gewohnheiten, Präferenzen…) zu verarbeiten (Art 13. Abs 2 lit f DSGVO).
+Zum Schutz Ihrer personenbezogenen Daten bei uns haben wir entsprechend der Bestimmungen des Art 32 DSGVO geeignete technische und organisatorische Maßnahmen getroffen.
+</t>
+    </r>
+  </si>
+  <si>
+    <t>*betrifft Personen, die in Österreich nicht sozialversichert sind</t>
+  </si>
+  <si>
+    <t>Pauschale Reiseaufwandsentschädigung (PRAE) - Stand: 10/2023</t>
+  </si>
+  <si>
+    <t xml:space="preserve">(Als Hauptberuf gilt auch die Tätigkeit als Student:in [bei ordentlichem Studienfortgang], als Hausfrau/-mann im Familienverband sowie als Grundwehrdiener, Frau im Ausbildungsdienst bzw. Zivildiener. Keinen [Haupt-]Beruf haben Bezieher:innen von Transferleistungen [wie Arbeitslosengeld und Notstandshilfe] oder einer Altersversorgung [Pension oder Ruhegenuss]. Sollten die Transferleistungen, Leistungen aus der Altersversorgung oder sonstigen Einnahmen höher als die PRAE sein, ist ein Bezug möglich.) </t>
+  </si>
+  <si>
+    <r>
+      <t xml:space="preserve">3) Zahlungsmodalität  </t>
+    </r>
+    <r>
+      <rPr>
+        <b/>
+        <sz val="10"/>
+        <color indexed="8"/>
+        <rFont val="Arial"/>
+        <family val="2"/>
+      </rPr>
+      <t>(Zutreffendes ankreuzen)</t>
+    </r>
+  </si>
+</sst>

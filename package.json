@@ -22,7 +22,6 @@
   ],
   "author": "",
   "dependencies": {
-    "carbone": "^3.8.2",
     "compression": "^1.8.1",
     "connect-sqlite3": "^0.9.16",
     "dotenv": "^17.3.1",
@@ -34,7 +33,8 @@
     "jszip": "^3.10.1",
     "morgan": "^1.10.1",
     "qrcode": "^1.5.4",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "^6.0.1",
+    "xml-formatter": "^3.7.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

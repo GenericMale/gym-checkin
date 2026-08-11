@@ -1,0 +1,267 @@
+<xml xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+  <o:shapelayout v:ext="edit">
+    <o:idmap v:ext="edit" data="1"/>
+  </o:shapelayout>
+  <v:shapetype id="_x0000_t201" coordsize="21600,21600" o:spt="201" path="m,l,21600r21600,l21600,xe">
+    <v:stroke joinstyle="miter"/>
+    <v:path shadowok="f" o:extrusionok="f" strokeok="f" fillok="f" o:connecttype="rect"/>
+    <o:lock v:ext="edit" shapetype="t"/>
+  </v:shapetype>
+  <v:shape id="Kontrollkästchen_x0020_9" o:spid="_x0000_s1033" type="#_x0000_t201" style="position:absolute;margin-left:0;margin-top:213.6pt;
+  width:14.4pt;height:17.4pt;z-index:1;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 0, 8, 5, 0, 24, 8, 34</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Sportler' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_10" o:spid="_x0000_s1034" type="#_x0000_t201" style="position:absolute;margin-left:0;margin-top:234.6pt;
+  width:15.6pt;height:18.6pt;z-index:2;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 0, 9, 4, 0, 26, 9, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Sportarzt' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_13" o:spid="_x0000_s1037" type="#_x0000_t201" style="position:absolute;margin-left:111.6pt;
+  margin-top:212.4pt;width:15.6pt;height:18.6pt;z-index:3;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>1, 0, 8, 3, 1, 26, 8, 34</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Trainer' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_14" o:spid="_x0000_s1038" type="#_x0000_t201" style="position:absolute;margin-left:111.6pt;
+  margin-top:234pt;width:15.6pt;height:18.6pt;z-index:4;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>1, 0, 9, 3, 1, 26, 9, 34</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Zeugwart' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_15" o:spid="_x0000_s1039" type="#_x0000_t201" style="position:absolute;margin-left:222pt;margin-top:213pt;
+  width:15.6pt;height:18.6pt;z-index:5;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>7, 0, 8, 4, 7, 26, 8, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Lehrwart' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_16" o:spid="_x0000_s1040" type="#_x0000_t201" style="position:absolute;margin-left:222pt;margin-top:234.6pt;
+  width:15.6pt;height:18.6pt;z-index:6;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>7, 0, 9, 4, 7, 26, 9, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Schiedsrichter' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_17" o:spid="_x0000_s1041" type="#_x0000_t201" style="position:absolute;margin-left:368.4pt;
+  margin-top:213pt;width:15.6pt;height:18.6pt;z-index:7;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>15, 0, 8, 4, 15, 26, 8, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Übungsleiter' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_19" o:spid="_x0000_s1043" type="#_x0000_t201" style="position:absolute;margin-left:368.4pt;
+  margin-top:234.6pt;width:15.6pt;height:18.6pt;z-index:8;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>15, 0, 9, 4, 15, 26, 9, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Rennleiter' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_20" o:spid="_x0000_s1044" type="#_x0000_t201" style="position:absolute;margin-left:516pt;margin-top:213pt;
+  width:15.6pt;height:18.6pt;z-index:9;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>23, 0, 8, 4, 23, 26, 8, 35</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= activity === 'Masseur' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_22" o:spid="_x0000_s1046" type="#_x0000_t201" style="position:absolute;margin-left:.6pt;margin-top:549.6pt;
+  width:19.2pt;height:20.4pt;z-index:10;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 1, 25, 5, 0, 33, 25, 39</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= employmentStatus === 'secondary' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_23" o:spid="_x0000_s1047" type="#_x0000_t201" style="position:absolute;margin-left:112.2pt;
+  margin-top:549.6pt;width:19.8pt;height:20.4pt;z-index:11;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>1, 1, 25, 5, 2, 4, 25, 39</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= employmentStatus === 'primary' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_24" o:spid="_x0000_s1048" type="#_x0000_t201" style="position:absolute;margin-left:.6pt;margin-top:618.6pt;
+  width:19.2pt;height:20.4pt;z-index:12;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 1, 28, 5, 0, 33, 28, 39</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= allowanceType === 'single' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_25" o:spid="_x0000_s1049" type="#_x0000_t201" style="position:absolute;margin-left:111.6pt;
+  margin-top:618.6pt;width:19.8pt;height:20.4pt;z-index:13;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>1, 0, 28, 5, 2, 3, 28, 39</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= allowanceType === 'multiple' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_26" o:spid="_x0000_s1050" type="#_x0000_t201" style="position:absolute;margin-left:0;margin-top:660.6pt;
+  width:13.8pt;height:18.6pt;z-index:14;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 0, 30, 10, 0, 23, 30, 41</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= payment === 'cash' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="Kontrollkästchen_x0020_27" o:spid="_x0000_s1051" type="#_x0000_t201" style="position:absolute;margin-left:0;margin-top:695.4pt;
+  width:13.8pt;height:18.6pt;z-index:15;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>0, 0, 32, 10, 0, 23, 32, 41</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= payment === 'bank_transfer' ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+  <v:shape id="_x0000_s1052" type="#_x0000_t201" style="position:absolute;
+  margin-left:369pt;margin-top:855pt;width:21pt;height:20.4pt;z-index:16;
+  visibility:visible;mso-wrap-style:tight" filled="f" fillcolor="window [65]" stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+    <v:path shadowok="t" strokeok="t" fillok="t"/>
+    <o:lock v:ext="edit" rotation="t"/>
+    <v:textbox style="mso-direction-alt:auto" o:singleclick="f">
+      <div style="text-align:left"></div>
+    </v:textbox>
+    <x:ClientData ObjectType="Checkbox">
+      <x:Anchor>15, 1, 41, 5, 16, 4, 41, 39</x:Anchor>
+      <x:AutoFill>False</x:AutoFill>
+      <x:AutoLine>False</x:AutoLine>
+      <x:TextVAlign>Center</x:TextVAlign>
+      <x:NoThreeD/>
+      <x:Checked><%= confirmed === true ? 1 : 0 %></x:Checked>
+    </x:ClientData>
+  </v:shape>
+</xml>

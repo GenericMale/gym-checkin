@@ -1,16 +1,10 @@
-import carbone from 'carbone';
-import JSZip from 'jszip';
+import fs from 'fs';
 import path from 'path';
-import { promisify } from 'util';
+import ejs from 'ejs';
+import JSZip from 'jszip';
 import { getZonedNow, formatUtcTimestampInAppZone } from './time.js';
 
-const render = promisify(carbone.render);
-
-const TEMPLATE_PATH = path.join(
-  process.cwd(),
-  'resources',
-  'Pauschale_Reiseaufwandsentschaedigung.xlsx'
-);
+const UNPACKED_TEMPLATE_PATH = path.join(process.cwd(), 'resources', 'PRAE');
 
 /**
  * Converts a currency string/number into spelled-out German words.
@@ -86,18 +80,32 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
   const [year, month] = selectedMonth.split('-');
 
   const { year: gy, month: gm, day: gd } = getZonedNow();
-  const generationDate = `${String(gd).padStart(2, '0')}.${String(gm).padStart(2, '0')}.${gy}`;
+  const documentDate = `${String(gd).padStart(2, '0')}.${String(gm).padStart(2, '0')}.${gy}`;
 
   const data = {
-    trainerName: trainer.name,
-    svn: trainer.svn || '',
-    birthDate: formatBirthDate(trainer.birth_date),
+    fullName: trainer.name || '',
+    socialSecurityNumber: trainer.svn || '',
+    dateOfBirth: formatBirthDate(trainer.birth_date),
+    foreignSocialSecurityNumber: '',
     address: trainer.address || '',
-    iban: trainer.iban || '',
-    generationDate: generationDate,
+    activity: 'Übungsleiter',
+
     month: month,
     year: year,
-    total: 0,
+    purpose: '',
+    totalAmount: 0,
+
+    employmentStatus: 'secondary',
+    allowanceType: 'single',
+
+    payment: 'bank_transfer',
+    cashReceivedDate: '',
+    iban: trainer.iban || '',
+    bic: '',
+
+    organizationName: process.env.APP_NAME,
+    confirmed: true,
+    documentDate,
   };
 
   // Gruppiere nach Tag und summiere die Vergütung
@@ -114,7 +122,7 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
     if (day >= 1 && day <= 31) {
       const pay = typeof row.pay === 'number' ? row.pay : 0;
       data[`day${day}`] = (data[`day${day}`] || 0) + pay;
-      data.total += pay;
+      data.totalAmount += pay;
     }
   });
 
@@ -122,20 +130,61 @@ export const preparePraeData = (trainer, rows, selectedMonth) => {
     data[`day${day}`] = data[`day${day}`] || '';
   }
 
-  data.totalWords = euroToWords(data.total);
+  data.amountInWords = euroToWords(data.totalAmount);
 
   return data;
 };
 
 /**
- * Generiert ein einzelnes PRAE-Dokument als Buffer.
+ * Generiert ein einzelnes PRAE-Dokument als Buffer via EJS & JSZip.
  */
-export const generatePraeDocument = async (data) => {
-  return await render(TEMPLATE_PATH, data);
+export const generatePraeDocument = async (trainersDataInput) => {
+  const zip = new JSZip();
+  const trainers = Array.isArray(trainersDataInput) ? trainersDataInput : [trainersDataInput];
+
+  function walkDirectory(currentDir) {
+    const items = fs.readdirSync(currentDir);
+
+    for (const item of items) {
+      const fullPath = path.join(currentDir, item);
+      const relativePath = path.relative(UNPACKED_TEMPLATE_PATH, fullPath).replace(/\\/g, '/');
+
+      if (fs.statSync(fullPath).isDirectory()) {
+        walkDirectory(fullPath);
+      } else if (/\.(xml|rels|vml)$/i.test(item)) {
+        const rawTemplate = fs.readFileSync(fullPath, 'utf8');
+
+        if (relativePath.startsWith('xl/worksheets/') || relativePath.startsWith('xl/drawings/')) {
+          // per-sheet template
+          trainers.forEach((trainer, index) => {
+            const targetPath = relativePath.replace(/1(?=\.(xml|vml|xml\.rels)$)/i, index);
+
+            const renderedXml = ejs.render(rawTemplate, {
+              ...trainer,
+              index,
+            });
+            zip.file(targetPath, renderedXml);
+          });
+        } else {
+          const renderedXml = ejs.render(rawTemplate, { trainers });
+          zip.file(relativePath, renderedXml);
+        }
+      } else {
+        zip.file(relativePath, fs.readFileSync(fullPath));
+      }
+    }
+  }
+  walkDirectory(UNPACKED_TEMPLATE_PATH);
+
+  return await zip.generateAsync({
+    type: 'nodebuffer',
+    compression: 'DEFLATE',
+    compressionOptions: { level: 6 },
+  });
 };
 
 /**
- * Generiert PRAE-Dokumente für alle Trainer und bündelt sie ggf. in einem ZIP.
+ * Generiert PRAE-Dokumente für alle Trainer.
  * @returns {Object} { buffer, filename, contentType }
  */
 export const generateExport = async (rowsByTrainer, selectedMonth) => {
@@ -145,34 +194,32 @@ export const generateExport = async (rowsByTrainer, selectedMonth) => {
     throw new Error('No trainers data to export');
   }
 
-  if (trainerNames.length === 1) {
-    const trainerName = trainerNames[0];
-    const { trainer, rows } = rowsByTrainer[trainerName];
-    const data = preparePraeData(trainer, rows, selectedMonth);
-    const buffer = await generatePraeDocument(data);
-    const filename = `PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`;
-    return {
-      buffer,
-      filename,
-      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    };
-  }
-
-  const zip = new JSZip();
+  // Build dataset for trainers with > 0 compensation
+  const trainersDataList = [];
   for (const trainerName of trainerNames) {
     const { trainer, rows } = rowsByTrainer[trainerName];
     const data = preparePraeData(trainer, rows, selectedMonth);
 
-    if (data.total > 0) {
-      const buffer = await generatePraeDocument(data);
-      zip.file(`PRAE_${trainerName.replace(/\s+/g, '_')}_${selectedMonth}.xlsx`, buffer);
+    if (data.totalAmount > 0) {
+      trainersDataList.push(data);
     }
   }
 
-  const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
+  if (trainersDataList.length === 0) {
+    throw new Error('No payable data for selected month');
+  }
+
+  let filename;
+  if (trainersDataList.length === 1) {
+    const fullName = trainersDataList[0].fullName;
+    filename = `PRAE_${selectedMonth}_${fullName}.xlsx`;
+  } else {
+    filename = `PRAE_${selectedMonth}.xlsx`;
+  }
+
   return {
-    buffer: zipBuffer,
-    filename: `PRAE_Export_${selectedMonth}.zip`,
-    contentType: 'application/zip',
+    buffer: await generatePraeDocument(trainersDataList),
+    filename,
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   };
-};
+};;
