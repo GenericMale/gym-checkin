@@ -31,14 +31,24 @@
       <!-- Halls List -->
       <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <% halls.forEach(hall => { %>
+          <% halls.forEach((hall, i) => { const hue = halls.length > 0 ? Math.round((i * 360) / halls.length) : 0; %>
           <div
             class="edit-hall-card bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-100 hover:border-gray-200 transition flex items-center justify-between gap-4 group shadow-2xs cursor-pointer"
             data-id="<%= hall.id %>"
             data-name="<%= hall.name %>"
+            data-short="<%= hall.short_name || '' %>"
           >
             <div class="overflow-hidden mr-2 space-y-1">
-              <h3 class="font-bold text-gray-800 text-base truncate"><%= hall.name %></h3>
+              <div class="flex items-center gap-2">
+                <% if (hall.short_name) { %>
+                <span
+                  class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
+                  style="background: hsl(<%= hue %> 65% 90%); color: hsl(<%= hue %> 55% 32%)"
+                  ><%= hall.short_name %></span
+                >
+                <% } %>
+                <h3 class="font-bold text-gray-800 text-base truncate"><%= hall.name %></h3>
+              </div>
               <p
                 class="text-[10px] text-primary font-mono truncate opacity-70 group-hover:opacity-100 transition"
               >
@@ -119,6 +129,18 @@
               required
             />
           </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('hall.shortName') %></label
+            >
+            <input
+              type="text"
+              name="short_name"
+              maxlength="8"
+              placeholder="<%= __('hall.shortNamePlaceholder') %>"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+            />
+          </div>
           <button
             type="submit"
             class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl shadow-lg transition mt-2 cursor-pointer text-sm"
@@ -161,6 +183,18 @@
               id="editHallName"
               class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
               required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+              ><%= __('hall.shortName') %></label
+            >
+            <input
+              type="text"
+              name="short_name"
+              id="editHallShort"
+              maxlength="8"
+              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
             />
           </div>
           <div class="flex gap-2 mt-2">
@@ -246,8 +280,9 @@
           });
       });
 
-      function openEditHallModal(id, name) {
+      function openEditHallModal(id, name, shortName) {
           document.getElementById('editHallName').value = name;
+          document.getElementById('editHallShort').value = shortName || '';
           document.getElementById('editHallForm').action = `<%= url('/admin/edit-hall/') %>${id}`;
           document.getElementById('deleteHallForm').action = `<%= url('/admin/delete-hall/') %>${id}`;
           document.getElementById('deleteHallBtn').onclick = () => {
@@ -260,7 +295,7 @@
 
       document.querySelectorAll('.edit-hall-card').forEach(card => {
           card.addEventListener('click', () => {
-              openEditHallModal(card.getAttribute('data-id'), card.getAttribute('data-name'));
+              openEditHallModal(card.getAttribute('data-id'), card.getAttribute('data-name'), card.getAttribute('data-short'));
           });
       });
 

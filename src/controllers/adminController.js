@@ -20,7 +20,7 @@ const turnplanSortKey = (item) => {
   const time = item.time_from ? item.time_from.replace(':', '') : '0000';
   const dayOrder = WEEKDAY_ORDER[day] ?? 7;
   const hall = (item.hall_name || '').toLowerCase();
-  return `${String(dayOrder).padStart(2, '0')}_${hall}_${time}`;
+  return `${String(dayOrder).padStart(2, '0')}_${time}_${hall}`;
 };
 
 const redirect = (res, url) => {
@@ -52,8 +52,11 @@ export const logout = (req, res) => {
 
 export const getTurnplan = async (req, res) => {
   try {
+    const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
+    const hallsById = new Map(halls.map((h) => [h.id, h]));
+
     const turnplan = await db.all(`
-      SELECT tp.*, h.name as hall_name,
+      SELECT tp.*, h.name as hall_name, h.short_name as hall_short,
         (SELECT GROUP_CONCAT(t2.name, ', ')
          FROM turnplan_trainers tt
          JOIN trainers t2 ON tt.trainer_id = t2.id
@@ -70,13 +73,18 @@ export const getTurnplan = async (req, res) => {
       turnplanTrainerMap[r.turnplan_id].push(r.trainer_id);
     });
 
+    turnplan.forEach((item) => {
+      const hall = hallsById.get(item.hall_id);
+      const short = hall ? hall.short_name || hall.name : item.hall_short || item.hall_name || '';
+      item.hall_short = short;
+    });
+
     turnplan.sort((a, b) => {
       const byDayTime = turnplanSortKey(a).localeCompare(turnplanSortKey(b));
       if (byDayTime !== 0) return byDayTime;
       return (a.hall_name || '').localeCompare(b.hall_name || '');
     });
 
-    const halls = await db.all('SELECT * FROM halls ORDER BY name ASC');
     const trainers = await db.all('SELECT * FROM trainers WHERE is_trainer = 1 ORDER BY name ASC');
     const settings = await db.getSettings();
 
@@ -281,8 +289,9 @@ export const updateSettings = async (req, res) => {
 };
 
 export const addHall = async (req, res) => {
+  const { name, short_name } = req.body;
   try {
-    await db.run('INSERT INTO halls (name) VALUES (?)', [req.body.name]);
+    await db.run('INSERT INTO halls (name, short_name) VALUES (?, ?)', [name, short_name || '']);
     redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in addHall', err);
@@ -292,9 +301,13 @@ export const addHall = async (req, res) => {
 
 export const editHall = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const { name, short_name } = req.body;
   try {
-    await db.run('UPDATE halls SET name = ? WHERE id = ?', [name, id]);
+    await db.run('UPDATE halls SET name = ?, short_name = ? WHERE id = ?', [
+      name,
+      short_name || '',
+      id,
+    ]);
     redirect(res, '/admin/halls');
   } catch (err) {
     logger.error('Datenbankfehler in editHall', err);
@@ -411,18 +424,18 @@ export const deleteTrainer = async (req, res) => {
 };
 
 export const addTurnplan = async (req, res) => {
-  const { name, hall_id, trainer_ids, remarks, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to } = req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     const result = await db.run(
-      `INSERT INTO turnplan (name, hall_id, trainer_id, remarks, weekdays, time_from, time_to)
+      `INSERT INTO turnplan (name, hall_id, trainer_id, course_number, weekdays, time_from, time_to)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         hall_id,
         trainerIds[0] || null,
-        remarks || '',
+        course_number || '',
         JSON.stringify(days),
         time_from,
         time_to,
@@ -443,19 +456,19 @@ export const addTurnplan = async (req, res) => {
 
 export const editTurnplan = async (req, res) => {
   const { id } = req.params;
-  const { name, hall_id, trainer_ids, remarks, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to } = req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     await db.run(
       `UPDATE turnplan
-       SET name = ?, hall_id = ?, trainer_id = ?, remarks = ?, weekdays = ?, time_from = ?, time_to = ?
+       SET name = ?, hall_id = ?, trainer_id = ?, course_number = ?, weekdays = ?, time_from = ?, time_to = ?
        WHERE id = ?`,
       [
         name,
         hall_id,
         trainerIds[0] || null,
-        remarks || '',
+        course_number || '',
         JSON.stringify(days),
         time_from,
         time_to,

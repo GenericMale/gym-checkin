@@ -42,8 +42,9 @@
     "mainTrainer": "Leiter (Haupttrainer)",
     "allowedTrainers": "Erlaubte Trainer",
     "allowedTrainersHint": "Nur diese Trainer können sich für diese Einheit einchecken.",
-    "remarks": "Anmerkungen",
-    "remarksPlaceholder": "z.B. 9-10 Jahre, ausgebucht, ab Oktober"
+    "number": "Kursnummer",
+    "numberPlaceholder": "z.B. 01, 02",
+    "countLabel": "Kurse"
   },
   "trainer": {
     "subtitle": "Verwalte Trainer, PINs und individuelle Entschädigung für Leiter- und Helfertätigkeiten.",
@@ -69,6 +70,8 @@
     "add": "Sportstätte hinzufügen",
     "edit": "Sportstätte bearbeiten",
     "namePlaceholder": "Name der Sportstätte...",
+    "shortName": "Kürzel",
+    "shortNamePlaceholder": "z.B. GYM",
     "noHalls": "Noch keine Sportstätte eingerichtet.",
     "printQr": "QR-Code drucken",
     "printTapHere": "TELEFON HIER AUFLEGEN"

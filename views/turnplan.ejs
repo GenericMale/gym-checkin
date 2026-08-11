@@ -2,6 +2,110 @@
 <html lang="<%= locale %>">
   <head>
     <%- include('partials/head', { title: `${branding.shortName} - ${__('course.title')}` }) %>
+    <style>
+      .calendar-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .grid-row {
+        display: grid;
+        gap: 10px;
+      }
+      @media (max-width: 1280px) {
+        .grid-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      }
+      @media (max-width: 768px) {
+        .grid-row { grid-template-columns: 1fr !important; }
+      }
+      .day-col {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+      .day-head {
+        background: #f3f4f6;
+        padding: 6px 12px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .day-count {
+        font-size: 0.7rem;
+        color: #6b7280;
+        font-weight: 600;
+      }
+      .course-row {
+        display: grid;
+        grid-template-columns: 75px 34px 1fr auto auto;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 0.78rem;
+        cursor: pointer;
+        transition: background 0.1s;
+      }
+      .course-row:nth-child(even) { background: #fafafa; }
+      .course-row:hover { background: #f8fafc; }
+      .time {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-weight: 600;
+        color: #334155;
+        font-size: 0.72rem;
+        white-space: nowrap;
+      }
+      .num {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-primary, #2563eb);
+        background: #eff6ff;
+        padding: 1px 4px;
+        border-radius: 4px;
+        text-align: center;
+        min-width: 22px;
+        white-space: nowrap;
+      }
+      .name {
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .trainer {
+        font-size: 0.7rem;
+        color: #64748b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 90px;
+      }
+      .hall-badge {
+        font-size: 0.66rem;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+      .calendar-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 16px;
+        border-top: 1px solid #f1f5f9;
+        margin-top: 12px;
+        padding-top: 12px;
+        font-size: 0.72rem;
+        color: #6b7280;
+        align-items: center;
+      }
+      .calendar-footer strong { color: #0f172a; }
+      .legend-item { display: flex; align-items: center; gap: 4px; }
+    </style>
   </head>
   <body class="bg-[#f8fafa] text-gray-800 font-sans min-h-screen">
     <!-- Navigation -->
@@ -57,90 +161,87 @@
         </form>
       </section>
 
-      <!-- Turnplan Grid Section -->
-      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
-        <% const weekdaysOrder = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']; const
-        normalizedTurnplan = turnplan.map(item => { let days = []; try { days =
-        JSON.parse(item.weekdays); } catch(_e) { days = item.weekdays ? item.weekdays.split(',') :
-        []; } return { ...item, days }; }); %>
+      <!-- Calendar Section -->
+      <section class="bg-white rounded-3xl shadow-sm border border-gray-100 p-4 md:p-6">
+        <%
+          const normalizedTurnplan = turnplan.map(item => {
+            let days = [];
+            try { days = JSON.parse(item.weekdays); } catch(_e) { days = item.weekdays ? item.weekdays.split(',') : []; }
+            return { ...item, days };
+          });
+          const hasDay = (day) => normalizedTurnplan.some(item => item.days.includes(day));
+          const rows = [
+            ['Mo', 'Di', 'Mi'].filter(hasDay),
+            ['Do', 'Fr', 'Sa', 'So'].filter(hasDay),
+          ];
+          const hallColors = {};
+          halls.forEach((h, i) => {
+            hallColors[h.id] = halls.length > 0 ? Math.round((i * 360) / halls.length) : 0;
+          });
+        %>
         <% if (turnplan.length === 0) { %>
         <div class="text-center text-gray-400 py-12 text-sm italic">
           <%= __('course.noCourses') %>
         </div>
         <% } else { %>
-        <% weekdaysOrder.forEach(day => { const dayCourses = normalizedTurnplan.filter(item =>
-        item.days.includes(day)); if (dayCourses.length === 0) return; %>
-        <div class="pt-8 mb-8 first:pt-0 last:mb-0">
-          <div class="flex items-center gap-3 mb-4">
-            <span class="w-1.5 h-6 bg-primary rounded-full"></span>
-            <h3 class="font-brand-serif text-xl text-gray-800"><%= __('weekdays.' + day) %></h3>
-            <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-0.5 rounded-full"
-              ><%= dayCourses.length %>
-              <%= __('common.units') %></span
-            >
-            <div class="flex-1 h-px bg-gray-200"></div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3">
-            <% dayCourses.forEach(item => { %>
-            <div
-              class="edit-turnplan-card bg-gray-50 hover:bg-white rounded-xl p-3 border border-gray-100 hover:border-gray-200 transition cursor-pointer group"
-            >
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0 space-y-1">
-                  <h3 class="font-bold text-gray-800 text-sm leading-snug truncate">
-                    <%= item.name %>
-                  </h3>
-                  <p class="text-[11px] text-gray-500 font-medium truncate">
-                    <span class="font-mono text-gray-700 font-semibold"
-                      ><%= item.time_from %>
-                      -
-                      <%= item.time_to %></span
-                    >
-                    <% if (item.trainer_names) { %>
-                    ·
-                    <%= item.trainer_names %><% } %>
-                  </p>
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span
-                      class="bg-primary/10 text-primary text-[9px] font-bold px-2 py-0.5 rounded-full"
-                      ><%= item.hall_name %></span
-                    >
-                    <% if (item.remarks) { %>
-                    <span
-                      class="italic text-gray-400 text-[10px] truncate"
-                      title="<%= item.remarks %>"
-                      >—
-                      <%= item.remarks %></span
-                    >
-                    <% } %>
-                  </div>
-                </div>
-                <button
-                  class="edit-turnplan-btn text-gray-400 hover:text-primary transition p-1.5 rounded-lg hover:bg-gray-100 cursor-pointer shrink-0"
+        <div class="calendar-grid">
+          <% rows.forEach(row => { if (row.length === 0) return; %>
+          <div class="grid-row" style="grid-template-columns: repeat(<%= row.length %>, minmax(0, 1fr));">
+            <% row.forEach(day => {
+              const dayCourses = normalizedTurnplan.filter(item => item.days.includes(day));
+            %>
+            <div class="day-col">
+              <div class="day-head">
+                <span><%= __('weekdays.' + day) %></span>
+                <span class="day-count"><%= dayCourses.length %> <%= __('course.countLabel') %></span>
+              </div>
+              <div class="course-list">
+                <% dayCourses.forEach(item => { %>
+                <div
+                  class="course-row edit-turnplan-card"
                   data-id="<%= item.id %>"
                   data-name="<%= item.name %>"
                   data-hall="<%= item.hall_id %>"
                   data-trainers="<%= JSON.stringify(turnplanTrainerMap[item.id] || []) %>"
-                  data-remarks="<%= item.remarks || '' %>"
+                  data-number="<%= item.course_number || '' %>"
                   data-weekdays="<%= JSON.stringify(item.days) %>"
                   data-from="<%= item.time_from %>"
                   data-to="<%= item.time_to %>"
                 >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    ></path>
-                  </svg>
-                </button>
+                  <span class="time"><%= item.time_from %>–<%= item.time_to %></span>
+                  <span class="num"><%= item.course_number ? '#' + item.course_number : '' %></span>
+                  <span class="name" title="<%= item.name %>"><%= item.name %></span>
+                  <span class="trainer" title="<%= item.trainer_names || '' %>"
+                    ><%= item.trainer_names || '' %></span
+                  >
+                  <span
+                    class="hall-badge"
+                    style="background: hsl(<%= hallColors[item.hall_id] %> 65% 90%); color: hsl(<%= hallColors[item.hall_id] %> 55% 32%)"
+                    ><%= item.hall_short %></span
+                  >
+                </div>
+                <% }) %>
               </div>
             </div>
             <% }) %>
           </div>
+          <% }) %>
         </div>
-        <% }) %>
+
+        <!-- Hall Legend -->
+        <footer class="calendar-footer">
+          <strong><%= __('common.halls') %>:</strong>
+          <% halls.forEach(h => { %>
+          <span class="legend-item">
+          <span
+            class="hall-badge"
+            style="background: hsl(<%= hallColors[h.id] %> 65% 90%); color: hsl(<%= hallColors[h.id] %> 55% 32%)"
+            ><%= h.short_name || h.name %></span
+          >
+            <%= h.name %>
+          </span>
+          <% }) %>
+        </footer>
         <% } %>
       </section>
     </main>
@@ -179,19 +280,35 @@
               required
             />
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('common.hall') %></label
-            >
-            <select
-              name="hall_id"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
-              required
-            >
-              <% halls.forEach(h => { %>
-              <option value="<%= h.id %>"><%= h.name %></option>
-              <% }) %>
-            </select>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('course.number') %></label
+              >
+              <input
+                type="text"
+                name="course_number"
+                maxlength="8"
+                placeholder="<%= __('course.numberPlaceholder') %>"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('common.hall') %></label
+              >
+              <select
+                name="hall_id"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
+                required
+              >
+                <% halls.forEach(h => { %>
+                <option value="<%= h.id %>"
+                  ><%= h.short_name ? h.short_name + ' – ' : '' %><%= h.name %></option
+                >
+                <% }) %>
+              </select>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
@@ -213,17 +330,6 @@
               <% }) %>
             </div>
             <p class="text-[10px] text-gray-400 mt-1.5"><%= __('course.allowedTrainersHint') %></p>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('course.remarks') %></label
-            >
-            <input
-              type="text"
-              name="remarks"
-              placeholder="<%= __('course.remarksPlaceholder') %>"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-            />
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
@@ -317,20 +423,36 @@
               required
             />
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('common.hall') %></label
-            >
-            <select
-              name="hall_id"
-              id="editTurnplanHall"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
-              required
-            >
-              <% halls.forEach(h => { %>
-              <option value="<%= h.id %>"><%= h.name %></option>
-              <% }) %>
-            </select>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('course.number') %></label
+              >
+              <input
+                type="text"
+                name="course_number"
+                id="editTurnplanNumber"
+                maxlength="8"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('common.hall') %></label
+              >
+              <select
+                name="hall_id"
+                id="editTurnplanHall"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition cursor-pointer"
+                required
+              >
+                <% halls.forEach(h => { %>
+                <option value="<%= h.id %>"
+                  ><%= h.short_name ? h.short_name + ' – ' : '' %><%= h.name %></option
+                >
+                <% }) %>
+              </select>
+            </div>
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
@@ -352,17 +474,6 @@
               <% }) %>
             </div>
             <p class="text-[10px] text-gray-400 mt-1.5"><%= __('course.allowedTrainersHint') %></p>
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('course.remarks') %></label
-            >
-            <input
-              type="text"
-              name="remarks"
-              id="editTurnplanRemarks"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-sm font-medium outline-none focus:ring-2 ring-primary transition"
-            />
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
@@ -454,14 +565,14 @@
               const name = btn.getAttribute('data-name');
               const hallId = btn.getAttribute('data-hall');
               const trainerIdsJson = btn.getAttribute('data-trainers');
-              const remarks = btn.getAttribute('data-remarks');
+              const number = btn.getAttribute('data-number');
               const weekdaysJson = btn.getAttribute('data-weekdays');
               const timeFrom = btn.getAttribute('data-from');
               const timeTo = btn.getAttribute('data-to');
 
               document.getElementById('editTurnplanName').value = name;
               document.getElementById('editTurnplanHall').value = hallId;
-              document.getElementById('editTurnplanRemarks').value = remarks || '';
+              document.getElementById('editTurnplanNumber').value = number || '';
               document.getElementById('editTurnplanTimeFrom').value = timeFrom;
               document.getElementById('editTurnplanTimeTo').value = timeTo;
 

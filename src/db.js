@@ -27,7 +27,9 @@ const run = (sql, params = []) => {
 };
 
 const initDb = async () => {
-  await run('CREATE TABLE IF NOT EXISTS halls (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)');
+  await run(
+    "CREATE TABLE IF NOT EXISTS halls (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, short_name TEXT DEFAULT '')"
+  );
 
   await run(
     `CREATE TABLE IF NOT EXISTS trainers (
@@ -51,7 +53,7 @@ const initDb = async () => {
     name TEXT,
     hall_id INTEGER,
     trainer_id INTEGER,
-    remarks TEXT,
+    course_number TEXT DEFAULT '',
     weekdays TEXT,
     time_from TEXT,
     time_to TEXT
@@ -61,6 +63,20 @@ const initDb = async () => {
   const turnplanCols = await dbAll('PRAGMA table_info(turnplan)');
   if (turnplanCols.some((c) => c.name === 'is_special')) {
     await run('ALTER TABLE turnplan DROP COLUMN is_special');
+  }
+
+  // halls: add short_name to databases created before it existed
+  const hallCols = await dbAll('PRAGMA table_info(halls)');
+  if (!hallCols.some((c) => c.name === 'short_name')) {
+    await run("ALTER TABLE halls ADD COLUMN short_name TEXT DEFAULT ''");
+  }
+
+  // turnplan: replace the remarks column with course_number
+  if (!turnplanCols.some((c) => c.name === 'course_number')) {
+    await run("ALTER TABLE turnplan ADD COLUMN course_number TEXT DEFAULT ''");
+    if (turnplanCols.some((c) => c.name === 'remarks')) {
+      await run('ALTER TABLE turnplan DROP COLUMN remarks');
+    }
   }
 
   // Trainers allowed to check in for a course (many-to-many)
