@@ -209,7 +209,7 @@
                   data-to="<%= item.time_to %>"
                 >
                   <span class="time"><%= item.time_from %>–<%= item.time_to %></span>
-                  <span class="num"><%= item.course_number ? '#' + item.course_number : '' %></span>
+                  <span class="num"><%= item.course_number ? item.course_number : '' %></span>
                   <span class="name" title="<%= item.name %>"><%= item.name %></span>
                   <span class="trainer" title="<%= item.trainer_names || '' %>"
                     ><%= item.trainer_names || '' %></span
