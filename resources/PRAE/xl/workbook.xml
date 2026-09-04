@@ -12,8 +12,8 @@
     <workbookView xWindow="0" yWindow="0" windowWidth="23040" windowHeight="8484" xr2:uid="{00000000-000D-0000-FFFF-FFFF00000000}"/>
   </bookViews>
   <sheets>
-    <% trainers.forEach((t, i) => { %>
-    <sheet name="<%= t.fullName %>" sheetId="<%= i %>" r:id="rIdSheet<%= i %>"/>
+    <% trainers.forEach(t => { %>
+    <sheet name="<%= t.fullName %>" sheetId="<%= t.index %>" r:id="rIdSheet<%= t.index %>" />
     <% }) %>
   </sheets>
   <calcPr calcId="191029"/>

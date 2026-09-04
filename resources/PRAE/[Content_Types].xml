@@ -6,9 +6,9 @@
   <Default Extension="xml" ContentType="application/xml"/>
   <Default Extension="vml" ContentType="application/vnd.openxmlformats-officedocument.vmlDrawing"/>
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-  <% trainers.forEach((t, i) => { %>
-  <Override PartName="/xl/worksheets/sheet<%= i %>.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
-  <Override PartName="/xl/drawings/drawing<%= i %>.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
+  <% trainers.forEach(t => { %>
+  <Override PartName="/xl/worksheets/sheet<%= t.index %>.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/drawings/drawing<%= t.index %>.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>
   <% }) %>
   <Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>

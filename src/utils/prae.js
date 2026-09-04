@@ -156,13 +156,9 @@ export const generatePraeDocument = async (trainersDataInput) => {
 
         if (relativePath.startsWith('xl/worksheets/') || relativePath.startsWith('xl/drawings/')) {
           // per-sheet template
-          trainers.forEach((trainer, index) => {
-            const targetPath = relativePath.replace(/1(?=\.(xml|vml|xml\.rels)$)/i, index);
-
-            const renderedXml = ejs.render(rawTemplate, {
-              ...trainer,
-              index,
-            });
+          trainers.forEach((trainer) => {
+            const targetPath = relativePath.replace(/1(?=\.(xml|vml|xml\.rels)$)/i, trainer.index);
+            const renderedXml = ejs.render(rawTemplate, trainer);
             zip.file(targetPath, renderedXml);
           });
         } else {
@@ -199,6 +195,7 @@ export const generateExport = async (rowsByTrainer, selectedMonth) => {
   for (const trainerName of trainerNames) {
     const { trainer, rows } = rowsByTrainer[trainerName];
     const data = preparePraeData(trainer, rows, selectedMonth);
+    data.index = trainersDataList.length + 1;
 
     if (data.totalAmount > 0) {
       trainersDataList.push(data);
