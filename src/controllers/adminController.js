@@ -3,6 +3,13 @@ import { generateQRCode } from '../utils/qrcode.js';
 import { generateExport } from '../utils/prae.js';
 import { calculateTrainerDailyWage } from '../utils/wage.js';
 import { getZonedNow, getZonedMonthStr, getZonedDateStr } from '../utils/time.js';
+import {
+  parseParticipants,
+  participantFullName,
+  parseParticipantNames,
+  parseParticipantText,
+  serializeParticipantNames,
+} from '../utils/participants.js';
 import logger from '../utils/logger.js';
 
 const BASE_PATH = process.env.BASE_PATH || '';
@@ -77,6 +84,7 @@ export const getTurnplan = async (req, res) => {
       const hall = hallsById.get(item.hall_id);
       const short = hall ? hall.short_name || hall.name : item.hall_short || item.hall_name || '';
       item.hall_short = short;
+      item.participantNames = parseParticipantNames(item.participants);
     });
 
     turnplan.sort((a, b) => {
@@ -424,13 +432,14 @@ export const deleteTrainer = async (req, res) => {
 };
 
 export const addTurnplan = async (req, res) => {
-  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to, participants } =
+    req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     const result = await db.run(
-      `INSERT INTO turnplan (name, hall_id, trainer_id, course_number, weekdays, time_from, time_to)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO turnplan (name, hall_id, trainer_id, course_number, weekdays, time_from, time_to, participants)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         name,
         hall_id,
@@ -439,6 +448,7 @@ export const addTurnplan = async (req, res) => {
         JSON.stringify(days),
         time_from,
         time_to,
+        serializeParticipantNames(parseParticipantText(participants)),
       ]
     );
     for (const tId of trainerIds) {
@@ -456,13 +466,14 @@ export const addTurnplan = async (req, res) => {
 
 export const editTurnplan = async (req, res) => {
   const { id } = req.params;
-  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to } = req.body;
+  const { name, hall_id, trainer_ids, course_number, weekdays, time_from, time_to, participants } =
+    req.body;
   try {
     const days = Array.isArray(weekdays) ? weekdays : weekdays ? [weekdays] : [];
     const trainerIds = Array.isArray(trainer_ids) ? trainer_ids : trainer_ids ? [trainer_ids] : [];
     await db.run(
       `UPDATE turnplan
-       SET name = ?, hall_id = ?, trainer_id = ?, course_number = ?, weekdays = ?, time_from = ?, time_to = ?
+       SET name = ?, hall_id = ?, trainer_id = ?, course_number = ?, weekdays = ?, time_from = ?, time_to = ?, participants = ?
        WHERE id = ?`,
       [
         name,
@@ -472,6 +483,7 @@ export const editTurnplan = async (req, res) => {
         JSON.stringify(days),
         time_from,
         time_to,
+        serializeParticipantNames(parseParticipantText(participants)),
         id,
       ]
     );
@@ -497,6 +509,70 @@ export const deleteTurnplan = async (req, res) => {
   } catch (err) {
     logger.error('Datenbankfehler in deleteTurnplan', err);
     res.status(500).send(req.__('errors.db'));
+  }
+};
+
+export const importParticipants = async (req, res) => {
+  if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+    return res.status(400).json({ error: req.__('course.importNoFile') });
+  }
+
+  let parsedCourses;
+  try {
+    parsedCourses = await parseParticipants(req.body);
+  } catch (err) {
+    logger.error('PDF konnte nicht gelesen werden', err);
+    return res.status(400).json({ error: req.__('course.importInvalidPdf') });
+  }
+
+  if (parsedCourses.length === 0) {
+    return res.status(400).json({ error: req.__('course.importInvalidPdf') });
+  }
+
+  try {
+    const courses = [];
+    let matchedCourses = 0;
+    let updatedRows = 0;
+    let totalParticipants = 0;
+
+    for (const course of parsedCourses) {
+      const names = course.participants.map(participantFullName).filter(Boolean);
+      const rows = await db.all(
+        'SELECT id FROM turnplan WHERE TRIM(course_number) = ? COLLATE NOCASE',
+        [course.courseId]
+      );
+
+      const participantList = serializeParticipantNames(names);
+      for (const row of rows) {
+        await db.run('UPDATE turnplan SET participants = ? WHERE id = ?', [
+          participantList,
+          row.id,
+        ]);
+      }
+
+      if (rows.length > 0) matchedCourses++;
+      updatedRows += rows.length;
+      totalParticipants += names.length;
+
+      courses.push({
+        courseId: course.courseId,
+        name: course.name,
+        participantCount: names.length,
+        matchedCourses: rows.length,
+      });
+    }
+
+    res.json({
+      success: true,
+      courses,
+      totalCourses: parsedCourses.length,
+      matchedCourses,
+      updatedRows,
+      totalParticipants,
+    });
+  } catch (err) {
+    logger.error('Importfehler in importParticipants', err);
+    res.status(500).json({ error: req.__('errors.db') });
   }
 };
 

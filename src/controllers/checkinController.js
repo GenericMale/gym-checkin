@@ -1,6 +1,7 @@
 import db from '../db.js';
 import logger from '../utils/logger.js';
 import { getZonedNow, getZonedDateStr, getAppTimeZone } from '../utils/time.js';
+import { parseParticipantNames } from '../utils/participants.js';
 
 const timeToMinutes = (timeStr) => {
   if (!timeStr) return 0;
@@ -82,6 +83,7 @@ export const getCheckinPage = async (req, res) => {
         statusLabel,
         trainerNames: entry.trainer_names || '',
         allowedTrainerIds: allowedByCourse[entry.id] || [],
+        participantNames: parseParticipantNames(entry.participants),
       });
     });
 

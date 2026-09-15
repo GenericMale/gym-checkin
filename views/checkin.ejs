@@ -114,6 +114,7 @@
               data-to="<%= c.time_to %>"
               data-allowed="<%= c.allowedTrainerIds.join(',') %>"
               data-trainer-name="<%= c.trainerNames %>"
+              data-participants="<%= JSON.stringify(c.participantNames || []) %>"
             >
               <div class="min-w-0">
                 <p class="font-bold text-gray-800 truncate"><%= c.name %></p>
@@ -265,6 +266,23 @@
         </h2>
         <p id="successText" class="text-gray-600 text-sm font-medium leading-relaxed"></p>
 
+        <!-- Participant list of the confirmed course -->
+        <div id="participantsSection" class="hidden w-full text-left mt-4">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <%= __('checkin.participantsTitle') %>
+            </h3>
+            <span
+              id="participantsCount"
+              class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20"
+            ></span>
+          </div>
+          <div
+            id="participantsList"
+            class="max-h-[45vh] overflow-y-auto bg-gray-50 border border-gray-100 rounded-2xl p-2.5 grid grid-cols-2 gap-1.5 content-start"
+          ></div>
+        </div>
+
         <button
           onclick="location.reload()"
           class="mt-6 bg-gray-800 hover:bg-black text-white font-bold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer"
@@ -303,13 +321,21 @@
         backToCoursesFromTrainerBtn: document.getElementById('backToCoursesFromTrainerBtn'),
         changeTrainerBtn: document.getElementById('changeTrainerBtn'),
         successContainer: document.getElementById('successContainer'),
-        successText: document.getElementById('successText')
+        successText: document.getElementById('successText'),
+        participantsSection: document.getElementById('participantsSection'),
+        participantsList: document.getElementById('participantsList'),
+        participantsCount: document.getElementById('participantsCount')
       };
 
       const i18n = {
         alertMissingInfo: "<%= __('checkin.alertMissingInfo') %>",
+        participantsCount: "<%= __('checkin.participantsCount') %>",
         locale: "<%= locale %>"
       };
+
+      function formatText(template, ...args) {
+        return template.replace(/%s/g, () => args.shift());
+      }
 
       const STORAGE = { id: 'gym_trainer_id', pin: 'gym_trainer_pin', name: 'gym_trainer_name' };
 
@@ -495,6 +521,12 @@
 
       function selectCourse(card) {
         document.querySelectorAll('.course-card').forEach(c => c.classList.toggle('selected', c === card));
+        let participants = [];
+        try {
+          participants = JSON.parse(card.getAttribute('data-participants'));
+        } catch (_e) {
+          participants = [];
+        }
         selectedCourse = {
           id: card.getAttribute('data-id'),
           name: card.getAttribute('data-name'),
@@ -504,6 +536,7 @@
           allowedTrainerIds: card.getAttribute('data-allowed')
             ? card.getAttribute('data-allowed').split(',').map(Number)
             : [],
+          participants: Array.isArray(participants) ? participants : [],
         };
         const savedOk =
           session.trainerId &&
@@ -551,6 +584,33 @@
       el.backToCoursesBtn.addEventListener('click', showCourseStep);
       el.backToCoursesFromTrainerBtn.addEventListener('click', showCourseStep);
 
+      function renderParticipants(names) {
+        el.participantsList.innerHTML = '';
+        if (!names || names.length === 0) {
+          el.participantsSection.classList.add('hidden');
+          return;
+        }
+
+        el.participantsCount.textContent = formatText(i18n.participantsCount, names.length);
+        names.forEach((name, index) => {
+          const item = document.createElement('div');
+          item.className =
+            'flex items-start gap-1.5 bg-white border border-gray-100 rounded-lg px-2 py-1.5 min-w-0';
+
+          const num = document.createElement('span');
+          num.className = 'text-[9px] font-bold text-gray-300 w-3.5 text-right shrink-0 pt-px';
+          num.textContent = index + 1;
+
+          const label = document.createElement('span');
+          label.className = 'text-[11px] font-semibold text-gray-700 leading-tight break-words min-w-0';
+          label.textContent = name;
+
+          item.append(num, label);
+          el.participantsList.appendChild(item);
+        });
+        el.participantsSection.classList.remove('hidden');
+      }
+
       el.submitBtn.addEventListener('click', async () => {
         if (!selectedCourse || !session.trainerId || !session.pin) {
           showError(i18n.alertMissingInfo);
@@ -574,6 +634,7 @@
             el.flow.classList.add('hidden');
             el.status.classList.add('hidden');
             el.successText.textContent = data.message;
+            renderParticipants(selectedCourse.participants);
             el.successContainer.classList.remove('hidden');
             el.successContainer.classList.add('flex');
           } else {

@@ -56,7 +56,8 @@ const initDb = async () => {
     course_number TEXT DEFAULT '',
     weekdays TEXT,
     time_from TEXT,
-    time_to TEXT
+    time_to TEXT,
+    participants TEXT DEFAULT '[]'
   )`);
 
   // Drop the obsolete is_special column from databases created before its removal
@@ -77,6 +78,11 @@ const initDb = async () => {
     if (turnplanCols.some((c) => c.name === 'remarks')) {
       await run('ALTER TABLE turnplan DROP COLUMN remarks');
     }
+  }
+
+  // turnplan: participant list (JSON array of full names)
+  if (!turnplanCols.some((c) => c.name === 'participants')) {
+    await run("ALTER TABLE turnplan ADD COLUMN participants TEXT DEFAULT '[]'");
   }
 
   // Trainers allowed to check in for a course (many-to-many)

@@ -24,5 +24,12 @@ export default [
       'no-console': 'off',
     },
   },
+  {
+    // CLI helper scripts write to the terminal on purpose
+    files: ['scripts/**/*.js'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
   prettier,
 ];

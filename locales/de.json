@@ -44,7 +44,21 @@
     "allowedTrainersHint": "Nur diese Trainer können sich für diese Einheit einchecken.",
     "number": "Kursnummer",
     "numberPlaceholder": "z.B. 01, 02",
-    "countLabel": "Kurse"
+    "countLabel": "Kurse",
+    "participants": "Teilnehmerliste",
+    "participantsPlaceholder": "Ein Name pro Zeile, z.B. Max Mustermann",
+    "participantsHint": "Ein Name pro Zeile. Ein Teilnehmer-Import ersetzt diese Liste vollständig.",
+    "import": "Teilnehmer importieren",
+    "importing": "Importiere …",
+    "importFailed": "Import fehlgeschlagen.",
+    "importNoFile": "Keine PDF-Datei empfangen.",
+    "importInvalidPdf": "Die PDF-Datei konnte nicht gelesen werden.",
+    "importTitle": "Teilnehmerliste importiert",
+    "importSummary": "%s Kurse gelesen · %s Kurse zugeordnet · %s Einträge aktualisiert",
+    "importParticipants": "%s Teilnehmer",
+    "importMatchedOne": "1 Kurs aktualisiert",
+    "importMatchedMany": "%s Kurse aktualisiert",
+    "importUnmatched": "Kein Kurs im Turnplan"
   },
   "trainer": {
     "subtitle": "Verwalte Trainer, PINs und individuelle Entschädigung für Leiter- und Helfertätigkeiten.",
@@ -123,6 +137,8 @@
     "trainerNotAllowed": "Du bist für diesen Kurs nicht freigeschaltet.",
     "successConfirmed": "Bestätigt!",
     "backBtn": "Zurück zur Auswahl",
+    "participantsTitle": "Teilnehmerliste",
+    "participantsCount": "%s Teilnehmer",
     "alertMissingInfo": "Bitte wähle einen Trainer aus und gib deinen PIN ein.",
     "sessionConfirmed": "Hallo %s! Dein Kurs '%s' wurde erfolgreich erfasst."
   },

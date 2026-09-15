@@ -32,6 +32,14 @@ router.post('/admin/add-turnplan', requireAuth, adminController.addTurnplan);
 router.post('/admin/edit-turnplan/:id', requireAuth, adminController.editTurnplan);
 router.post('/admin/delete-turnplan/:id', requireAuth, adminController.deleteTurnplan);
 
+// Participants PDF import (raw PDF body)
+router.post(
+  '/admin/import-participants',
+  requireAuth,
+  express.raw({ type: ['application/pdf', 'application/octet-stream'], limit: '20mb' }),
+  adminController.importParticipants
+);
+
 // Checkins / Protocol
 router.post('/admin/delete-checkin/:id', requireAuth, adminController.deleteCheckin);
 router.post('/admin/delete-filtered-checkins', requireAuth, adminController.deleteFilteredCheckins);

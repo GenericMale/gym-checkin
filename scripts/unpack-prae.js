@@ -7,7 +7,7 @@ const inputFile = process.argv[2];
 const outputDir = path.join(process.cwd(), 'resources', 'PRAE');
 
 if (!inputFile) {
-  console.error("Usage: node scripts/unpack-prae.js <path-to-official-xlsx>");
+  console.error('Usage: node scripts/unpack-prae.js <path-to-official-xlsx>');
   process.exit(1);
 }
 
@@ -40,9 +40,9 @@ async function unpackPRAE() {
         formattedXml = formatXml(rawXml, {
           indentation: '  ',
           collapseContent: true, // Keeps text inside <t>Hello</t> on a single line
-          lineSeparator: '\n'
+          lineSeparator: '\n',
         });
-      } catch (err) {
+      } catch {
         // Fallback to raw XML if formatting fails on unusual VML syntax
         formattedXml = rawXml;
       }

@@ -22,6 +22,7 @@
   ],
   "author": "",
   "dependencies": {
+    "@libpdf/core": "^0.4.2",
     "compression": "^1.8.1",
     "connect-sqlite3": "^0.9.16",
     "dotenv": "^17.3.1",
