@@ -70,11 +70,11 @@
 
       <!-- Flow -->
       <div id="flow" class="space-y-5">
-        <!-- Step 1: Course selection -->
-        <div id="courseStep" class="space-y-3">
+        <!-- Step 1: Trainer identification -->
+        <div id="trainerStep" class="space-y-4">
           <div class="flex items-center justify-between">
             <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
-              ><%= __('checkin.selectCourse') %></label
+              ><%= __('checkin.whoAreYou') %></label
             >
             <button
               onclick="location.reload()"
@@ -92,9 +92,10 @@
             </button>
           </div>
 
-          <% if (courses.length === 0) { %>
-          <div class="text-center py-10">
-            <p class="text-sm text-gray-400 italic"><%= __('checkin.noActiveCourses') %></p>
+          <div id="trainerList" class="space-y-2"></div>
+
+          <div id="noTrainers" class="hidden text-center py-10">
+            <p id="noTrainersText" class="text-sm text-gray-400 italic"></p>
             <button
               onclick="location.reload()"
               class="mt-4 bg-gray-800 hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl transition cursor-pointer"
@@ -102,99 +103,82 @@
               <%= __('checkin.backBtn') %>
             </button>
           </div>
-          <% } else { %>
-          <div id="courseList" class="space-y-2">
-            <% courses.forEach(c => { %>
-            <button
-              type="button"
-              class="course-card w-full text-left bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3 cursor-pointer"
-              data-id="<%= c.id %>"
-              data-name="<%= c.name %>"
-              data-from="<%= c.time_from %>"
-              data-to="<%= c.time_to %>"
-              data-allowed="<%= c.allowedTrainerIds.join(',') %>"
-              data-trainer-name="<%= c.trainerNames %>"
-              data-participants="<%= JSON.stringify(c.participantNames || []) %>"
-            >
-              <div class="min-w-0">
-                <p class="font-bold text-gray-800 truncate"><%= c.name %></p>
-                <p class="text-xs text-gray-500 font-medium mt-0.5">
-                  <span class="font-mono text-gray-700"><%= c.time_from %> – <%= c.time_to %></span>
-                  <% if (c.trainerNames) { %>
-                  ·
-                  <%= c.trainerNames %><% } %>
-                </p>
-              </div>
-              <span
-                class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full <%= c.statusKey === 'running' ? 'bg-emerald-100 text-emerald-700' : c.statusKey === 'upcoming' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500' %>"
+
+          <div id="pinArea" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
+                ><%= __('checkin.pinLabel') %></label
               >
-                <% if (c.statusKey === 'running') { %><span
-                  class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"
-                ></span
-                ><% } %>
-                <%= c.statusLabel %>
-              </span>
+              <input
+                type="password"
+                id="pin"
+                pattern="[0-9]*"
+                inputmode="numeric"
+                maxlength="4"
+                autocomplete="off"
+                placeholder="<%= __('checkin.pinPlaceholder') %>"
+                class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-center text-2xl tracking-widest font-bold text-gray-800 outline-none focus:ring-2 ring-primary transition"
+              />
+            </div>
+
+            <label
+              class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
+            >
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked
+                class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
+              />
+              <span class="text-xs font-bold text-gray-700"><%= __('checkin.rememberMe') %></span>
+            </label>
+
+            <button
+              id="trainerContinueBtn"
+              type="button"
+              disabled
+              class="w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider"
+            >
+              <%= __('checkin.continue') %>
             </button>
-            <% }) %>
           </div>
-          <% } %>
         </div>
 
-        <!-- Step 2: Trainer identification -->
-        <div id="trainerStep" class="hidden space-y-4">
+        <!-- Step 2: Course selection -->
+        <div id="courseStep" class="hidden space-y-3">
           <button
-            id="backToCoursesFromTrainerBtn"
+            id="backToTrainerBtn"
             type="button"
             class="text-xs text-gray-400 hover:text-gray-600 font-bold cursor-pointer"
           >
-            <%= __('checkin.backCourses') %>
+            <%= __('checkin.backTrainer') %>
           </button>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-2"
-              ><%= __('checkin.whoAreYou') %></label
+
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold text-gray-400 uppercase mb-1"
+              ><%= __('checkin.selectCourse') %></label
             >
-            <div id="trainerList" class="space-y-2"></div>
-            <p id="noTrainers" class="text-sm text-gray-400 italic hidden">
-              <%= __('checkin.noTrainersAvailable') %>
-            </p>
+            <button
+              id="refreshCoursesBtn"
+              type="button"
+              class="text-gray-300 hover:text-primary transition cursor-pointer"
+              title="Aktualisieren"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                ></path>
+              </svg>
+            </button>
           </div>
 
-          <div id="pinContainer">
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1.5"
-              ><%= __('checkin.pinLabel') %></label
-            >
-            <input
-              type="password"
-              id="pin"
-              pattern="[0-9]*"
-              inputmode="numeric"
-              maxlength="4"
-              autocomplete="off"
-              placeholder="<%= __('checkin.pinPlaceholder') %>"
-              class="w-full bg-gray-50 border border-gray-200 p-2.5 rounded-xl text-center text-2xl tracking-widest font-bold text-gray-800 outline-none focus:ring-2 ring-primary transition"
-            />
-          </div>
-
-          <label
-            class="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-3 cursor-pointer select-none"
-          >
-            <input
-              type="checkbox"
-              id="rememberMe"
-              checked
-              class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary cursor-pointer"
-            />
-            <span class="text-xs font-bold text-gray-700"><%= __('checkin.rememberMe') %></span>
-          </label>
-
-          <button
-            id="trainerContinueBtn"
-            type="button"
-            disabled
-            class="w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider"
-          >
-            <%= __('checkin.continue') %>
-          </button>
+          <div id="courseList" class="space-y-2"></div>
+          <p id="noCourses" class="hidden text-center text-sm text-gray-400 italic py-10">
+            <%= __('checkin.noCoursesForTrainer') %>
+          </p>
         </div>
 
         <!-- Step 3: Confirm -->
@@ -297,19 +281,25 @@
       const TRAINERS = <%- JSON.stringify(trainers).replace(/<\//g, '<\\/') %>;
       const HALL_ID = '<%- hallId %>';
       const APP_TIMEZONE = '<%- appTimeZone %>';
+      const ACTIVE_COURSE_COUNT = <%- activeCourseCount %>;
 
       const el = {
         clock: document.getElementById('liveClock'),
         status: document.getElementById('status'),
         flow: document.getElementById('flow'),
-        courseStep: document.getElementById('courseStep'),
-        courseList: document.getElementById('courseList'),
         trainerStep: document.getElementById('trainerStep'),
         trainerList: document.getElementById('trainerList'),
         noTrainers: document.getElementById('noTrainers'),
+        noTrainersText: document.getElementById('noTrainersText'),
+        pinArea: document.getElementById('pinArea'),
         pinInput: document.getElementById('pin'),
         rememberMe: document.getElementById('rememberMe'),
         trainerContinueBtn: document.getElementById('trainerContinueBtn'),
+        courseStep: document.getElementById('courseStep'),
+        courseList: document.getElementById('courseList'),
+        noCourses: document.getElementById('noCourses'),
+        refreshCoursesBtn: document.getElementById('refreshCoursesBtn'),
+        backToTrainerBtn: document.getElementById('backToTrainerBtn'),
         confirmStep: document.getElementById('confirmStep'),
         confirmCourseName: document.getElementById('confirmCourseName'),
         confirmCourseMeta: document.getElementById('confirmCourseMeta'),
@@ -318,7 +308,6 @@
         noHelpers: document.getElementById('noHelpers'),
         submitBtn: document.getElementById('submitBtn'),
         backToCoursesBtn: document.getElementById('backToCoursesBtn'),
-        backToCoursesFromTrainerBtn: document.getElementById('backToCoursesFromTrainerBtn'),
         changeTrainerBtn: document.getElementById('changeTrainerBtn'),
         successContainer: document.getElementById('successContainer'),
         successText: document.getElementById('successText'),
@@ -330,6 +319,8 @@
       const i18n = {
         alertMissingInfo: "<%= __('checkin.alertMissingInfo') %>",
         participantsCount: "<%= __('checkin.participantsCount') %>",
+        noActiveCourses: "<%= __('checkin.noActiveCourses') %>",
+        noTrainersAvailable: "<%= __('checkin.noTrainersAvailable') %>",
         locale: "<%= locale %>"
       };
 
@@ -340,16 +331,21 @@
       const STORAGE = { id: 'gym_trainer_id', pin: 'gym_trainer_pin', name: 'gym_trainer_name' };
 
       let selectedCourse = null;
+      let eligibleCourses = [];
       let session = { trainerId: null, trainerName: null, pin: null };
       const selectedHelpers = new Set();
 
       const savedId = localStorage.getItem(STORAGE.id);
       const savedPin = localStorage.getItem(STORAGE.pin);
-      const savedName = localStorage.getItem(STORAGE.name);
-      if (savedId && savedPin) {
-        session.trainerId = savedId;
-        session.trainerName = savedName || 'Trainer';
-        session.pin = savedPin;
+      const savedTrainer = savedId ? TRAINERS.find((t) => String(t.id) === String(savedId)) : null;
+      if (savedTrainer) {
+        session.trainerId = String(savedTrainer.id);
+        session.trainerName = savedTrainer.name;
+        session.pin = savedPin || null;
+      } else {
+        localStorage.removeItem(STORAGE.id);
+        localStorage.removeItem(STORAGE.pin);
+        localStorage.removeItem(STORAGE.name);
       }
 
       function updateClock() {
@@ -374,15 +370,38 @@
       }
 
       function showStep(step) {
-        el.courseStep.classList.add('hidden');
         el.trainerStep.classList.add('hidden');
+        el.courseStep.classList.add('hidden');
         el.confirmStep.classList.add('hidden');
         step.classList.remove('hidden');
+      }
+
+      function showTrainerStep() {
+        hideStatus();
+        renderTrainers();
+        updateTrainerContinue();
+        showStep(el.trainerStep);
       }
 
       function showCourseStep() {
         hideStatus();
         showStep(el.courseStep);
+      }
+
+      function setBusy(busy) {
+        el.trainerContinueBtn.disabled = busy || !isTrainerReady();
+      }
+
+      function isTrainerReady() {
+        return !!session.trainerId && el.pinInput.value.length === 4;
+      }
+
+      function updateTrainerContinue() {
+        const ready = isTrainerReady();
+        el.trainerContinueBtn.disabled = !ready;
+        el.trainerContinueBtn.className = ready
+          ? 'w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider'
+          : 'w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider';
       }
 
       function setTrainerSelected(card, on) {
@@ -395,25 +414,35 @@
         }
       }
 
-      function renderTrainers(course, selectedTrainerId) {
+      function selectTrainer(t) {
+        session.trainerId = String(t.id);
+        session.trainerName = t.name;
+        session.pin = null;
+        el.trainerList.querySelectorAll('.trainer-card').forEach(c => setTrainerSelected(c, c.getAttribute('data-id') === String(t.id)));
+        updateTrainerContinue();
+        el.pinInput.focus();
+      }
+
+      function renderTrainers() {
         el.trainerList.innerHTML = '';
-        const allowed = (course.allowedTrainerIds || []).map(String);
-        const eligible = TRAINERS.filter(t => allowed.includes(String(t.id)));
 
-        if (eligible.length === 0) {
+        if (TRAINERS.length === 0) {
+          el.noTrainersText.textContent =
+            ACTIVE_COURSE_COUNT === 0 ? i18n.noActiveCourses : i18n.noTrainersAvailable;
           el.noTrainers.classList.remove('hidden');
-          session.trainerId = null;
-          return false;
+          el.pinArea.classList.add('hidden');
+          return;
         }
-        el.noTrainers.classList.add('hidden');
 
-        eligible.forEach(t => {
+        el.noTrainers.classList.add('hidden');
+        el.pinArea.classList.remove('hidden');
+
+        TRAINERS.forEach(t => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className =
             'trainer-card w-full text-left bg-gray-50 hover:bg-white rounded-2xl px-4 py-3 border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3 cursor-pointer';
           btn.setAttribute('data-id', String(t.id));
-          btn.setAttribute('data-name', t.name);
 
           const nameSpan = document.createElement('span');
           nameSpan.className = 'font-bold text-gray-800 text-sm';
@@ -424,53 +453,21 @@
           check.className = 'trainer-check w-5 h-5 rounded-full border-2 border-gray-300 shrink-0 transition';
           btn.appendChild(check);
 
-          btn.addEventListener('click', () => {
-            session.trainerId = String(t.id);
-            session.trainerName = t.name;
-            el.trainerList.querySelectorAll('.trainer-card').forEach(c => setTrainerSelected(c, c === btn));
-            el.pinInput.focus();
-            updateTrainerContinue();
-          });
+          btn.addEventListener('click', () => selectTrainer(t));
           el.trainerList.appendChild(btn);
         });
 
         const preselectId =
-          selectedTrainerId && eligible.some(t => String(t.id) === String(selectedTrainerId))
-            ? String(selectedTrainerId)
-            : String(eligible[0].id);
+          session.trainerId && TRAINERS.some(t => String(t.id) === String(session.trainerId))
+            ? String(session.trainerId)
+            : String(TRAINERS[0].id);
         const preselectBtn = el.trainerList.querySelector(`.trainer-card[data-id="${preselectId}"]`);
         if (preselectBtn) {
           setTrainerSelected(preselectBtn, true);
           session.trainerId = preselectId;
-          session.trainerName = preselectBtn.getAttribute('data-name');
+          session.trainerName =
+            (TRAINERS.find(t => String(t.id) === preselectId) || {}).name || session.trainerName;
         }
-        return true;
-      }
-
-      function showTrainerStep(course, selectedTrainerId) {
-        hideStatus();
-        const rendered = renderTrainers(course, selectedTrainerId);
-        el.pinInput.value = '';
-        updateTrainerContinue();
-        showStep(el.trainerStep);
-        if (rendered && session.trainerId) el.pinInput.focus();
-      }
-
-      function showConfirmStep() {
-        hideStatus();
-        el.confirmCourseName.textContent = selectedCourse.name;
-        el.confirmCourseMeta.textContent = `${selectedCourse.timeFrom} – ${selectedCourse.timeTo}${selectedCourse.trainerName ? ' · ' + selectedCourse.trainerName : ''}`;
-        el.confirmTrainerName.textContent = session.trainerName;
-        renderHelpers();
-        showStep(el.confirmStep);
-      }
-
-      function updateTrainerContinue() {
-        const ready = session.trainerId && el.pinInput.value.length === 4;
-        el.trainerContinueBtn.disabled = !ready;
-        el.trainerContinueBtn.className = ready
-          ? 'w-full bg-primary hover:bg-primary-hover text-white font-bold py-3.5 rounded-xl shadow-md transition cursor-pointer text-xs uppercase tracking-wider'
-          : 'w-full bg-gray-200 text-gray-400 font-bold py-3.5 rounded-xl transition cursor-pointer text-xs uppercase tracking-wider';
       }
 
       function setHelperChipSelected(chip, on) {
@@ -519,50 +516,77 @@
         });
       }
 
-      function selectCourse(card) {
-        document.querySelectorAll('.course-card').forEach(c => c.classList.toggle('selected', c === card));
-        let participants = [];
-        try {
-          participants = JSON.parse(card.getAttribute('data-participants'));
-        } catch (_e) {
-          participants = [];
-        }
-        selectedCourse = {
-          id: card.getAttribute('data-id'),
-          name: card.getAttribute('data-name'),
-          timeFrom: card.getAttribute('data-from'),
-          timeTo: card.getAttribute('data-to'),
-          trainerName: card.getAttribute('data-trainer-name') || '',
-          allowedTrainerIds: card.getAttribute('data-allowed')
-            ? card.getAttribute('data-allowed').split(',').map(Number)
-            : [],
-          participants: Array.isArray(participants) ? participants : [],
-        };
-        const savedOk =
-          session.trainerId &&
-          TRAINERS.some(t => String(t.id) === String(session.trainerId)) &&
-          selectedCourse.allowedTrainerIds.map(String).includes(String(session.trainerId));
-        if (savedOk) {
-          showConfirmStep();
-        } else {
-          showTrainerStep(selectedCourse);
-        }
+      function courseStatusClasses(statusKey) {
+        if (statusKey === 'running') return 'bg-emerald-100 text-emerald-700';
+        if (statusKey === 'upcoming') return 'bg-amber-100 text-amber-700';
+        return 'bg-gray-100 text-gray-500';
       }
 
-      document.querySelectorAll('.course-card').forEach(card => {
-        card.addEventListener('click', () => selectCourse(card));
-      });
+      function createCourseCard(course) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className =
+          'course-card w-full text-left bg-gray-50 hover:bg-white rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition flex items-center justify-between gap-3 cursor-pointer';
+        btn.setAttribute('data-id', String(course.id));
 
-      el.pinInput.addEventListener('input', updateTrainerContinue);
-      el.pinInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (!el.trainerContinueBtn.disabled) el.trainerContinueBtn.click();
+        const info = document.createElement('div');
+        info.className = 'min-w-0';
+
+        const name = document.createElement('p');
+        name.className = 'font-bold text-gray-800 truncate';
+        name.textContent = course.name;
+        info.appendChild(name);
+
+        const meta = document.createElement('p');
+        meta.className = 'text-xs text-gray-500 font-medium mt-0.5';
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'font-mono text-gray-700';
+        timeSpan.textContent = `${course.timeFrom} – ${course.timeTo}`;
+        meta.appendChild(timeSpan);
+        if (course.trainerNames) meta.appendChild(document.createTextNode(` · ${course.trainerNames}`));
+        info.appendChild(meta);
+        btn.appendChild(info);
+
+        const badge = document.createElement('span');
+        badge.className = `shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ${courseStatusClasses(course.statusKey)}`;
+        if (course.statusKey === 'running') {
+          const dot = document.createElement('span');
+          dot.className = 'inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse';
+          badge.appendChild(dot);
         }
-      });
+        badge.appendChild(document.createTextNode(course.statusLabel));
+        btn.appendChild(badge);
 
-      el.trainerContinueBtn.addEventListener('click', () => {
-        session.pin = el.pinInput.value;
+        btn.addEventListener('click', () => selectCourse(course, btn));
+        return btn;
+      }
+
+      function renderCourses() {
+        el.courseList.innerHTML = '';
+        if (eligibleCourses.length === 0) {
+          el.noCourses.classList.remove('hidden');
+          return;
+        }
+        el.noCourses.classList.add('hidden');
+        eligibleCourses.forEach(course => el.courseList.appendChild(createCourseCard(course)));
+      }
+
+      function selectCourse(course, card) {
+        selectedCourse = course;
+        el.courseList.querySelectorAll('.course-card').forEach(c => c.classList.toggle('selected', c === card));
+        showConfirmStep();
+      }
+
+      function showConfirmStep() {
+        hideStatus();
+        el.confirmCourseName.textContent = selectedCourse.name;
+        el.confirmCourseMeta.textContent = `${selectedCourse.timeFrom} – ${selectedCourse.timeTo}${selectedCourse.trainerNames ? ' · ' + selectedCourse.trainerNames : ''}`;
+        el.confirmTrainerName.textContent = session.trainerName;
+        renderHelpers();
+        showStep(el.confirmStep);
+      }
+
+      function persistSession() {
         if (el.rememberMe.checked) {
           localStorage.setItem(STORAGE.id, session.trainerId);
           localStorage.setItem(STORAGE.name, session.trainerName);
@@ -572,17 +596,86 @@
           localStorage.removeItem(STORAGE.name);
           localStorage.removeItem(STORAGE.pin);
         }
-        showConfirmStep();
+      }
+
+      async function fetchTrainerCourses(pin) {
+        const res = await fetch('<%= url("/api/trainer-courses") %>', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ hallId: HALL_ID, trainerId: session.trainerId, pin }),
+        });
+        let data = {};
+        try {
+          data = await res.json();
+        } catch (_e) {
+          data = {};
+        }
+        return { ok: res.ok, status: res.status, data };
+      }
+
+      async function refreshCourses() {
+        if (!session.trainerId || !session.pin) return;
+        const { ok, data } = await fetchTrainerCourses(session.pin);
+        if (!ok) {
+          showError(data.error || i18n.alertMissingInfo);
+          return;
+        }
+        eligibleCourses = data.courses || [];
+        renderCourses();
+      }
+
+      el.pinInput.addEventListener('input', updateTrainerContinue);
+      el.pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (!el.trainerContinueBtn.disabled) el.trainerContinueBtn.click();
+        }
       });
+
+      el.trainerContinueBtn.addEventListener('click', async () => {
+        const pin = el.pinInput.value;
+        if (!session.trainerId || pin.length !== 4) return;
+
+        setBusy(true);
+        let result;
+        try {
+          result = await fetchTrainerCourses(pin);
+        } catch (err) {
+          setBusy(false);
+          showError(err.message);
+          return;
+        }
+        setBusy(false);
+
+        if (!result.ok) {
+          el.pinInput.value = '';
+          session.pin = null;
+          updateTrainerContinue();
+          showError(result.data.error || i18n.alertMissingInfo);
+          el.pinInput.focus();
+          return;
+        }
+
+        session.pin = pin;
+        if (result.data.trainer && result.data.trainer.name) {
+          session.trainerName = result.data.trainer.name;
+        }
+        persistSession();
+        eligibleCourses = result.data.courses || [];
+        renderCourses();
+        showCourseStep();
+      });
+
+      el.refreshCoursesBtn.addEventListener('click', refreshCourses);
+      el.backToTrainerBtn.addEventListener('click', showTrainerStep);
+      el.backToCoursesBtn.addEventListener('click', showCourseStep);
 
       el.changeTrainerBtn.addEventListener('click', () => {
         session.trainerId = null;
         session.pin = null;
-        showTrainerStep(selectedCourse);
+        el.pinInput.value = '';
+        showTrainerStep();
       });
-
-      el.backToCoursesBtn.addEventListener('click', showCourseStep);
-      el.backToCoursesFromTrainerBtn.addEventListener('click', showCourseStep);
 
       function renderParticipants(names) {
         el.participantsList.innerHTML = '';
@@ -637,22 +730,30 @@
             renderParticipants(selectedCourse.participants);
             el.successContainer.classList.remove('hidden');
             el.successContainer.classList.add('flex');
+          } else if (res.status === 401 || res.status === 403) {
+            session.pin = null;
+            el.pinInput.value = '';
+            showTrainerStep();
+            showError(data.error);
+          } else if (res.status === 409) {
+            showCourseStep();
+            showError(data.error);
+            await refreshCourses();
           } else {
-            if (res.status === 401 || res.status === 403) {
-              showTrainerStep(selectedCourse, session.trainerId);
-              showError(data.error);
-              el.pinInput.focus();
-            } else if (res.status === 409) {
-              showCourseStep();
-              showError(data.error);
-            } else {
-              showError(data.error || data.message);
-            }
+            showError(data.error || data.message);
           }
         } catch (err) {
           showError(err.message);
         }
       });
+
+      renderTrainers();
+      updateTrainerContinue();
+      if (session.trainerId && session.pin) {
+        el.pinInput.value = session.pin;
+        updateTrainerContinue();
+        el.trainerContinueBtn.click();
+      }
     </script>
   </body>
 </html>

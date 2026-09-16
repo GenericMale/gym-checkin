@@ -9,6 +9,82 @@ const timeToMinutes = (timeStr) => {
   return h * 60 + m;
 };
 
+const parseWeekdays = (value) => {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return String(value)
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+};
+
+const getCourseWindowState = (entry, currentDay, currentMinutes, gracePeriod) => {
+  const startMins = timeToMinutes(entry.time_from);
+  const endMins = timeToMinutes(entry.time_to);
+  const onDay = parseWeekdays(entry.weekdays).includes(currentDay);
+  const inWindow =
+    currentMinutes >= startMins - gracePeriod && currentMinutes <= endMins + gracePeriod;
+  if (!onDay || !inWindow) return null;
+  if (currentMinutes < startMins) return 'upcoming';
+  if (currentMinutes > endMins) return 'ended';
+  return 'running';
+};
+
+const getGracePeriod = async () => {
+  const settings = await db.getSettings();
+  return parseInt(settings.grace_period_minutes || '30', 10);
+};
+
+const getHallCourses = (hallId) =>
+  db.all(
+    `SELECT tp.*,
+      (SELECT GROUP_CONCAT(t2.name, ', ')
+       FROM turnplan_trainers tt
+       JOIN trainers t2 ON tt.trainer_id = t2.id
+       WHERE tt.turnplan_id = tp.id) as trainer_names
+     FROM turnplan tp
+     WHERE tp.hall_id = ?
+     ORDER BY tp.time_from ASC`,
+    [hallId]
+  );
+
+const getCourseTrainerMap = async (hallId) => {
+  const rows = await db.all(
+    `SELECT tt.turnplan_id, tt.trainer_id
+     FROM turnplan_trainers tt
+     JOIN turnplan tp ON tt.turnplan_id = tp.id
+     WHERE tp.hall_id = ?`,
+    [hallId]
+  );
+  const map = {};
+  rows.forEach((r) => {
+    if (!map[r.turnplan_id]) map[r.turnplan_id] = [];
+    map[r.turnplan_id].push(r.trainer_id);
+  });
+  return map;
+};
+
+const toCoursePayload = (entry, statusKey, req) => {
+  let statusLabel = req.__('checkin.statusRunning');
+  if (statusKey === 'upcoming') statusLabel = req.__('checkin.statusUpcoming', entry.time_from);
+  else if (statusKey === 'ended') statusLabel = req.__('checkin.statusEnded', entry.time_to);
+
+  return {
+    id: entry.id,
+    name: entry.name,
+    timeFrom: entry.time_from,
+    timeTo: entry.time_to,
+    trainerNames: entry.trainer_names || '',
+    participants: parseParticipantNames(entry.participants),
+    statusKey,
+    statusLabel,
+  };
+};
+
 export const getCheckinPage = async (req, res) => {
   const hallId = req.query.hall;
   if (!hallId) return res.send(req.__('errors.invalidQr'));
@@ -17,79 +93,34 @@ export const getCheckinPage = async (req, res) => {
     const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hallId]);
     if (!hall) return res.send(req.__('errors.hallNotFound'));
 
-    const turnplanEntries = await db.all(
-      `SELECT tp.*,
-        (SELECT GROUP_CONCAT(t2.name, ', ')
-         FROM turnplan_trainers tt
-         JOIN trainers t2 ON tt.trainer_id = t2.id
-         WHERE tt.turnplan_id = tp.id) as trainer_names
-       FROM turnplan tp
-       WHERE tp.hall_id = ?
-       ORDER BY tp.time_from ASC`,
-      [hallId]
-    );
-
-    const allowedRows = await db.all(
-      `SELECT tt.turnplan_id, tt.trainer_id
-       FROM turnplan_trainers tt
-       JOIN turnplan tp ON tt.turnplan_id = tp.id
-       WHERE tp.hall_id = ?`,
-      [hallId]
-    );
-    const allowedByCourse = {};
-    allowedRows.forEach((r) => {
-      if (!allowedByCourse[r.turnplan_id]) allowedByCourse[r.turnplan_id] = [];
-      allowedByCourse[r.turnplan_id].push(r.trainer_id);
-    });
-
-    const settings = await db.getSettings();
-    const gracePeriod = parseInt(settings.grace_period_minutes || '30', 10);
-
+    const gracePeriod = await getGracePeriod();
     const now = getZonedNow();
-    const currentDay = now.dayCode;
     const currentMinutes = now.hour * 60 + now.minute;
 
-    const courses = [];
+    const turnplanEntries = await getHallCourses(hallId);
+    const trainersByCourse = await getCourseTrainerMap(hallId);
+
+    const activeTrainerIds = new Set();
+    let activeCourseCount = 0;
     turnplanEntries.forEach((entry) => {
-      let weekdays;
-      try {
-        weekdays = JSON.parse(entry.weekdays);
-      } catch {
-        weekdays = entry.weekdays ? entry.weekdays.split(',').map((s) => s.trim()) : [];
-      }
-
-      const startMins = timeToMinutes(entry.time_from);
-      const endMins = timeToMinutes(entry.time_to);
-      const graceStartMins = startMins - gracePeriod;
-      const graceEndMins = endMins + gracePeriod;
-
-      const onDay = weekdays.includes(currentDay);
-      const inWindow = currentMinutes >= graceStartMins && currentMinutes <= graceEndMins;
-      if (!onDay || !inWindow) return;
-
-      let statusKey = 'running';
-      if (currentMinutes < startMins) statusKey = 'upcoming';
-      else if (currentMinutes > endMins) statusKey = 'ended';
-
-      let statusLabel = req.__('checkin.statusRunning');
-      if (statusKey === 'upcoming')
-        statusLabel = req.__('checkin.statusUpcoming', entry.time_from);
-      else if (statusKey === 'ended') statusLabel = req.__('checkin.statusEnded', entry.time_to);
-
-      courses.push({
-        ...entry,
-        weekdays,
-        statusKey,
-        statusLabel,
-        trainerNames: entry.trainer_names || '',
-        allowedTrainerIds: allowedByCourse[entry.id] || [],
-        participantNames: parseParticipantNames(entry.participants),
-      });
+      const statusKey = getCourseWindowState(entry, now.dayCode, currentMinutes, gracePeriod);
+      if (!statusKey) return;
+      activeCourseCount += 1;
+      (trainersByCourse[entry.id] || []).forEach((id) => activeTrainerIds.add(id));
     });
 
-    const trainers = await db.all(
-      "SELECT id, name, pin FROM trainers WHERE is_trainer = 1 AND pin IS NOT NULL AND pin != '' ORDER BY name ASC"
-    );
+    let trainers = [];
+    if (activeTrainerIds.size > 0) {
+      const ids = Array.from(activeTrainerIds);
+      const placeholders = ids.map(() => '?').join(', ');
+      trainers = await db.all(
+        `SELECT id, name FROM trainers
+         WHERE is_trainer = 1 AND pin IS NOT NULL AND pin != '' AND id IN (${placeholders})
+         ORDER BY name ASC`,
+        ids
+      );
+    }
+
     const helpers = await db.all(
       'SELECT id, name FROM trainers WHERE is_helper = 1 ORDER BY name ASC'
     );
@@ -97,15 +128,74 @@ export const getCheckinPage = async (req, res) => {
     res.render('checkin', {
       hallId,
       hallName: hall.name,
-      courses,
       trainers,
       helpers,
+      activeCourseCount,
       gracePeriod,
       appTimeZone: getAppTimeZone(),
     });
   } catch (err) {
     logger.error('Datenbankfehler in getCheckinPage', err);
     res.status(500).send(req.__('errors.db'));
+  }
+};
+
+export const postTrainerCourses = async (req, res) => {
+  const { hallId, trainerId, pin } = req.body;
+
+  try {
+    const trainer = await db.get('SELECT * FROM trainers WHERE id = ? AND pin = ?', [
+      trainerId,
+      pin,
+    ]);
+    if (!trainer) return res.status(401).json({ error: req.__('errors.invalidPinRetry') });
+    if (!trainer.is_trainer || !trainer.pin || !trainer.pin.trim()) {
+      return res.status(403).json({ error: req.__('errors.trainerDisabled') });
+    }
+
+    const hall = await db.get('SELECT * FROM halls WHERE id = ?', [hallId]);
+    if (!hall) return res.status(404).json({ error: req.__('errors.hallNotFound') });
+
+    const gracePeriod = await getGracePeriod();
+    const now = getZonedNow();
+    const currentMinutes = now.hour * 60 + now.minute;
+
+    const turnplanEntries = await db.all(
+      `SELECT tp.*,
+        (SELECT GROUP_CONCAT(t2.name, ', ')
+         FROM turnplan_trainers tt
+         JOIN trainers t2 ON tt.trainer_id = t2.id
+         WHERE tt.turnplan_id = tp.id) as trainer_names
+       FROM turnplan tp
+       JOIN turnplan_trainers allowed ON allowed.turnplan_id = tp.id AND allowed.trainer_id = ?
+       WHERE tp.hall_id = ?
+       ORDER BY tp.time_from ASC`,
+      [trainerId, hallId]
+    );
+
+    const dateStr = getZonedDateStr();
+    const confirmedRows = await db.all(
+      'SELECT turnplan_id FROM checkins WHERE date = ? AND turnplan_id IS NOT NULL',
+      [dateStr]
+    );
+    const confirmedCourseIds = new Set(confirmedRows.map((r) => r.turnplan_id));
+
+    const courses = [];
+    turnplanEntries.forEach((entry) => {
+      if (confirmedCourseIds.has(entry.id)) return;
+      const statusKey = getCourseWindowState(entry, now.dayCode, currentMinutes, gracePeriod);
+      if (!statusKey) return;
+      courses.push(toCoursePayload(entry, statusKey, req));
+    });
+
+    res.json({
+      success: true,
+      trainer: { id: trainer.id, name: trainer.name },
+      courses,
+    });
+  } catch (err) {
+    logger.error('Datenbankfehler in postTrainerCourses', err);
+    res.status(500).json({ error: req.__('errors.db') });
   }
 };
 
@@ -220,31 +310,18 @@ export const postCheckin = async (req, res) => {
 export const getSessionStatus = async (req, res) => {
   const { hallId } = req.params;
   try {
-    const settings = await db.getSettings();
-    const gracePeriod = parseInt(settings.grace_period_minutes || '30', 10);
+    const gracePeriod = await getGracePeriod();
+    const now = getZonedNow();
+    const currentMinutes = now.hour * 60 + now.minute;
 
     const turnplanEntries = await db.all(
       'SELECT tp.*, t.name as main_trainer_name FROM turnplan tp LEFT JOIN trainers t ON tp.trainer_id = t.id WHERE tp.hall_id = ?',
       [hallId]
     );
 
-    const now = getZonedNow();
-    const currentDay = now.dayCode;
-    const currentMinutes = now.hour * 60 + now.minute;
-
-    const active = turnplanEntries.find((entry) => {
-      let weekdays;
-      try {
-        weekdays = JSON.parse(entry.weekdays);
-      } catch {
-        weekdays = entry.weekdays ? entry.weekdays.split(',').map((s) => s.trim()) : [];
-      }
-      const startMins = timeToMinutes(entry.time_from) - gracePeriod;
-      const endMins = timeToMinutes(entry.time_to) + gracePeriod;
-      return (
-        weekdays.includes(currentDay) && currentMinutes >= startMins && currentMinutes <= endMins
-      );
-    });
+    const active = turnplanEntries.find(
+      (entry) => getCourseWindowState(entry, now.dayCode, currentMinutes, gracePeriod) !== null
+    );
 
     res.json({ active: !!active, course: active || null });
   } catch (err) {
